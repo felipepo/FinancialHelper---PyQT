@@ -1,4 +1,5 @@
 from PySide2 import QtWidgets, QtCore
+import math
 
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
@@ -23,6 +24,7 @@ class Create(QtWidgets.QWidget):
 class FilterFrame(QtWidgets.QFrame):
     def __init__(self, parent):
         super().__init__(parent)
+        self.parent=parent
         ## Initialization ==
         self.setMinimumSize(QtCore.QSize(421, 0))
         #self.setMaximumSize(QtCore.QSize(421, 16777215))
@@ -36,6 +38,9 @@ class FilterFrame(QtWidgets.QFrame):
         self.filterGroup = FilterGroup(self)
 
         ## Customization ==
+        self.button_1.clicked.connect(self.parent.cardArea.HideAllCards)
+        self.button_2.clicked.connect(self.parent.cardArea.ShowAllCards)
+
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
         self.gridLayout.addWidget(self.filterGroup,0,0,1,2)
@@ -98,6 +103,7 @@ class CardArea(QtWidgets.QScrollArea):
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 698, 285))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.gridLayout = QtWidgets.QGridLayout(self.scrollAreaWidgetContents, objectName="gridLayout")
+        self.maxCol = 4
         self.row = 0
         self.col = 0
         self.setWidget(self.scrollAreaWidgetContents)
@@ -114,7 +120,7 @@ class CardArea(QtWidgets.QScrollArea):
 
     def updatePosition(self):
         self.col = self.col + 1
-        if self.col == 4:
+        if self.col == self.maxCol:
             self.col = 0
             self.row = self.row + 1
 
@@ -128,7 +134,17 @@ class CardArea(QtWidgets.QScrollArea):
         del self.card[transID]
     
     def HideAllCards(self):
-        self.gridLayout.removeItem
+        for iCard in list(self.card.keys()):
+            self.card[iCard].hide()
+            self.gridLayout.removeWidget(self.card[iCard])
+        self.row = 0
+        self.col = 0
+
+    def ShowAllCards(self):
+        for iCard in list(self.card.keys()):
+            self.card[iCard].show()
+            self.gridLayout.addWidget(self.card[iCard],self.row, self.col, 1, 1)
+            self.updatePosition()
     
     def AddCard(self, transID):
         self.card[transID] = Card(self, transID)
@@ -140,10 +156,15 @@ class CardArea(QtWidgets.QScrollArea):
         pass
 
     def Reshape(self):
+        # Minimun - 700 (Card - 150 *4 = 600)
+        # Steps: 700(4) - 850(5) - 1000(6) - 1150(7) - 1300(8)
+        # floor((width-100)/150) > 0
         currWidth = self.frameGeometry().width()
-        self.gridLayout
-
-        print(currWidth)
+        testWidth = math.floor((currWidth-100)/150)
+        if math.floor((currWidth-100)/150) > self.maxCol:
+            self.maxCol = testWidth
+            self.HideAllCards()
+            self.ShowAllCards
 
 class Card(QtWidgets.QFrame):
     def __init__(self, parent, transID):
