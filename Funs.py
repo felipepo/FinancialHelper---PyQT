@@ -1,6 +1,7 @@
 import pickle
 import time
 import re
+import os,binascii
 
 '''
 General Functions
@@ -40,14 +41,16 @@ def GetMY(date):
     return month, year
 
 #=========================================================================================
-def saveData(data):
-    outfile = open("DataBase/data", "wb")
+def saveData(fileName, data):
+    path = "DataBase/" + fileName
+    outfile = open(path, "wb")
     pickle.dump(data,outfile)
     outfile.close()
 
 #=========================================================================================
-def loadData():
-    infile = open("DataBase/data", "rb")
+def loadData(fileName):
+    path = "DataBase/" + fileName
+    infile = open(path, "rb")
     loadedData = pickle.load(infile)
     infile.close()
     return loadedData
@@ -70,3 +73,8 @@ def checkDate(date):
     datePattern = re.compile(r'[0-3]\d/[0-1]\d/\d{4}\Z')
     matched = datePattern.match(date)
     return matched
+    
+#=========================================================================================
+def createID():
+    newID = binascii.b2a_hex(os.urandom(15))
+    return newID
