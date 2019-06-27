@@ -43,24 +43,24 @@ class Account():
 
     def UpdateTotal(self, newTotal):
         diff = newTotal - self.totalAmount
-        self.AddTransaction('Outros', diff, Funs.getDate(), "Atualização de valor")
+        transData = {'Category': 'Outros',
+        'Date':Funs.getDate(),
+        'Value':diff,
+        'Comment':'Atualização de valor'}
+        self.AddTransaction(transData)
         
-    def AddTransaction(self, category, value, date, comment,transID = "default"):
-        matched = Funs.checkDate(date)
-        if not matched:
-            return False
+    def AddTransaction(self, transData, transID = "default"):
+        self.totalAmount += float(transData["Value"])
+        if transID == "default":
+            currTrans = Funs.createID()
         else:
-            self.totalAmount += float(value)
-            if transID == "default":
-                currTrans = Funs.createID()
-            else:
-                currTrans = transID
-            self.transactions[currTrans] = Transaction(currTrans, category, value, date, comment, self.name)
-            mon_year = self.transactions[currTrans].month + "_" + self.transactions[currTrans].year
-            self.parent.UpdateCategoriesTotal(mon_year, category, value)
-            return currTrans
+            currTrans = transID
+        self.transactions[currTrans] = Transaction(currTrans, transData["Category"], transData["Value"], transData["Date"], transData["Comment"], self.name)
+        mon_year = self.transactions[currTrans].month + "_" + self.transactions[currTrans].year
+        self.parent.UpdateCategoriesTotal(mon_year, transData["Category"], transData["Value"])
+        return currTrans
 
-    def UpdateAccount(self, transID, allAcc):
+    def UpdateAccount(self, transID):
         # Get previous Values
         prev_value = float(self.transactions[transID].value)
         prev_mon_year = self.transactions[transID].month + "_" + self.transactions[transID].year
@@ -68,14 +68,14 @@ class Account():
 
         # Update all the necessary parameters before assigning updated values
         self.totalAmount -= prev_value
-        allAcc.categoriesTotal[prev_mon_year][prev_category] -= float(prev_value)
-        if allAcc.categoriesTotal[prev_mon_year][prev_category] == 0:
-            del allAcc.categoriesTotal[prev_mon_year][prev_category]
-            if not allAcc.categoriesTotal[prev_mon_year]:
-                del allAcc.categoriesTotal[prev_mon_year]
+        self.parent.categoriesTotal[prev_mon_year][prev_category] -= float(prev_value)
+        if self.parent.categoriesTotal[prev_mon_year][prev_category] == 0:
+            del self.parent.categoriesTotal[prev_mon_year][prev_category]
+            if not self.parent.categoriesTotal[prev_mon_year]:
+                del self.parent.categoriesTotal[prev_mon_year]
 
-    def RemoveTransaction(self, transID, allAcc):
-        self.UpdateAccount(transID, allAcc)
+    def RemoveTransaction(self, transID):
+        self.UpdateAccount(transID)
         del self.transactions[transID]
 
     def RenameAccount(self, newName):
@@ -93,13 +93,12 @@ class Transaction:
         self.bankAccount = acc
         self.month, self.year = Funs.GetMY(date)
 
-    def Update(self, cat, val, date, com):
-        self.category = cat
-        self.value = val
-        self.date = date
-        self.comment = com
-        self.month, self.year = Funs.GetMY(date)
-    
+    def Update(self, transData):
+        self.category = transData["Category"]
+        self.value = transData["Value"]
+        self.date = transData["Date"]
+        self.comment = transData["Comment"]
+        self.month, self.year = Funs.GetMY(transData["Date"])  
 #=========================================================================================
 class AllAccounts():
     #Class to create an overall account
@@ -108,34 +107,29 @@ class AllAccounts():
         self.creditCardObjs = {}
         self.categoriesTotal = {}
 
-    def UpdateTransaction(self, currTrans, category, value, date, comment, bankAccount, prev_bankAccount, bank_or_creditCard = "bank"):
-        matched = Funs.checkDate(date)
-        if not matched:
-            return False
-        else:
-            
-            # Assign updated values to target transaction object
-            if bankAccount != prev_bankAccount:
-                if bank_or_creditCard == "bank":
-                    self.accountsObjs[bankAccount].RemoveTransaction(currTrans, self)
-                    self.accountsObjs[bankAccount].AddTransaction(category, value, date, comment, currTrans, "bank")
-                else:
-                    self.creditCardObjs[bankAccount].RemoveTransaction(currTrans, self)
-                    self.creditCardObjs[bankAccount].AddTransaction(category, value, date, comment, currTrans, "creditCard")
+    def UpdateTransaction(self, currTrans, transData, bankAccount, prev_bankAccount, bank_or_creditCard = "bank"):     
+        # Assign updated values to target transaction object
+        if bankAccount != prev_bankAccount:
+            if bank_or_creditCard == "bank":
+                self.accountsObjs[prev_bankAccount].RemoveTransaction(currTrans, self)
+                self.accountsObjs[bankAccount].AddTransaction(transData, currTrans)
             else:
-                month, year = Funs.GetMY(date)
-                mon_year = month + "_" + year
-                if bank_or_creditCard == "bank":
-                    self.accountsObjs[prev_bankAccount].UpdateAccount(currTrans, self)
-                    self.accountsObjs[bankAccount].totalAmount += float(value)
-                    self.accountsObjs[bankAccount].transactions[currTrans].Update(category, value, date, comment, self.accountsObjs[bankAccount].name)
-                else:
-                    self.creditCardObjs[prev_bankAccount].UpdateAccount(currTrans, self)
-                    self.creditCardObjs[bankAccount].totalAmount += float(value)
-                    self.creditCardObjs[bankAccount].transactions[currTrans].Update(category, value, date, comment, self.creditCardObjs[bankAccount].name)
-                
-                self.UpdateCategoriesTotal(mon_year, category, value)
-            return True
+                self.creditCardObjs[prev_bankAccount].RemoveTransaction(currTrans, self)
+                self.creditCardObjs[bankAccount].AddTransaction(transData, currTrans)
+        else:
+            month, year = Funs.GetMY(transData['Date'])
+            mon_year = month + "_" + year
+            if bank_or_creditCard == "bank":
+                self.callUpdate(self.accountsObjs[bankAccount], transData, currTrans)
+            else:
+                self.callUpdate(self.accountsObjs[bankAccount], transData, currTrans)
+            
+            self.UpdateCategoriesTotal(mon_year, transData['Category'], transData['Value'])
+
+    def callUpdate(self, targetObj, transData, currTrans):
+        targetObj.UpdateAccount(currTrans)
+        targetObj.totalAmount += float(transData['Value'])
+        targetObj.transactions[currTrans].Update(transData)
 
     def UpdateCategoriesTotal(self, mon_year, category, value):
         if mon_year in list(self.categoriesTotal.keys()):
@@ -190,26 +184,38 @@ if __name__ == "__main__":
     allAcc = AllAccounts()
 
     #Add transaction when there is no accounts
-    #allAcc.AddTransaction("Food",50,"05/03/2015","BK","BB")
+    #allAcc.AddTransaction(transData)
+    transData = {'Category': 'Food',
+    'Date':"05/03/2015",
+    'Value':50,
+    'Comment':'BK'}
+    transData1 = {'Category': 'Feira',
+    'Date':"05/03/2015",
+    'Value':50,
+    'Comment':'BK'}
+    transData2 = {'Category': 'Remédio',
+    'Date':"05/03/2015",
+    'Value':50,
+    'Comment':'BK'}
 
     #Add Account
     allAcc.AddAcc("BB")
     #Add transaction to an account that doesn't exist
-    #allAcc.AddTransaction("Food",50,"05/03/2015","BK","Santander")
+    #allAcc.AddTransaction(transData)
 
     allAcc.AddAcc("Santander")
-    allAcc.accountsObjs["BB"].AddTransaction("Food",50,"05/03/2015","BK","BB")
-    allAcc.accountsObjs["Santander"].AddTransaction("Food",50,"05/03/2015","BK","Santander")
-    allAcc.accountsObjs["BB"].AddTransaction("Feira",50,"05/03/2015","BK","BB")
-    allAcc.accountsObjs["Santander"].AddTransaction("Food",50,"05/03/2015","BK","Santander")
-    allAcc.accountsObjs["BB"].AddTransaction("Remédio",50,"05/03/2015","BK","BB")
-    allAcc.accountsObjs["Santander"].AddTransaction("Food",50,"05/03/2015","BK","Santander")
-    allAcc.accountsObjs["BB"].AddTransaction("Feira",50,"05/03/2015","BK","BB")
-    allAcc.accountsObjs["Santander"].AddTransaction("Food",50,"05/03/2015","BK","Santander")
-    allAcc.accountsObjs["BB"].AddTransaction("Food",50,"05/03/2015","BK","BB")
-    allAcc.accountsObjs["Santander"].AddTransaction("Food",50,"05/03/2015","BK","Santander")
-    allAcc.accountsObjs["BB"].AddTransaction("Feira",50,"05/03/2015","BK","BB")
-    allAcc.accountsObjs["Santander"].AddTransaction("Food",50,"05/03/2015","BK","Santander")
+    allAcc.accountsObjs["BB"].AddTransaction(transData)
+    allAcc.accountsObjs["Santander"].AddTransaction(transData)
+    allAcc.accountsObjs["BB"].AddTransaction(transData1)
+    allAcc.accountsObjs["Santander"].AddTransaction(transData)
+    allAcc.accountsObjs["BB"].AddTransaction(transData2)
+    allAcc.accountsObjs["Santander"].AddTransaction(transData)
+    allAcc.accountsObjs["BB"].AddTransaction(transData1)
+    allAcc.accountsObjs["Santander"].AddTransaction(transData)
+    allAcc.accountsObjs["BB"].AddTransaction(transData)
+    allAcc.accountsObjs["Santander"].AddTransaction(transData)
+    allAcc.accountsObjs["BB"].AddTransaction(transData1)
+    allAcc.accountsObjs["Santander"].AddTransaction(transData)
 
 
     #Check all accounts attributes
@@ -224,4 +230,5 @@ if __name__ == "__main__":
     print(allAcc.accountsObjs["BB"].transactions[allKeys[0]].bankAccount)
     #Check specific accounts attributes
     print(allAcc.accountsObjs["BB"].totalAmount)
+    print(allAcc.accountsObjs["Santander"].totalAmount)
     #Funs.showdic(allAcc.accountsObjs["Santander"].transactions)

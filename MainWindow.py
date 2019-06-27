@@ -4,6 +4,7 @@ import HomePage
 import AccPage
 import NewWindows
 import Classes
+import Funs
 
 class Create(QtWidgets.QMainWindow):
     ## Signals ==
@@ -16,6 +17,20 @@ class Create(QtWidgets.QMainWindow):
         self.setIconSize(QtCore.QSize(32, 32)) 
 
         ## Creation ==
+        # Create Object with all accounts
+        try:
+            categoryData = Funs.loadData("Categories")
+            accountData = Funs.loadData("Data") #Loads the data from file
+            self.allAcc = accountData #Creates object from loaded data
+            self.allCategories = categoryData
+        except:
+            self.allAcc = Classes.AllAccounts() #Creates object from scratch
+            self.allAcc.AddAcc("Todas", "bank")
+            self.allAcc.AddAcc("Todas", "creditCard")
+            self.allCategories = Classes.Categories()
+            Funs.saveData('Data', self.allAcc)
+            Funs.saveData('Categories', self.allCategories)
+
         self.centralwidget = QtWidgets.QWidget(self, objectName="centralwidget", styleSheet="")
         self.showHideSide = QtWidgets.QPushButton(self.centralwidget, text="<<", objectName="showHideSide")
         self.stackFrame = QtWidgets.QStackedWidget(self.centralwidget, objectName="stackFrame", styleSheet="")
@@ -23,22 +38,10 @@ class Create(QtWidgets.QMainWindow):
         self.statusbar = QtWidgets.QStatusBar(self, objectName="statusbar")
         self.toolbar = ToolBar(self)
         self.menubar = MenuBar(self)
+
         # Pages
         self.homePage = HomePage.Create(self)
         self.accPage = AccPage.Create(self)
-
-        # Create Object with all accounts
-        try:
-            categoryData = Funs.loadData("Categories")
-            accountData = Funs.loadData("Data") #Loads the data from file
-            self.allAcc = accountData #Creates object from loaded data
-            self.categories = categoryData
-        except:
-            self.allAcc = Classes.AllAccounts() #Creates object from scratch
-            self.allAcc.AddAcc("Todas", "bank")
-            self.allAcc.AddAcc("Todas", "creditCard")
-            self.allCategories = Classes.Categories()
-
 
         ## Customization ==
         self.stackFrame.addWidget(self.homePage)
@@ -75,7 +78,6 @@ class Create(QtWidgets.QMainWindow):
         self.resized.connect(self.accPage.cardArea.Reshape)
 
     def showHide(self):
-        print(self.accPage.filterFrame.frameGeometry().width())
         currText = self.showHideSide.text()
         if currText == "<<":
             self.showHideSide.setText('>>')
@@ -91,7 +93,7 @@ class Create(QtWidgets.QMainWindow):
 class SideFrame(QtWidgets.QFrame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.parent = parent
+        self.mainWin = parent
         ## Initialization ==
         self.setObjectName("sideFrame")
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
@@ -114,7 +116,7 @@ class SideFrame(QtWidgets.QFrame):
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         for button in list(sideButtons.keys()):
             pageNumber = pageNumber + 1
-            self.button[button] = SideButton(pageNumber, self.parent, text=sideButtons[button])
+            self.button[button] = SideButton(pageNumber, self.mainWin, text=sideButtons[button])
             self.button[button].setObjectName(button)
             self.verticalLayout.addWidget(self.button[button])
 
@@ -128,14 +130,18 @@ class SideFrame(QtWidgets.QFrame):
 class ToolBar(QtWidgets.QToolBar):
     def __init__(self, parent):
         super().__init__(parent)
-        self.parent = parent
+        self.mainWin = parent
         ## Initialization ==
         self.setObjectName("toolbar")
         self.button = {}
+        #toolbarButtons = ("HomeButton", "AddExpenseBank",
+        #"AddRevenueBank", "AddAccBank",
+        #"RemoveAccBank", "AddAccCC",
+        #"RemoveAccCC", "AddRevenueCC",
+        #"Transfer", "EditTransfer")
         toolbarButtons = ("HomeButton", "AddExpenseBank",
-        "AddRevenueBank", "AddAccBank",
-        "RemoveAccBank", "AddAccCC",
-        "RemoveAccCC", "AddRevenueCC",
+        "AddAccBank",
+        "RemoveAccBank",
         "Transfer", "EditTransfer")
 
         ## Creation ==
@@ -150,42 +156,76 @@ class ToolBar(QtWidgets.QToolBar):
         ## Customization ==
         self.button["HomeButton"].triggered.connect(self.goToHome)
         self.button["AddExpenseBank"].triggered.connect(self.addTransaction)
-        self.button["AddRevenueBank"].triggered.connect(self.goToHome)
-        self.button["AddAccBank"].triggered.connect(self.goToHome)
+        #self.button["AddRevenueBank"].triggered.connect(self.goToHome)
+        self.button["AddAccBank"].triggered.connect(self.addAccount)
         self.button["RemoveAccBank"].triggered.connect(self.goToHome)
-        self.button["AddAccCC"].triggered.connect(self.goToHome)
-        self.button["RemoveAccCC"].triggered.connect(self.goToHome)
-        self.button["AddRevenueCC"].triggered.connect(self.goToHome)
+        #self.button["AddAccCC"].triggered.connect(self.goToHome)
+        #self.button["RemoveAccCC"].triggered.connect(self.goToHome)
+        #self.button["AddRevenueCC"].triggered.connect(self.goToHome)
         self.button["Transfer"].triggered.connect(self.goToHome)
-        self.button["EditTransfer"].triggered.connect(self.goToHome)
+        self.button["EditTransfer"].triggered.connect(self.debug)
 
         ## Layout ==
 
     def goToHome(self):
-        self.parent.stackFrame.setCurrentIndex(0)
+        self.mainWin.stackFrame.setCurrentIndex(0)
     
     def addTransaction(self):
         wind = NewWindows.Transaction(self)
-        wind.show()
+        if wind.exec_():
+            if wind.inputs['AccType'] == 'bank':
+                transID = self.mainWin.allAcc.accountsObjs["Todas"].AddTransaction(wind.inputs)
+                transID = self.mainWin.allAcc.accountsObjs[wind.inputs['Account']].AddTransaction(wind.inputs)
+                self.mainWin.homePage.accGroupBox.UpdateValue()
+            else:
+                transID = self.mainWin.allAcc.creditCardObjs["Todas"].AddTransaction(wind.inputs)
+                transID = self.mainWin.allAcc.creditCardObjs[wind.inputs['Account']].AddTransaction(wind.inputs)
+                self.mainWin.homePage.CCGroupBox.UpdateValue()
+            self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
+
+    def addAccount(self):
+        wind = NewWindows.AddAccount(self)
+        if wind.exec_():
+            self.mainWin.allAcc.AddAcc(wind.inputs['NewAcc'], wind.inputs['AccType'])
+            if wind.inputs['AccType'] == 'bank':
+                self.mainWin.homePage.accGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+            else:
+                self.mainWin.homePage.CCGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+
+    def debug(self):
+        Funs.debugAccounts(self.mainWin.allAcc)
 
 class MenuBar(QtWidgets.QMenuBar):
     def __init__(self, parent):
         super().__init__(parent)
+        self.mainWin = parent
         ## Initialization ==
-        self.setGeometry(QtCore.QRect(0,0,1315,21))
+        self.button = {}
+        #self.setGeometry(QtCore.QRect(0,0,1315,21))
         self.setObjectName("menubar")
+        menuButtons = {"Save", "Save As..."}
 
         ## Creation ==
+        self.menuFile = QtWidgets.QMenu(self, objectName="MenuFile", title="File")
+        for button in menuButtons:
+            self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
+            self.menuFile.addAction(self.button[button])
+        self.addAction(self.menuFile.menuAction())
         ## Customization ==
+        self.button["Save"].triggered.connect(self.save)
         ## Layout ==
+
+    def save(self):
+        Funs.saveData('Data', self.mainWin.allAcc)
+        print("Saved")
 
 class SideButton(QtWidgets.QPushButton):
     def __init__(self, pageNumber, parent, text = ""):
         super().__init__(parent)
-        self.parent = parent
+        self.mainWin = parent
         self.pageNumber = pageNumber
         self.setText(text)
         self.clicked.connect(self.goTo)
         
     def goTo(self):
-        self.parent.stackFrame.setCurrentIndex(self.pageNumber)
+        self.mainWin.stackFrame.setCurrentIndex(self.pageNumber)

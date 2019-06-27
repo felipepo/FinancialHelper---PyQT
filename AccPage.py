@@ -4,6 +4,7 @@ import math
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
         super().__init__(parent)
+        self.mainWin = parent
         self.setObjectName("AccPage")
         ## Initialization ==
         ## Creation ==
@@ -11,7 +12,7 @@ class Create(QtWidgets.QWidget):
         self.filterFrame = FilterFrame(self)
         self.graphicsView = QtWidgets.QGraphicsView(self, objectName="graphicsView")
         self.graphicsView.setMinimumSize(QtCore.QSize(0, 200))
-        self.graphicsView.setMaximumSize(QtCore.QSize(16777215, 300))
+        self.graphicsView.setMaximumSize(QtCore.QSize(16777215, 500))
 
         ## Customization ==
         ## Layout ==
@@ -24,7 +25,7 @@ class Create(QtWidgets.QWidget):
 class FilterFrame(QtWidgets.QFrame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.parent=parent
+        self.accPage=parent
         ## Initialization ==
         self.setMinimumSize(QtCore.QSize(421, 0))
         #self.setMaximumSize(QtCore.QSize(421, 16777215))
@@ -38,8 +39,8 @@ class FilterFrame(QtWidgets.QFrame):
         self.filterGroup = FilterGroup(self)
 
         ## Customization ==
-        self.button_1.clicked.connect(self.parent.cardArea.HideAllCards)
-        self.button_2.clicked.connect(self.parent.cardArea.ShowAllCards)
+        self.button_1.clicked.connect(self.accPage.cardArea.HideAllCards)
+        self.button_2.clicked.connect(self.accPage.cardArea.ShowAllCards)
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
@@ -61,7 +62,7 @@ class FilterGroup(QtWidgets.QGroupBox):
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
 
         ## Creation ==
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        vertSpacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         for iFilter in self.filterNames:
             self.filter[iFilter] = Filter(self, iFilter)
             self.gridLayout.addWidget(self.filter[iFilter].filterLbl, self.row,self.col,1,1)
@@ -70,7 +71,7 @@ class FilterGroup(QtWidgets.QGroupBox):
 
         ## Customization ==
         ## Layout ==
-        self.gridLayout.addItem(spacerItem, self.row+1, 0, 1, 1)
+        self.gridLayout.addItem(vertSpacerItem, self.row+1, 0, 1, 1)
     
     def addFilter(self, filterName="", options=[]):
         self.filter[filterName]=options
@@ -92,8 +93,10 @@ class Filter():
         self.chooseCombo = QtWidgets.QComboBox(parent, objectName=filterName+"Combo")
 
 class CardArea(QtWidgets.QScrollArea):
+    resized = QtCore.Signal()   
     def __init__(self,parent):
         super().__init__(parent)
+        self.accPage = parent
         ## Initialization ==
         self.setMinimumSize(QtCore.QSize(700, 0))
         #self.setMaximumSize(QtCore.QSize(700, 16777215))
@@ -103,24 +106,46 @@ class CardArea(QtWidgets.QScrollArea):
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 698, 285))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.gridLayout = QtWidgets.QGridLayout(self.scrollAreaWidgetContents, objectName="gridLayout")
-        self.maxCol = 4
+        self.nCOl = 4
         self.row = 0
         self.col = 0
         self.setWidget(self.scrollAreaWidgetContents)
         self.card = {}
+        transData={}
 
         ## Creation ==
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        for iFrame in range(40):
-            self.AddCard("card"+str(iFrame))
+        if self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions:
+            for iFrame in list(self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions.keys()):
+                currTransData = self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions[iFrame]
+                transData["Value"] = currTransData.value
+                transData["Category"] = currTransData.category
+                transData["Account"] = currTransData.bankAccount
+                transData["Comment"] = currTransData.comment
+                transData["Date"] = currTransData.date
+                self.AddCard(transData, currTransData.transID)
+        '''for iFrame in range(60):
+            transData["Value"] = "00,00"
+            transData["Category"] = "Feira"
+            transData["Account"] = "BB"
+            transData["Comment"] = "Testando"
+            transData["Date"] = "10/10/2010"
+            transData["transID"] = "trans"+str(iFrame)
+            self.AddCard(transData, "trans"+str(iFrame))'''
 
         ## Customization ==
         ## Layout ==
         self.gridLayout.addItem(spacerItem, self.row+1, 0, 1, 1)
 
+        self.resized.connect(self.Reshape)
+
+    def resizeEvent(self, event):
+        self.resized.emit()
+        return super().resizeEvent(event)
+
     def updatePosition(self):
         self.col = self.col + 1
-        if self.col == self.maxCol:
+        if self.col == self.nCOl:
             self.col = 0
             self.row = self.row + 1
 
@@ -142,13 +167,13 @@ class CardArea(QtWidgets.QScrollArea):
 
     def ShowAllCards(self):
         for iCard in list(self.card.keys()):
-            self.card[iCard].show()
             self.gridLayout.addWidget(self.card[iCard],self.row, self.col, 1, 1)
+            self.card[iCard].show()
             self.updatePosition()
     
-    def AddCard(self, transID):
-        self.card[transID] = Card(self, transID)
-        self.card[transID].setObjectName(transID)
+    def AddCard(self, transData, transID):
+        self.card[transID] = Card(self, transData, transID)
+        self.card[transID].setObjectName(str(transID))
         self.gridLayout.addWidget(self.card[transID], self.row, self.col, 1, 1)
         self.updatePosition()
     
@@ -157,17 +182,15 @@ class CardArea(QtWidgets.QScrollArea):
 
     def Reshape(self):
         # Minimun - 700 (Card - 150 *4 = 600)
-        # Steps: 700(4) - 850(5) - 1000(6) - 1150(7) - 1300(8)
-        # floor((width-100)/150) > 0
         currWidth = self.frameGeometry().width()
         testWidth = math.floor((currWidth-100)/150)
-        if math.floor((currWidth-100)/150) > self.maxCol:
-            self.maxCol = testWidth
+        if math.floor((currWidth-100)/150) != self.nCOl:
+            self.nCOl = testWidth
             self.HideAllCards()
-            self.ShowAllCards
+            self.ShowAllCards()
 
 class Card(QtWidgets.QFrame):
-    def __init__(self, parent, transID):
+    def __init__(self, parent, transData, transID):
         super().__init__(parent)
         self.Id = transID
         ## Initialization ==
@@ -178,12 +201,12 @@ class Card(QtWidgets.QFrame):
         self.setFrameShadow(QtWidgets.QFrame.Raised)
 
         ## Creation ==
-        self.categoryLbl = QtWidgets.QLabel(self, text="Categoria", objectName="categoryLbl")
-        self.valueLbl = QtWidgets.QLabel(self, text="00,00", objectName="valueLbl")
+        self.categoryLbl = QtWidgets.QLabel(self, text=transData["Category"], objectName="categoryLbl")
+        self.valueLbl = QtWidgets.QLabel(self, text=str(transData["Value"]), objectName="valueLbl")
         self.currencyLbl = QtWidgets.QLabel(self, text="R$", objectName="currencyLbl")
-        self.dateLbl = QtWidgets.QLabel(self, text="10/10/2010", objectName="dateLbl")
-        self.commLbl = QtWidgets.QLabel(self, text="Compras da feira", objectName="commLbl")
-        self.accLbl = QtWidgets.QLabel(self, text="Nubank", objectName="accLbl")
+        self.dateLbl = QtWidgets.QLabel(self, text=transData["Date"], objectName="dateLbl")
+        self.commLbl = QtWidgets.QLabel(self, text=transData["Comment"], objectName="commLbl")
+        self.accLbl = QtWidgets.QLabel(self, text=transData["Account"], objectName="accLbl")
         self.editButton = QtWidgets.QPushButton(self, text="e", objectName="editButton")
 
         ## Customization ==

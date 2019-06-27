@@ -78,3 +78,65 @@ def checkDate(date):
 def createID():
     newID = binascii.b2a_hex(os.urandom(15))
     return newID
+    
+#=========================================================================================
+def debugAccounts(Accounts):
+    SPACE = 15
+    print("===============================")
+    print("CONTAS")
+    for acc in Accounts.accountsObjs:
+        print("-----")
+        print(acc)
+        print(Accounts.accountsObjs[acc].totalAmount)
+        for trans in Accounts.accountsObjs[acc].transactions:
+            print("                Transition")
+            try:
+                print(Accounts.accountsObjs[acc].transactions[trans].value)
+                print(Accounts.accountsObjs[acc].transactions[trans].category)
+                print(Accounts.accountsObjs[acc].transactions[trans].date)
+            except:
+                print("None")
+    print("===============================")
+    print("Cartão de Crédito")
+    for acc in Accounts.creditCardObjs:
+        print("-----")
+        print(acc)
+        print(Accounts.creditCardObjs[acc].totalAmount)
+        value = ""
+        category = ""
+        date = ""
+        print("                Transitions")
+        for trans in Accounts.creditCardObjs[acc].transactions:
+            #try:
+            currValue = str(Accounts.creditCardObjs[acc].transactions[trans].value)
+            currCat = Accounts.creditCardObjs[acc].transactions[trans].category
+            currDate = Accounts.creditCardObjs[acc].transactions[trans].date
+            value = value + currValue + getSpace(currValue)
+            category = category + currCat + getSpace(currCat)
+            date = date + currDate + getSpace(currDate)
+            #except:
+            #    print("None")
+        print(value)
+        print(date)
+        print(category)
+
+def getSpace(targetStr):
+    length = len(targetStr)
+    spaces = ""
+    for i in range(15-length):
+        spaces = spaces + " "
+    return spaces
+
+def generateData():
+    transactions={
+        'trans1':1,
+        'trans2':1,
+        'trans3':1,
+        'trans4':1,
+        'trans5':1,
+        'trans6':1,
+        'trans7':1,
+        'trans8':1,
+        'trans9':1,
+        'trans10':1
+    }

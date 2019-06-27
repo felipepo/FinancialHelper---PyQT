@@ -3,6 +3,7 @@ from PySide2 import QtWidgets, QtCore
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
         super().__init__(parent)
+        self.mainWin = parent
         self.setObjectName("HomePage")
         ## Initialization ==
 
@@ -29,6 +30,7 @@ class Create(QtWidgets.QWidget):
 class GroupBox(QtWidgets.QGroupBox):
     def __init__(self, parent, titleSTR):
         super().__init__(parent)
+        self.homepage=parent
         ## Initialization ==
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setTitle(titleSTR)
@@ -38,15 +40,32 @@ class GroupBox(QtWidgets.QGroupBox):
         self.Label = QtWidgets.QLabel(self, text = "Contas", objectName="Label")
         self.comboBox = QtWidgets.QComboBox(self, objectName="comboBox")
         self.currencyLbl = QtWidgets.QLabel(self, text = "R$", objectName="currencyLbl")
-        self.valueLbl = QtWidgets.QLabel(self, text = "00,00", objectName="valueLbl")
+        self.valueLbl = QtWidgets.QLabel(self, objectName="valueLbl")
 
         ## Customizaion ==
+        options = list(self.homepage.mainWin.allAcc.accountsObjs.keys())
+        self.comboBox.addItems(options)
+        self.comboBox.currentIndexChanged.connect(self.UpdateValue)
+
+        if self.title() == "Conta":
+            valueStr = str(self.homepage.mainWin.allAcc.accountsObjs[self.comboBox.currentText()].totalAmount)
+        else:
+            valueStr = str(self.homepage.mainWin.allAcc.creditCardObjs[self.comboBox.currentText()].totalAmount)
+        self.valueLbl.setText(valueStr)
 
         ## Layout ==
         self.gridLayout.addWidget(self.Label, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.comboBox, 0, 1, 1, 1)
         self.gridLayout.addWidget(self.valueLbl, 1, 1, 1, 1)
         self.gridLayout.addWidget(self.currencyLbl, 1, 0, 1, 1)
+
+    def UpdateValue(self):
+        acc = self.comboBox.currentText()
+        if self.title() == "Conta":
+            valueStr = str(self.homepage.mainWin.allAcc.accountsObjs[acc].totalAmount)
+        else:
+            valueStr = str(self.homepage.mainWin.allAcc.creditCardObjs[acc].totalAmount)
+        self.valueLbl.setText(valueStr)
 
 class BudgetGroupBox(QtWidgets.QGroupBox):
     def __init__(self, parent, titleSTR):
