@@ -50,15 +50,18 @@ class Account():
         self.AddTransaction(transData)
         
     def AddTransaction(self, transData, transID = "default"):
-        self.totalAmount += float(transData["Value"])
-        if transID == "default":
-            currTrans = Funs.createID()
-        else:
-            currTrans = transID
-        self.transactions[currTrans] = Transaction(currTrans, transData["Category"], transData["Value"], transData["Date"], transData["Comment"], self.name)
-        mon_year = self.transactions[currTrans].month + "_" + self.transactions[currTrans].year
-        self.parent.UpdateCategoriesTotal(mon_year, transData["Category"], transData["Value"])
-        return currTrans
+        try:
+            self.totalAmount += float(transData["Value"])
+            if transID == "default":
+                currTrans = Funs.createID()
+            else:
+                currTrans = transID
+            self.transactions[currTrans] = Transaction(currTrans, transData["Category"], transData["Value"], transData["Date"], transData["Comment"], self.name)
+            mon_year = self.transactions[currTrans].month + "_" + self.transactions[currTrans].year
+            self.parent.UpdateCategoriesTotal(mon_year, transData["Category"], transData["Value"])
+            return currTrans
+        except:
+            return 'Error'
 
     def UpdateAccount(self, transID):
         # Get previous Values

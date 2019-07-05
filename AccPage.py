@@ -1,4 +1,4 @@
-from PySide2 import QtWidgets, QtCore
+from PySide2 import QtWidgets, QtCore, QtGui
 import math
 
 class Create(QtWidgets.QWidget):
@@ -112,26 +112,29 @@ class CardArea(QtWidgets.QScrollArea):
         self.setWidget(self.scrollAreaWidgetContents)
         self.card = {}
         transData={}
+        testFlag = 0
 
         ## Creation ==
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        if self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions:
-            for iFrame in list(self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions.keys()):
-                currTransData = self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions[iFrame]
-                transData["Value"] = currTransData.value
-                transData["Category"] = currTransData.category
-                transData["Account"] = currTransData.bankAccount
-                transData["Comment"] = currTransData.comment
-                transData["Date"] = currTransData.date
-                self.AddCard(transData, currTransData.transID)
-        '''for iFrame in range(60):
-            transData["Value"] = "00,00"
-            transData["Category"] = "Feira"
-            transData["Account"] = "BB"
-            transData["Comment"] = "Testando"
-            transData["Date"] = "10/10/2010"
-            transData["transID"] = "trans"+str(iFrame)
-            self.AddCard(transData, "trans"+str(iFrame))'''
+        if testFlag == 0:
+            if self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions:
+                for iFrame in list(self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions.keys()):
+                    currTransData = self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions[iFrame]
+                    transData["Value"] = currTransData.value
+                    transData["Category"] = currTransData.category
+                    transData["Account"] = currTransData.bankAccount
+                    transData["Comment"] = currTransData.comment
+                    transData["Date"] = currTransData.date
+                    self.AddCard(transData, currTransData.transID)
+        else:
+            for iFrame in range(60):
+                transData["Value"] = "00,00"
+                transData["Category"] = "Feira"
+                transData["Account"] = "BB"
+                transData["Comment"] = "Testando"
+                transData["Date"] = "10/10/2010"
+                transData["transID"] = "trans"+str(iFrame)
+                self.AddCard(transData, "trans"+str(iFrame))
 
         ## Customization ==
         ## Layout ==
@@ -207,14 +210,21 @@ class Card(QtWidgets.QFrame):
         self.dateLbl = QtWidgets.QLabel(self, text=transData["Date"], objectName="dateLbl")
         self.commLbl = QtWidgets.QLabel(self, text=transData["Comment"], objectName="commLbl")
         self.accLbl = QtWidgets.QLabel(self, text=transData["Account"], objectName="accLbl")
-        self.editButton = QtWidgets.QPushButton(self, text="e", objectName="editButton")
+        self.editButton = QtWidgets.QPushButton(self, objectName="editButton")
 
         ## Customization ==
         self.editButton.setCursor(QtCore.Qt.PointingHandCursor)
+        self.editButton.setIcon(QtGui.QIcon('Icons/EditTransfer.png'))
+        self.editButton.setIconSize(QtCore.QSize(24,24))
+        self.editButton.setMinimumSize(QtCore.QSize(24, 24))
+        self.editButton.setMaximumSize(QtCore.QSize(24, 24))
+
+        self.currencyLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.accLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        self.gridLayout.setContentsMargins(3,3,3,3)
+        #self.gridLayout.setContentsMargins(3,3,3,3)
 
         self.gridLayout.addWidget(self.categoryLbl, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.dateLbl, 0, 2, 1, 1)
@@ -222,7 +232,7 @@ class Card(QtWidgets.QFrame):
         self.gridLayout.addWidget(self.valueLbl, 1, 1, 1, 1)
         self.gridLayout.addWidget(self.accLbl, 1, 2, 1, 1)
         self.gridLayout.addWidget(self.commLbl, 2, 0, 1, 2)
-        self.gridLayout.addWidget(self.editButton, 2, 2, 1, 1)
+        self.gridLayout.addWidget(self.editButton, 2, 2, 1, 1, alignment = QtCore.Qt.AlignRight)
 
     def Update(self):
         pass

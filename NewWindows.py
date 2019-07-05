@@ -100,21 +100,24 @@ class Transaction(QtWidgets.QDialog):
         self.accountCombo.addItems(options)
 
     def getInputs(self):
-        self.inputs['Category'] = self.categoryCombo.currentText()
-        self.inputs['Date'] = self.dateEdit.date().toString('dd/MM/yyyy')
-        self.inputs['Account'] = self.accountCombo.currentText()
-        self.inputs['Comment'] = self.commentEdit.text()
-        if self.accRadio.isChecked():
-            self.inputs['AccType'] = 'bank'
-        else: 
-            self.inputs['AccType'] = 'creditCard'
-        if self.expenseRadio.isChecked():
-            self.inputs['TransType'] = 'Expense'
-            self.inputs['Value'] = float("-" + self.valueEdit.text())
-        else:
-            self.inputs['TransType'] = 'Revenue'
-            self.inputs['Value'] = float(self.valueEdit.text())
-        self.accept()
+        try:
+            self.inputs['Category'] = self.categoryCombo.currentText()
+            self.inputs['Date'] = self.dateEdit.date().toString('dd/MM/yyyy')
+            self.inputs['Account'] = self.accountCombo.currentText()
+            self.inputs['Comment'] = self.commentEdit.text()
+            if self.accRadio.isChecked():
+                self.inputs['AccType'] = 'bank'
+            else: 
+                self.inputs['AccType'] = 'creditCard'
+            if self.expenseRadio.isChecked():
+                self.inputs['TransType'] = 'Expense'
+                self.inputs['Value'] = float("-" + self.valueEdit.text())
+            else:
+                self.inputs['TransType'] = 'Revenue'
+                self.inputs['Value'] = float(self.valueEdit.text())
+            self.accept()
+        except:
+            print('problema na conta')
 
 class AddAccount(QtWidgets.QDialog):
     def __init__(self, parent):

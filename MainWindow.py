@@ -171,26 +171,44 @@ class ToolBar(QtWidgets.QToolBar):
         self.mainWin.stackFrame.setCurrentIndex(0)
     
     def addTransaction(self):
-        wind = NewWindows.Transaction(self)
-        if wind.exec_():
-            if wind.inputs['AccType'] == 'bank':
-                transID = self.mainWin.allAcc.accountsObjs["Todas"].AddTransaction(wind.inputs)
-                transID = self.mainWin.allAcc.accountsObjs[wind.inputs['Account']].AddTransaction(wind.inputs)
-                self.mainWin.homePage.accGroupBox.UpdateValue()
-            else:
-                transID = self.mainWin.allAcc.creditCardObjs["Todas"].AddTransaction(wind.inputs)
-                transID = self.mainWin.allAcc.creditCardObjs[wind.inputs['Account']].AddTransaction(wind.inputs)
-                self.mainWin.homePage.CCGroupBox.UpdateValue()
-            self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
+        mayProceed = False
+        while mayProceed == False:
+            wind = NewWindows.Transaction(self)
+            if wind.exec_():
+                if wind.inputs['AccType'] == 'bank':
+                    transID = self.mainWin.allAcc.accountsObjs["Todas"].AddTransaction(wind.inputs)
+                    if transID != 'Error':
+                        self.mainWin.allAcc.accountsObjs[wind.inputs['Account']].AddTransaction(wind.inputs, transID)
+                        self.mainWin.homePage.accGroupBox.UpdateValue()
+                else:
+                    transID = self.mainWin.allAcc.creditCardObjs["Todas"].AddTransaction(wind.inputs)
+                    if transID != 'Error':
+                        self.mainWin.allAcc.creditCardObjs[wind.inputs['Account']].AddTransaction(wind.inputs, transID)
+                        self.mainWin.homePage.CCGroupBox.UpdateValue()
+                if transID != 'Error':
+                    mayProceed = True
+                    self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
+                else:
+                    print('Problema na conta')
+            else: 
+                mayProceed = True
 
     def addAccount(self):
-        wind = NewWindows.AddAccount(self)
-        if wind.exec_():
-            self.mainWin.allAcc.AddAcc(wind.inputs['NewAcc'], wind.inputs['AccType'])
-            if wind.inputs['AccType'] == 'bank':
-                self.mainWin.homePage.accGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
-            else:
-                self.mainWin.homePage.CCGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+        mayProceed = False
+        while mayProceed == False:
+            wind = NewWindows.AddAccount(self)
+            if wind.exec_():
+                addedFlag = self.mainWin.allAcc.AddAcc(wind.inputs['NewAcc'], wind.inputs['AccType'])
+                if addedFlag:
+                    mayProceed = True
+                    if wind.inputs['AccType'] == 'bank':
+                        self.mainWin.homePage.accGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+                    else:
+                        self.mainWin.homePage.CCGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+                else:
+                    print('acc ja existe')
+            else: 
+                mayProceed = True
 
     def debug(self):
         Funs.debugAccounts(self.mainWin.allAcc)
