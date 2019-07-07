@@ -2,6 +2,7 @@ import pickle
 import time
 import re
 import os,binascii
+import random
 
 '''
 General Functions
@@ -15,8 +16,9 @@ General Functions
 def showdic(dict):
     for x in dict:
         print (x)
-        for y in dict[x]:
-            print ('               ',y,':',dict[x][y])
+        print ('               ',dict[x])
+        # for y in dict[x]:
+        #     print ('               ',y,':',dict[x][y])
    
 #=========================================================================================     
 def AddTransaction(objAcc, category, value, date, comment, bankAccount):
@@ -81,7 +83,6 @@ def createID():
     
 #=========================================================================================
 def debugAccounts(Accounts):
-    SPACE = 15
     print("===============================")
     print("CONTAS")
     for acc in Accounts.accountsObjs:
@@ -123,20 +124,24 @@ def debugAccounts(Accounts):
 def getSpace(targetStr):
     length = len(targetStr)
     spaces = ""
-    for i in range(15-length):
+    while len(spaces) < 15-length:
         spaces = spaces + " "
     return spaces
 
 def generateData():
-    transactions={
-        'trans1':1,
-        'trans2':1,
-        'trans3':1,
-        'trans4':1,
-        'trans5':1,
-        'trans6':1,
-        'trans7':1,
-        'trans8':1,
-        'trans9':1,
-        'trans10':1
+    transData = {}
+    category = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros")
+    conta = ("BB", "NuBank", "Santander","Inter")
+    Comment = ("Comentário mais longo", "Curto", "Esse seria um comentário imenso")
+    transData={
+        'Value':round(random.uniform(-5000,5000), 3),
+        'Category':random.choice(category),
+        'Account':random.choice(conta),
+        'Comment':random.choice(Comment),
+        'Date':'10/10/2010',
     }
+    return transData
+
+if __name__ == "__main__":
+    for i in range(10):
+        print(generateData())

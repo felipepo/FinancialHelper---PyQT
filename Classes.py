@@ -12,26 +12,29 @@ class Categories():
     __slots__ = ("category")
     def __init__(self):
         self.category = {
-            "Feira": 'navajo white',
-            "Transporte": 'coral',
-            "Remédio": 'hot pink',
-            "Academia": 'violet red',
-            "Aluguel": 'PaleGreen1',
-            "Condomínio": 'DarkSlateGray1',
-            "Telefone": 'khaki3',
-            "Internet": 'LightGoldenrod1',
-            "Luz": 'firebrick1',
-            "Outros": "yellow"
+            "Feira": 'rgb(255, 200, 127)',
+            "Transporte": 'rgb(200, 255, 127)',
+            "Remedio": 'rgb(255, 255, 200)',
+            "Academia": 'rgb(255, 155, 127)',
+            "Aluguel": 'rgb(155, 255, 127)',
+            "Condominio": 'rgb(155, 155, 127)',
+            "Telefone": 'rgb(200, 200, 127)',
+            "Internet": 'rgb(55, 255, 127)',
+            "Luz": 'rgb(255, 55, 127)',
+            "Outros": 'rgb(55, 55, 127)'
             }
     
-    def AddCategory(self, categoryName, categoryColor):
+    def Add(self, categoryName, categoryColor):
         self.category[categoryName] = categoryColor
 
-    def RemoveCategory(self, categoryName):
+    def Remove(self, categoryName):
         del self.category[categoryName]
 
-    def UpdateCategory(self, categoryName, categoryColor):
+    def Update(self, categoryName, categoryColor):
         self.category[categoryName] = categoryColor
+
+    def Rename(self, oldCategory, newCategory):
+        self.category[newCategory] = self.category.pop(oldCategory)
 
 class Account():
     #Class to create the accounts

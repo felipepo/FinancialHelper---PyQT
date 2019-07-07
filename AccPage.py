@@ -1,5 +1,7 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 import math
+import Funs
+import unidecode
 
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
@@ -98,7 +100,9 @@ class CardArea(QtWidgets.QScrollArea):
         super().__init__(parent)
         self.accPage = parent
         ## Initialization ==
-        self.setMinimumSize(QtCore.QSize(700, 0))
+        self.width = 750
+        self.cardWidth = 160
+        self.setMinimumSize(QtCore.QSize(self.width, 0))
         #self.setMaximumSize(QtCore.QSize(700, 16777215))
         self.setWidgetResizable(True)
         self.setObjectName("cardArea")
@@ -112,7 +116,7 @@ class CardArea(QtWidgets.QScrollArea):
         self.setWidget(self.scrollAreaWidgetContents)
         self.card = {}
         transData={}
-        testFlag = 0
+        testFlag = 1
 
         ## Creation ==
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -128,12 +132,12 @@ class CardArea(QtWidgets.QScrollArea):
                     self.AddCard(transData, currTransData.transID)
         else:
             for iFrame in range(60):
-                transData["Value"] = "00,00"
-                transData["Category"] = "Feira"
-                transData["Account"] = "BB"
-                transData["Comment"] = "Testando"
-                transData["Date"] = "10/10/2010"
-                transData["transID"] = "trans"+str(iFrame)
+                transData = Funs.generateData()
+                # transData["Value"] = "00,00"
+                # transData["Category"] = "Feira"
+                # transData["Account"] = "BB"
+                # transData["Comment"] = "Testando"
+                # transData["Date"] = "10/10/2010"
                 self.AddCard(transData, "trans"+str(iFrame))
 
         ## Customization ==
@@ -176,7 +180,7 @@ class CardArea(QtWidgets.QScrollArea):
     
     def AddCard(self, transData, transID):
         self.card[transID] = Card(self, transData, transID)
-        self.card[transID].setObjectName(str(transID))
+        self.card[transID].setObjectName(unidecode.unidecode(transData['Category']))
         self.gridLayout.addWidget(self.card[transID], self.row, self.col, 1, 1)
         self.updatePosition()
     
@@ -186,8 +190,8 @@ class CardArea(QtWidgets.QScrollArea):
     def Reshape(self):
         # Minimun - 700 (Card - 150 *4 = 600)
         currWidth = self.frameGeometry().width()
-        testWidth = math.floor((currWidth-100)/150)
-        if math.floor((currWidth-100)/150) != self.nCOl:
+        testWidth = math.floor((currWidth-100)/self.cardWidth )
+        if testWidth != self.nCOl:
             self.nCOl = testWidth
             self.HideAllCards()
             self.ShowAllCards()
@@ -197,9 +201,9 @@ class Card(QtWidgets.QFrame):
         super().__init__(parent)
         self.Id = transID
         ## Initialization ==
-        self.setMinimumSize(QtCore.QSize(150, 100))
-        self.setMaximumSize(QtCore.QSize(150, 100))
-        self.setStyleSheet("background-color: rgb(255, 255, 127);")
+        self.setMinimumSize(QtCore.QSize(parent.cardWidth, 100))
+        self.setMaximumSize(QtCore.QSize(parent.cardWidth, 100))
+        #self.setStyleSheet("background-color: rgb(255, 255, 127);")
         self.setFrameShape(QtWidgets.QFrame.Panel)
         self.setFrameShadow(QtWidgets.QFrame.Raised)
 
@@ -224,15 +228,25 @@ class Card(QtWidgets.QFrame):
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        #self.gridLayout.setContentsMargins(3,3,3,3)
-
-        self.gridLayout.addWidget(self.categoryLbl, 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.dateLbl, 0, 2, 1, 1)
+        self.gridLayout.setContentsMargins(9,9,9,9)
+        # self.gridLayout.addWidget(self.categoryLbl, 0, 0, 1, 2)
+        # self.gridLayout.addWidget(self.dateLbl, 0, 2, 1, 1)
+        # self.gridLayout.addWidget(self.currencyLbl, 1, 0, 1, 1)
+        # self.gridLayout.addWidget(self.valueLbl, 1, 1, 1, 1)
+        # self.gridLayout.addWidget(self.accLbl, 1, 2, 1, 1)
+        # self.gridLayout.addWidget(self.commLbl, 2, 0, 1, 2)
+        # self.gridLayout.addWidget(self.editButton, 2, 2, 1, 1, alignment = QtCore.Qt.AlignRight)
+        # 0 | 1 | 2 | 3 | 4 | 5 | 6
+        # CAT       |        Date
+        # RS|    00.00  |banco
+        # comment               |OK
+        self.gridLayout.addWidget(self.categoryLbl, 0, 0, 1, 3)
+        self.gridLayout.addWidget(self.dateLbl, 0, 3, 1, 4, alignment = QtCore.Qt.AlignRight)
         self.gridLayout.addWidget(self.currencyLbl, 1, 0, 1, 1)
-        self.gridLayout.addWidget(self.valueLbl, 1, 1, 1, 1)
-        self.gridLayout.addWidget(self.accLbl, 1, 2, 1, 1)
-        self.gridLayout.addWidget(self.commLbl, 2, 0, 1, 2)
-        self.gridLayout.addWidget(self.editButton, 2, 2, 1, 1, alignment = QtCore.Qt.AlignRight)
+        self.gridLayout.addWidget(self.valueLbl, 1, 1, 1, 3)
+        self.gridLayout.addWidget(self.accLbl, 1, 4, 1, 3)
+        self.gridLayout.addWidget(self.commLbl, 2, 0, 1, 6)
+        self.gridLayout.addWidget(self.editButton, 2, 6, 1, 1, alignment = QtCore.Qt.AlignRight)
 
     def Update(self):
         pass

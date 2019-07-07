@@ -1,10 +1,10 @@
-from ui_mainwindow import Ui_MainWindow
 from PySide2 import QtWidgets, QtCore, QtGui
 import HomePage
 import AccPage
 import NewWindows
 import Classes
 import Funs
+from InterfaceStyle import Style
 
 class Create(QtWidgets.QMainWindow):
     ## Signals ==
@@ -14,9 +14,10 @@ class Create(QtWidgets.QMainWindow):
         super().__init__()
         self.setObjectName("MainWindow")
         self.resize(1315, 682)
-        self.setIconSize(QtCore.QSize(32, 32)) 
+        self.setIconSize(QtCore.QSize(32, 32))
 
-        ## Creation ==
+        ## Creation ==        
+
         # Create Object with all accounts
         try:
             categoryData = Funs.loadData("Categories")
@@ -31,6 +32,8 @@ class Create(QtWidgets.QMainWindow):
             Funs.saveData('Data', self.allAcc)
             Funs.saveData('Categories', self.allCategories)
 
+        self.styleObj = Style.Create(self.allCategories)
+        self.setStyleSheet(self.styleObj.InterfaceStyle)
         self.centralwidget = QtWidgets.QWidget(self, objectName="centralwidget", styleSheet="")
         self.showHideSide = QtWidgets.QPushButton(self.centralwidget, text="<<", objectName="showHideSide")
         self.stackFrame = QtWidgets.QStackedWidget(self.centralwidget, objectName="stackFrame", styleSheet="")
@@ -89,6 +92,9 @@ class Create(QtWidgets.QMainWindow):
     def resizeEvent(self, event):
         self.resized.emit()
         return super().resizeEvent(event)
+
+    def UpdateStyle(self):
+        pass
 
 class SideFrame(QtWidgets.QFrame):
     def __init__(self, parent):
@@ -221,21 +227,36 @@ class MenuBar(QtWidgets.QMenuBar):
         self.button = {}
         #self.setGeometry(QtCore.QRect(0,0,1315,21))
         self.setObjectName("menubar")
-        menuButtons = {"Save", "Save As..."}
+        FileButtons = {"Save", "Save As..."}
+        EditButtons = {"Categorias"}
 
         ## Creation ==
         self.menuFile = QtWidgets.QMenu(self, objectName="MenuFile", title="File")
-        for button in menuButtons:
+        for button in FileButtons:
             self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
             self.menuFile.addAction(self.button[button])
         self.addAction(self.menuFile.menuAction())
+        
+        self.menuEdit = QtWidgets.QMenu(self, objectName="MenuEdit", title="Editar")
+        for button in EditButtons:
+            self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
+            self.menuEdit.addAction(self.button[button])
+        self.addAction(self.menuEdit.menuAction())
         ## Customization ==
         self.button["Save"].triggered.connect(self.save)
+        self.button["Categorias"].triggered.connect(self.configCategory)
         ## Layout ==
 
     def save(self):
         Funs.saveData('Data', self.mainWin.allAcc)
+        Funs.saveData('Categories', self.mainWin.allCategories)
+        self.mainWin.styleObj.createQSSFile()
         print("Saved")
+    
+    def configCategory(self):
+        wind = NewWindows.CategoryWindow(self.mainWin)
+        if wind.exec_():
+            pass
 
 class SideButton(QtWidgets.QPushButton):
     def __init__(self, pageNumber, parent, text = ""):

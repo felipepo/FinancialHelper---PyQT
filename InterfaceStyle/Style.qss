@@ -1,0 +1,33 @@
+QFrame#CD, QLabel#ColorCD {
+    background-color: rgb(255, 200, 127);
+}
+QFrame#Transporte, QLabel#ColorTransporte {
+    background-color: rgb(200, 255, 127);
+}
+QFrame#Remedio, QLabel#ColorRemedio {
+    background-color: rgb(255, 255, 200);
+}
+QFrame#Academia, QLabel#ColorAcademia {
+    background-color: rgb(255, 155, 127);
+}
+QFrame#Aluguel, QLabel#ColorAluguel {
+    background-color: rgb(155, 255, 127);
+}
+QFrame#Condominio, QLabel#ColorCondominio {
+    background-color: rgb(155, 155, 127);
+}
+QFrame#Telefone, QLabel#ColorTelefone {
+    background-color: rgb(200, 200, 127);
+}
+QFrame#Internet, QLabel#ColorInternet {
+    background-color: rgb(55, 255, 127);
+}
+QFrame#Luz, QLabel#ColorLuz {
+    background-color: rgb(255, 55, 127);
+}
+QFrame#Outros, QLabel#ColorOutros {
+    background-color: rgb(55, 55, 127);
+}
+QFrame#TESTE, QLabel#ColorTESTE {
+    background-color: rgb(170, 255, 255);
+}
