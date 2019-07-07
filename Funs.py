@@ -89,14 +89,33 @@ def debugAccounts(Accounts):
         print("-----")
         print(acc)
         print(Accounts.accountsObjs[acc].totalAmount)
+        value = ""
+        category = ""
+        date = ""
+        count = 0
+        print("                Transactions")
         for trans in Accounts.accountsObjs[acc].transactions:
-            print("                Transition")
-            try:
-                print(Accounts.accountsObjs[acc].transactions[trans].value)
-                print(Accounts.accountsObjs[acc].transactions[trans].category)
-                print(Accounts.accountsObjs[acc].transactions[trans].date)
-            except:
-                print("None")
+            count = count + 1
+            if count == 15:
+                count = 0
+                print(value)
+                print(date)
+                print(category)
+                print("")
+                value = ""
+                category = ""
+                date = ""
+            currValue = str(Accounts.accountsObjs[acc].transactions[trans].value)
+            currCat = Accounts.accountsObjs[acc].transactions[trans].category
+            currDate = Accounts.accountsObjs[acc].transactions[trans].date
+            value = value + currValue + getSpace(currValue)
+            category = category + currCat + getSpace(currCat)
+            date = date + currDate + getSpace(currDate)
+            #except:
+            #    print("None")
+        print(value)
+        print(date)
+        print(category)
     print("===============================")
     print("Cartão de Crédito")
     for acc in Accounts.creditCardObjs:
@@ -106,9 +125,20 @@ def debugAccounts(Accounts):
         value = ""
         category = ""
         date = ""
-        print("                Transitions")
+        count = 0
+        print("                Transactions")
         for trans in Accounts.creditCardObjs[acc].transactions:
             #try:
+            count = count + 1
+            if count == 15:
+                count = 0
+                print(value)
+                print(date)
+                print(category)
+                print("")
+                value = ""
+                category = ""
+                date = ""
             currValue = str(Accounts.creditCardObjs[acc].transactions[trans].value)
             currCat = Accounts.creditCardObjs[acc].transactions[trans].category
             currDate = Accounts.creditCardObjs[acc].transactions[trans].date
@@ -135,6 +165,15 @@ def generateData():
     cartoes = ("Santander", "Inter")
     tipo = ("bank", "creditCard")
     Comment = ("Comentário mais longo", "Curto", "Esse seria um comentário imenso")
+    month = random.randint(1,12)
+    year = random.randint(2017,2019)
+    if month == 2:
+        day = random.randint(1,28)
+    elif month in (1,3,5,7,8,10,12):
+        day = random.randint(1,31)
+    else:
+        day = random.randint(1,30)
+    date = str(day)+"/"+str(month)+"/"+str(year)
     acctype = random.choice(tipo)
     if acctype == "bank":
         acc = random.choice(conta)
@@ -145,7 +184,7 @@ def generateData():
         'Category':random.choice(category),
         'Account':acc,
         'Comment':random.choice(Comment),
-        'Date':'10/10/2010',
+        'Date':date,
         'AccType':acctype
     }
     return transData
@@ -153,4 +192,4 @@ def generateData():
 if __name__ == "__main__":
     for i in range(60):
         test = generateData()
-        print(test['Value'])
+        print(test['Date'])

@@ -9,12 +9,18 @@ from InterfaceStyle import Style
 class Create(QtWidgets.QMainWindow):
     ## Signals ==
     resized = QtCore.Signal()       
-    def __init__(self):
+    def __init__(self, SimulateData):
         ## Initialization ==
         super().__init__()
+        self.setWindowTitle('Financial Helper')
+        icon = QtGui.QIcon()
+        iconPath = "Icons/Icon.ico"
+        icon.addPixmap(QtGui.QPixmap(iconPath), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.setWindowIcon(icon)
         self.setObjectName("MainWindow")
         self.resize(1315, 682)
         self.setIconSize(QtCore.QSize(32, 32))
+        self.SimulateData = SimulateData
 
         ## Creation ==        
 

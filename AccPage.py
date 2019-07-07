@@ -117,11 +117,10 @@ class CardArea(QtWidgets.QScrollArea):
         self.setWidget(self.scrollAreaWidgetContents)
         self.card = {}
         transData={}
-        testFlag = 1
 
         ## Creation ==
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        if testFlag == 0:
+        if self.accPage.mainWin.SimulateData == 0:
             if self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions or self.accPage.mainWin.allAcc.creditCardObjs['Todas'].transactions:
                 for iFrame in list(self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions.keys()):
                     currTransData = self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions[iFrame]
