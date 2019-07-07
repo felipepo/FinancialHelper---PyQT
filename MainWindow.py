@@ -179,19 +179,19 @@ class ToolBar(QtWidgets.QToolBar):
     def addTransaction(self):
         mayProceed = False
         while mayProceed == False:
-            wind = NewWindows.Transaction(self)
+            accOptions = list(self.mainWin.allAcc.accountsObjs.keys())
+            del accOptions[0]
+            ccOptions = list(self.mainWin.allAcc.creditCardObjs.keys())
+            del ccOptions[0]
+            catOptions = list(self.mainWin.allCategories.category.keys())
+            wind = NewWindows.Transaction(self, accOptions, ccOptions, catOptions)
             if wind.exec_():
-                if wind.inputs['AccType'] == 'bank':
-                    transID = self.mainWin.allAcc.accountsObjs["Todas"].AddTransaction(wind.inputs)
-                    if transID != 'Error':
-                        self.mainWin.allAcc.accountsObjs[wind.inputs['Account']].AddTransaction(wind.inputs, transID)
-                        self.mainWin.homePage.accGroupBox.UpdateValue()
-                else:
-                    transID = self.mainWin.allAcc.creditCardObjs["Todas"].AddTransaction(wind.inputs)
-                    if transID != 'Error':
-                        self.mainWin.allAcc.creditCardObjs[wind.inputs['Account']].AddTransaction(wind.inputs, transID)
-                        self.mainWin.homePage.CCGroupBox.UpdateValue()
+                transID = self.mainWin.allAcc.AddTransaction(wind.inputs)
                 if transID != 'Error':
+                    if wind.inputs['AccType'] == 'bank':
+                        self.mainWin.homePage.accGroupBox.UpdateValue()
+                    else:
+                        self.mainWin.homePage.CCGroupBox.UpdateValue()
                     mayProceed = True
                     self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
                 else:

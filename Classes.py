@@ -44,7 +44,7 @@ class Account():
         self.totalAmount = 0
         self.transactions = {}
 
-    def UpdateTotal(self, newTotal):
+    def SetTotal(self, newTotal):
         diff = newTotal - self.totalAmount
         transData = {'Category': 'Outros',
         'Date':Funs.getDate(),
@@ -66,7 +66,7 @@ class Account():
         except:
             return 'Error'
 
-    def UpdateAccount(self, transID):
+    def SubtractTrans(self, transID):
         # Get previous Values
         prev_value = float(self.transactions[transID].value)
         prev_mon_year = self.transactions[transID].month + "_" + self.transactions[transID].year
@@ -81,7 +81,7 @@ class Account():
                 del self.parent.categoriesTotal[prev_mon_year]
 
     def RemoveTransaction(self, transID):
-        self.UpdateAccount(transID)
+        self.SubtractTrans(transID)
         del self.transactions[transID]
 
     def RenameAccount(self, newName):
@@ -113,27 +113,46 @@ class AllAccounts():
         self.creditCardObjs = {}
         self.categoriesTotal = {}
 
+    def AddTransaction(self, transData):
+        if transData['AccType'] == 'bank':
+            transID = self.accountsObjs["Todas"].AddTransaction(transData)
+            if transID != 'Error':
+                self.accountsObjs[transData['Account']].AddTransaction(transData, transID)
+        else:
+            transID = self.creditCardObjs["Todas"].AddTransaction(transData)
+            if transID != 'Error':
+                self.creditCardObjs[transData['Account']].AddTransaction(transData, transID)
+        return transID
+
     def UpdateTransaction(self, currTrans, transData, bankAccount, prev_bankAccount, bank_or_creditCard = "bank"):     
         # Assign updated values to target transaction object
-        if bankAccount != prev_bankAccount:
-            if bank_or_creditCard == "bank":
-                self.accountsObjs[prev_bankAccount].RemoveTransaction(currTrans, self)
-                self.accountsObjs[bankAccount].AddTransaction(transData, currTrans)
+        # try:
+            if bankAccount != prev_bankAccount:
+                if bank_or_creditCard == "bank":
+                    self.callUpdate(self.accountsObjs['Todas'], transData, currTrans)
+                    self.accountsObjs[prev_bankAccount].RemoveTransaction(currTrans, self)
+                    self.accountsObjs[bankAccount].AddTransaction(transData, currTrans)
+                else:
+                    self.callUpdate(self.creditCardObjs['Todas'], transData, currTrans)
+                    self.creditCardObjs[prev_bankAccount].RemoveTransaction(currTrans, self)
+                    self.creditCardObjs[bankAccount].AddTransaction(transData, currTrans)
             else:
-                self.creditCardObjs[prev_bankAccount].RemoveTransaction(currTrans, self)
-                self.creditCardObjs[bankAccount].AddTransaction(transData, currTrans)
-        else:
-            month, year = Funs.GetMY(transData['Date'])
-            mon_year = month + "_" + year
-            if bank_or_creditCard == "bank":
-                self.callUpdate(self.accountsObjs[bankAccount], transData, currTrans)
-            else:
-                self.callUpdate(self.accountsObjs[bankAccount], transData, currTrans)
-            
-            self.UpdateCategoriesTotal(mon_year, transData['Category'], transData['Value'])
+                month, year = Funs.GetMY(transData['Date'])
+                mon_year = month + "_" + year
+                if bank_or_creditCard == "bank":
+                    self.callUpdate(self.accountsObjs['Todas'], transData, currTrans)
+                    self.callUpdate(self.accountsObjs[bankAccount], transData, currTrans)
+                else:
+                    self.callUpdate(self.creditCardObjs['Todas'], transData, currTrans)
+                    self.callUpdate(self.creditCardObjs[bankAccount], transData, currTrans)
+                
+                self.UpdateCategoriesTotal(mon_year, transData['Category'], transData['Value'])
+            return 'OK'
+        # except:
+        #     return 'Error'        
 
     def callUpdate(self, targetObj, transData, currTrans):
-        targetObj.UpdateAccount(currTrans)
+        targetObj.SubtractTrans(currTrans)
         targetObj.totalAmount += float(transData['Value'])
         targetObj.transactions[currTrans].Update(transData)
 

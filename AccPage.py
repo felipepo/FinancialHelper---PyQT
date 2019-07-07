@@ -2,6 +2,7 @@ from PySide2 import QtWidgets, QtCore, QtGui
 import math
 import Funs
 import unidecode
+import NewWindows
 
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
@@ -121,7 +122,7 @@ class CardArea(QtWidgets.QScrollArea):
         ## Creation ==
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         if testFlag == 0:
-            if self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions:
+            if self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions or self.accPage.mainWin.allAcc.creditCardObjs['Todas'].transactions:
                 for iFrame in list(self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions.keys()):
                     currTransData = self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions[iFrame]
                     transData["Value"] = currTransData.value
@@ -129,16 +130,34 @@ class CardArea(QtWidgets.QScrollArea):
                     transData["Account"] = currTransData.bankAccount
                     transData["Comment"] = currTransData.comment
                     transData["Date"] = currTransData.date
+                    transData["AccType"] = "bank"
+                    self.AddCard(transData, currTransData.transID)
+                for iFrame in list(self.accPage.mainWin.allAcc.creditCardObjs['Todas'].transactions.keys()):
+                    currTransData = self.accPage.mainWin.allAcc.creditCardObjs['Todas'].transactions[iFrame]
+                    transData["Value"] = currTransData.value
+                    transData["Category"] = currTransData.category
+                    transData["Account"] = currTransData.bankAccount
+                    transData["Comment"] = currTransData.comment
+                    transData["Date"] = currTransData.date
+                    transData["AccType"] = "creditCard"
                     self.AddCard(transData, currTransData.transID)
         else:
             for iFrame in range(60):
                 transData = Funs.generateData()
-                # transData["Value"] = "00,00"
-                # transData["Category"] = "Feira"
-                # transData["Account"] = "BB"
-                # transData["Comment"] = "Testando"
-                # transData["Date"] = "10/10/2010"
-                self.AddCard(transData, "trans"+str(iFrame))
+                if transData['AccType'] == 'bank':
+                    if transData['Account'] not in list(self.accPage.mainWin.allAcc.accountsObjs.keys()):
+                        self.accPage.mainWin.allAcc.AddAcc(transData['Account'])
+                        self.accPage.mainWin.homePage.accGroupBox.comboBox.addItem(transData['Account'])
+                else:
+                    if transData['Account'] not in list(self.accPage.mainWin.allAcc.creditCardObjs.keys()):
+                        self.accPage.mainWin.allAcc.AddAcc(transData['Account'], transData['AccType'])
+                        self.accPage.mainWin.homePage.CCGroupBox.comboBox.addItem(transData['Account'])
+                transID = self.accPage.mainWin.allAcc.AddTransaction(transData)
+                if transData['AccType'] == 'bank':
+                    self.accPage.mainWin.homePage.accGroupBox.UpdateValue()
+                else:
+                    self.accPage.mainWin.homePage.CCGroupBox.UpdateValue()
+                self.AddCard(transData, transID)
 
         ## Customization ==
         ## Layout ==
@@ -156,8 +175,14 @@ class CardArea(QtWidgets.QScrollArea):
             self.col = 0
             self.row = self.row + 1
 
-    def Update(self):
-        pass
+    def UpdateCard(self, transData, transID):
+        self.card[transID].categoryLbl.setText(transData['Category'])
+        self.card[transID].valueLbl.setText(str(transData['Value']))
+        self.card[transID].dateLbl.setText(transData['Date'])
+        self.card[transID].commLbl.setText(transData['Comment'])
+        self.card[transID].accLbl.setText(transData['Account'])
+        self.card[transID].setObjectName(unidecode.unidecode(transData['Category']))
+        self.card[transID].setStyle(self.card[transID].style())
 
     def HideCard(self):
         pass
@@ -199,7 +224,9 @@ class CardArea(QtWidgets.QScrollArea):
 class Card(QtWidgets.QFrame):
     def __init__(self, parent, transData, transID):
         super().__init__(parent)
+        self.cardArea = parent
         self.Id = transID
+        self.type = transData["AccType"]
         ## Initialization ==
         self.setMinimumSize(QtCore.QSize(parent.cardWidth, 100))
         self.setMaximumSize(QtCore.QSize(parent.cardWidth, 100))
@@ -226,6 +253,7 @@ class Card(QtWidgets.QFrame):
         self.currencyLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.accLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
 
+        self.editButton.clicked.connect(self.Update)
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
         self.gridLayout.setContentsMargins(9,9,9,9)
@@ -249,4 +277,31 @@ class Card(QtWidgets.QFrame):
         self.gridLayout.addWidget(self.editButton, 2, 6, 1, 1, alignment = QtCore.Qt.AlignRight)
 
     def Update(self):
-        pass
+        mayProceed = False
+        while mayProceed == False:
+            accOptions = list(self.cardArea.accPage.mainWin.allAcc.accountsObjs.keys())
+            del accOptions[0]
+            ccOptions = list(self.cardArea.accPage.mainWin.allAcc.creditCardObjs.keys())
+            del ccOptions[0]
+            catOptions = list(self.cardArea.accPage.mainWin.allCategories.category.keys())
+            transData = {
+                'Value': float(self.valueLbl.text()),
+                'Comment': self.commLbl.text(),
+                'Account': self.accLbl.text(),
+                'Category': self.categoryLbl.text(),
+                'AccType': self.type
+            }
+            wind = NewWindows.Transaction(self, accOptions, ccOptions, catOptions, transData)
+            if wind.exec_():
+                updatedFlag = self.cardArea.accPage.mainWin.allAcc.UpdateTransaction(self.Id, wind.inputs, wind.inputs['Account'], self.accLbl.text(), wind.inputs['AccType'])
+                if updatedFlag == 'OK':
+                    if wind.inputs['AccType'] == 'bank':
+                        self.cardArea.accPage.mainWin.homePage.accGroupBox.UpdateValue()
+                    else:
+                        self.cardArea.accPage.mainWin.homePage.CCGroupBox.UpdateValue()
+                    mayProceed = True
+                    self.cardArea.accPage.mainWin.accPage.cardArea.UpdateCard(wind.inputs, self.Id)                    
+                else:
+                    print('Problema na conta')
+            else: 
+                mayProceed = True

@@ -4,8 +4,11 @@ import unidecode
 import Funs
 
 class Transaction(QtWidgets.QDialog):
-    def __init__(self, parent):
+    def __init__(self, parent,ACCoptions,CCoptions,CAToptions, transData={}):
         super().__init__(parent)
+        self.ACCoptions = ACCoptions
+        self.CCoptions = CCoptions
+        self.CAToptions = CAToptions
         self.caller = parent
         ## Initialization ==
         self.setObjectName("Dialog")
@@ -31,12 +34,8 @@ class Transaction(QtWidgets.QDialog):
         self.expenseRadio = QtWidgets.QRadioButton(self.groupBox, checked=True, objectName="expenseRadio", text="Despesa")
 
         ## Customization ==
-        accOptions = list(self.caller.mainWin.allAcc.accountsObjs.keys())
-        del accOptions[0]
-        self.accountCombo.addItems(accOptions)
-        
-        catOptions = list(self.caller.mainWin.allCategories.category.keys())
-        self.categoryCombo.addItems(catOptions)
+        self.accountCombo.addItems(self.ACCoptions)        
+        self.categoryCombo.addItems(self.CAToptions)
 
         self.valueLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
         self.categoryLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
@@ -60,6 +59,20 @@ class Transaction(QtWidgets.QDialog):
         self.dateEdit.setCalendarPopup(True)
         self.accRadio.toggled.connect(self.accTypeSwitch)
         self.CCRadio.toggled.connect(self.CCTypeSwitch)
+        if transData:
+            if "-" in str(transData['Value']):
+                self.expenseRadio.setChecked(True)
+                self.valueEdit.setText(str(transData['Value']*(-1)))
+            else:
+                self.revenueRadio.setChecked(True)
+                self.valueEdit.setText(str(transData['Value']))
+            self.commentEdit.setText(transData['Comment'])
+            self.categoryCombo.setCurrentText(transData['Category'])
+            if transData['AccType'] == "bank":
+                self.accRadio.setChecked(True)
+            else:
+                self.CCRadio.setChecked(True)
+            self.accountCombo.setCurrentText(transData['Account'])
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
@@ -96,10 +109,9 @@ class Transaction(QtWidgets.QDialog):
     def UpdateAccounts(self):
         self.accountCombo.clear()
         if self.accRadio.isChecked():
-            options = list(self.caller.mainWin.allAcc.accountsObjs.keys())
+            options = self.ACCoptions
         else:
-            options = list(self.caller.mainWin.allAcc.creditCardObjs.keys())
-        del options[0]
+            options = self.CCoptions
         self.accountCombo.addItems(options)
 
     def getInputs(self):
@@ -166,7 +178,7 @@ class AddAccount(QtWidgets.QDialog):
 class CategoryWindow(QtWidgets.QDialog):
     def __init__(self, parent):
         super().__init__()
-        self.parent = parent
+        self.mainWin = parent
         self.allCategories = parent.allCategories
         self.styleObj = copy.deepcopy(parent.styleObj)
         ## Initialization ==
@@ -209,21 +221,32 @@ class CategoryWindow(QtWidgets.QDialog):
 
     def Apply(self):
         # Edit category color 
-        self.parent.styleObj.InterfaceStyle = self.styleObj.InterfaceStyle
+        self.mainWin.styleObj.InterfaceStyle = self.styleObj.InterfaceStyle
 
         # Append new Category
         if self.addTab.newEntry.text():
-            self.parent.styleObj.appendStyle(self.addTab.getStyle())
+            self.mainWin.styleObj.appendStyle(self.addTab.getStyle())
 
         # Remove Category
         if self.removeTab.catCombo.currentText():
-            self.parent.styleObj.removeStyle(self.removeTab.catCombo.currentText())
+            self.mainWin.styleObj.removeStyle(self.removeTab.catCombo.currentText())
         
         # Rename Category
         if self.renameTab.newEntry.text():
-            self.parent.styleObj.renameStyle(self.renameTab.catCombo.currentText(),self.renameTab.newEntry.text())
+            oldName = self.renameTab.catCombo.currentText()
+            newName = self.renameTab.newEntry.text()
+            self.mainWin.styleObj.renameStyle(oldName, newName)
+            for iAcc in list(self.mainWin.allAcc.accountsObjs.keys()):
+                for iTrans in list(self.mainWin.allAcc.accountsObjs[iAcc].transactions.keys()):
+                    if self.mainWin.allAcc.accountsObjs[iAcc].transactions[iTrans].category == oldName:
+                        self.mainWin.allAcc.accountsObjs[iAcc].transactions[iTrans].category = newName
 
-        self.parent.setStyleSheet(self.parent.styleObj.InterfaceStyle)
+            for iAcc in list(self.mainWin.allAcc.creditCardObjs.keys()):
+                for iTrans in list(self.mainWin.allAcc.creditCardObjs[iAcc].transactions.keys()):
+                    if self.mainWin.allAcc.creditCardObjs[iAcc].transactions[iTrans].category == oldName:
+                        self.mainWin.allAcc.creditCardObjs[iAcc].transactions[iTrans].category = newName
+
+        self.mainWin.setStyleSheet(self.mainWin.styleObj.InterfaceStyle)
         
         self.close()
 

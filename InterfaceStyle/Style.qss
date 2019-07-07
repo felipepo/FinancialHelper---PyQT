@@ -1,4 +1,4 @@
-QFrame#CD, QLabel#ColorCD {
+QFrame#Feira, QLabel#ColorFeira {
     background-color: rgb(255, 200, 127);
 }
 QFrame#Transporte, QLabel#ColorTransporte {
@@ -27,7 +27,4 @@ QFrame#Luz, QLabel#ColorLuz {
 }
 QFrame#Outros, QLabel#ColorOutros {
     background-color: rgb(55, 55, 127);
-}
-QFrame#TESTE, QLabel#ColorTESTE {
-    background-color: rgb(170, 255, 255);
 }

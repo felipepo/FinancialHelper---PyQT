@@ -132,16 +132,25 @@ def generateData():
     transData = {}
     category = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros")
     conta = ("BB", "NuBank", "Santander","Inter")
+    cartoes = ("Santander", "Inter")
+    tipo = ("bank", "creditCard")
     Comment = ("Comentário mais longo", "Curto", "Esse seria um comentário imenso")
+    acctype = random.choice(tipo)
+    if acctype == "bank":
+        acc = random.choice(conta)
+    else:
+        acc = random.choice(cartoes)
     transData={
-        'Value':round(random.uniform(-5000,5000), 3),
+        'Value':round(random.uniform(-500,500), 2),
         'Category':random.choice(category),
-        'Account':random.choice(conta),
+        'Account':acc,
         'Comment':random.choice(Comment),
         'Date':'10/10/2010',
+        'AccType':acctype
     }
     return transData
 
 if __name__ == "__main__":
-    for i in range(10):
-        print(generateData())
+    for i in range(60):
+        test = generateData()
+        print(test['Value'])
