@@ -32,8 +32,21 @@ class Create(QtWidgets.QMainWindow):
             self.allCategories = categoryData
         except:
             self.allAcc = Classes.AllAccounts() #Creates object from scratch
-            self.allAcc.AddAcc("Todas", "bank")
-            self.allAcc.AddAcc("Todas", "creditCard")
+            dataBank = {
+                'NewAcc':'Todas',
+                'InitialValue':0,
+                'AccType':"bank"
+                }
+            dataCredit = {
+                'NewAcc':'Todas',
+                'InitialValue':0,
+                'AccType':"creditCard",
+                'DueDay':0,
+                'LimitValue':0,
+                'ClosingDay':0
+                }
+            self.allAcc.AddAcc(dataBank)
+            self.allAcc.AddAcc(dataCredit)
             self.allCategories = Classes.Categories()
             Funs.saveData('Data', self.allAcc)
             Funs.saveData('Categories', self.allCategories)
@@ -170,11 +183,11 @@ class ToolBar(QtWidgets.QToolBar):
         self.button["AddExpenseBank"].triggered.connect(self.addTransaction)
         #self.button["AddRevenueBank"].triggered.connect(self.goToHome)
         self.button["AddAccBank"].triggered.connect(self.addAccount)
-        self.button["RemoveAccBank"].triggered.connect(self.goToHome)
+        self.button["RemoveAccBank"].triggered.connect(self.removeAccount)
         #self.button["AddAccCC"].triggered.connect(self.goToHome)
         #self.button["RemoveAccCC"].triggered.connect(self.goToHome)
         #self.button["AddRevenueCC"].triggered.connect(self.goToHome)
-        self.button["Transfer"].triggered.connect(self.goToHome)
+        self.button["Transfer"].triggered.connect(self.transfer)
         self.button["EditTransfer"].triggered.connect(self.debug)
 
         ## Layout ==
@@ -205,18 +218,84 @@ class ToolBar(QtWidgets.QToolBar):
             else: 
                 mayProceed = True
 
+    def transfer(self):
+        mayProceed = False
+        while mayProceed == False:
+            accOptions = list(self.mainWin.allAcc.accountsObjs.keys())
+            del accOptions[0]
+            wind = NewWindows.TransferWindow(self, accOptions)
+            if wind.exec_():
+                sourceData = {
+                    'Category':'Transferência',
+                    'Date':wind.inputs['Date'],
+                    'Account':wind.inputs['srcName'],
+                    'Comment':'Transferência p/ '+wind.inputs['dstName'],
+                    'AccType':'bank',
+                    'Value':wind.inputs['Value']*(-1),
+                    'TransType':'Expense'
+                }
+                destData = {
+                    'Category':'Transferência',
+                    'Date':wind.inputs['Date'],
+                    'Account':wind.inputs['dstName'],
+                    'Comment':'Transferência de '+wind.inputs['srcName'],
+                    'AccType':'bank',
+                    'Value':wind.inputs['Value'],
+                    'TransType':'Revenue'
+                }
+                transID = self.mainWin.allAcc.AddTransaction(sourceData)
+                if transID != 'Error':
+                    self.mainWin.homePage.accGroupBox.UpdateValue()
+                    self.mainWin.accPage.cardArea.AddCard(sourceData, transID)
+                else:
+                    print('Problema na conta')
+                transID = self.mainWin.allAcc.AddTransaction(destData)
+                if transID != 'Error':
+                    self.mainWin.homePage.accGroupBox.UpdateValue()
+                    mayProceed = True
+                    self.mainWin.accPage.cardArea.AddCard(destData, transID)
+                else:
+                    print('Problema na conta')
+            else: 
+                mayProceed = True
+
     def addAccount(self):
         mayProceed = False
         while mayProceed == False:
             wind = NewWindows.AddAccount(self)
             if wind.exec_():
-                addedFlag = self.mainWin.allAcc.AddAcc(wind.inputs['NewAcc'], wind.inputs['AccType'])
+                addedFlag = self.mainWin.allAcc.AddAcc(wind.inputs)
                 if addedFlag:
                     mayProceed = True
                     if wind.inputs['AccType'] == 'bank':
                         self.mainWin.homePage.accGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+                        self.mainWin.homePage.accGroupBox.UpdateValue()
                     else:
                         self.mainWin.homePage.CCGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+                        self.mainWin.homePage.CCGroupBox.UpdateValue()
+                else:
+                    print('acc ja existe')
+            else: 
+                mayProceed = True
+
+    def removeAccount(self):
+        mayProceed = False
+        while mayProceed == False:
+            accOptions = list(self.mainWin.allAcc.accountsObjs.keys())
+            del accOptions[0]
+            ccOptions = list(self.mainWin.allAcc.creditCardObjs.keys())
+            del ccOptions[0]
+            wind = NewWindows.RemoveAccount(self, accOptions, ccOptions)
+            if wind.exec_():
+                removedFlag = self.mainWin.allAcc.DelAcc(wind.inputs['AccName'],wind.inputs['AccType'])
+                if removedFlag:
+                    mayProceed = True
+                    if wind.inputs['AccType'] == 'bank':
+                        itemToRemove = accOptions.index(wind.inputs['AccName']) + 1
+                        self.mainWin.homePage.accGroupBox.comboBox.removeItem(itemToRemove)
+                    else:
+                        itemToRemove = ccOptions.index(wind.inputs['AccName']) + 1
+                        self.mainWin.homePage.CCGroupBox.comboBox.removeItem(itemToRemove)
                 else:
                     print('acc ja existe')
             else: 

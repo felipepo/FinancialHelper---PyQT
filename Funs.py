@@ -122,6 +122,8 @@ def debugAccounts(Accounts):
         print("-----")
         print(acc)
         print(Accounts.creditCardObjs[acc].totalAmount)
+        print(Accounts.creditCardObjs[acc].dueDay)
+        print(Accounts.creditCardObjs[acc].closingDay)
         value = ""
         category = ""
         date = ""
@@ -185,6 +187,10 @@ def generateData():
         'Account':acc,
         'Comment':random.choice(Comment),
         'Date':date,
+        'InitialValue':round(random.uniform(-500,500), 2),
+        'LimitValue':round(random.uniform(-500,500), 2),
+        'DueDay':random.randint(1,28),
+        'ClosingDay':random.randint(1,28),
         'AccType':acctype
     }
     return transData

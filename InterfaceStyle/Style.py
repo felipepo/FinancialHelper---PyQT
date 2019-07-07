@@ -1,4 +1,4 @@
-
+import unidecode
 # import os.path
 # QssExist = os.path.exists("InterfaceStyle/Style.qss")
 
@@ -93,9 +93,10 @@ class Create():
         # QStackedWidget
         # Card    
         for iCategory in list(self.allCategories.category.keys()):
+            currCat = unidecode.unidecode(iCategory)
             styleList.append({
                 'selectorStr':["QFrame", "QLabel"],
-                'idStr':[iCategory, 'Color'+iCategory],
+                'idStr':[currCat, 'Color'+currCat],
                 'classStr':["", ''],
                 'descendantStr':["", ''],
                 'childStr':["", ''],

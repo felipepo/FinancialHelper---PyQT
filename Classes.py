@@ -14,13 +14,14 @@ class Categories():
         self.category = {
             "Feira": 'rgb(255, 200, 127)',
             "Transporte": 'rgb(200, 255, 127)',
-            "Remedio": 'rgb(255, 255, 200)',
+            "Remédio": 'rgb(255, 255, 200)',
             "Academia": 'rgb(255, 155, 127)',
             "Aluguel": 'rgb(155, 255, 127)',
-            "Condominio": 'rgb(155, 155, 127)',
+            "Condomínio": 'rgb(155, 155, 127)',
             "Telefone": 'rgb(200, 200, 127)',
             "Internet": 'rgb(55, 255, 127)',
             "Luz": 'rgb(255, 55, 127)',
+            "Transferência": 'rgb(5, 55, 227)',
             "Outros": 'rgb(55, 55, 127)'
             }
     
@@ -38,10 +39,10 @@ class Categories():
 
 class Account():
     #Class to create the accounts
-    def __init__(self, parent, name=None):
+    def __init__(self, parent, name=None, initialValue = 0):
         self.parent = parent
         self.name = name
-        self.totalAmount = 0
+        self.totalAmount = initialValue
         self.transactions = {}
 
     def SetTotal(self, newTotal):
@@ -166,19 +167,22 @@ class AllAccounts():
             self.categoriesTotal[mon_year] = {}
             self.categoriesTotal[mon_year][category] = float(value)
 
-    def AddAcc(self, accName, bank_or_creditCard = "bank"):
-        if bank_or_creditCard == "bank":
+    def AddAcc(self, accData):
+        accName = accData["NewAcc"]
+        if accData['AccType'] == "bank":
             if accName in self.accountsObjs:
                 return False #Didn't add a new account
             else:
-                self.accountsObjs[accName] = Account(self, accName)
+                self.accountsObjs[accName] = Account(self, accName, accData["InitialValue"])
+                self.accountsObjs['Todas'].totalAmount += accData["InitialValue"]
                 self.accountsObjs[accName].name = accName
                 return True #Added a new account
-        elif bank_or_creditCard == "creditCard":
+        else:
             if accName in self.creditCardObjs:
                 return False #Didn't add a new credit card
             else:
-                self.creditCardObjs[accName] = CreditCard(self, accName)
+                self.creditCardObjs[accName] = CreditCard(self, accName, accData["InitialValue"], accData["ClosingDay"], accData["DueDay"], accData["LimitValue"])
+                self.creditCardObjs['Todas'].totalAmount += accData["InitialValue"]
                 self.creditCardObjs[accName].name = accName
                 return True #Added a new credit card
         
@@ -199,9 +203,11 @@ class AllAccounts():
 #=========================================================================================
 class CreditCard(Account):
     #Class to create the credit cards accounts
-    def __init__(self, parent, name=None):
-        super().__init__(parent, name)
-        self.limit = 0
+    def __init__(self, parent, name=None, initialValue=0, closingDay='0', dueDay='0', limit=0):
+        super().__init__(parent, name, initialValue)
+        self.limit = limit
+        self.closingDay = closingDay
+        self.dueDay = dueDay
 
 #=========================================================================================     
 if __name__ == "__main__":

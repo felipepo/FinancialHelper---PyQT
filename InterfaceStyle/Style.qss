@@ -25,6 +25,9 @@ QFrame#Internet, QLabel#ColorInternet {
 QFrame#Luz, QLabel#ColorLuz {
     background-color: rgb(255, 55, 127);
 }
+QFrame#Transferencia, QLabel#ColorTransferencia {
+    background-color: rgb(5, 55, 227);
+}
 QFrame#Outros, QLabel#ColorOutros {
     background-color: rgb(55, 55, 127);
 }

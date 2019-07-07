@@ -141,39 +141,199 @@ class AddAccount(QtWidgets.QDialog):
         self.setObjectName("AddAccount")
         self.setWindowTitle("Nova Conta")
         self.inputs = {}
-        self.resize(275, 90)
+        self.resize(306, 227)
 
         ## Creation ==
         self.OK = QtWidgets.QPushButton(self, text="OK", objectName="OK")
         self.CCRadio = QtWidgets.QRadioButton(self, text="Cartão de Crédito", objectName="CCRadio")
-        self.newEdit = QtWidgets.QLineEdit(self, objectName="newEdit")
+        self.newEdit = QtWidgets.QLineEdit(self, objectName="newEdit", alignment=QtCore.Qt.AlignCenter)
         self.accRadio = QtWidgets.QRadioButton(self, text="Conta", objectName="accRadio")
-        self.label = QtWidgets.QLabel(self, text="Nome", objectName="label")
+        self.nameLbl = QtWidgets.QLabel(self, text="Nome", objectName="nameLbl", alignment=QtCore.Qt.AlignRight)
+        self.initialValueLbl = QtWidgets.QLabel(self, objectName="initialValueLbl", text="Valor Inicial (R$)")
+        self.initialValueEdit = QtWidgets.QLineEdit(self, objectName="newEdit", placeholderText="00.0", alignment=QtCore.Qt.AlignCenter)
+        self.groupBox = QtWidgets.QGroupBox(self, objectName="groupBox", title="Fatura")
+        self.closingDayLbl = QtWidgets.QLabel(self.groupBox, objectName="closingDayLbl", text="Dia de Fechamento")
+        self.closingDayEdit = QtWidgets.QLineEdit(self.groupBox, objectName="newEdit", placeholderText="00", alignment=QtCore.Qt.AlignCenter)
+        self.dueDatLbl = QtWidgets.QLabel(self.groupBox, objectName="dueDatLbl", text="Dia de Vencimento")
+        self.dueDatEdit = QtWidgets.QLineEdit(self.groupBox, objectName="newEdit", placeholderText="00", alignment=QtCore.Qt.AlignCenter)
+        self.limitLbl = QtWidgets.QLabel(self, objectName="limitLbl", text="Limite (R$)", alignment=QtCore.Qt.AlignRight)
+        self.limitEdit = QtWidgets.QLineEdit(self, objectName="limitEdit", placeholderText="00.0", alignment=QtCore.Qt.AlignCenter)
+        self.spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
         ## Customization ==
         self.accRadio.setChecked(True)
-        self.label.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.groupBox.hide()
+        self.nameLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.initialValueLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.closingDayLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.dueDatLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.limitLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
         self.OK.clicked.connect(self.getInputs)
         self.newEdit.setFocus()
 
+        self.accRadio.toggled.connect(self.accTypeSwitch)
+
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        self.gridLayout.addWidget(self.OK, 2, 1, 1, 1)
-        self.gridLayout.addWidget(self.CCRadio, 1, 1, 1, 1)
-        self.gridLayout.addWidget(self.newEdit, 2, 0, 1, 1)
-        self.gridLayout.addWidget(self.accRadio, 0, 1, 1, 1)
-        self.gridLayout.addWidget(self.label, 1, 0, 1, 1)
-        
-    def UpdateStyle(self):
-        pass
-        
-    def getInputs(self):
-        self.inputs['NewAcc'] = self.newEdit.text()
+        self.gridLayout.addWidget(self.accRadio, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.CCRadio, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.nameLbl, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.newEdit, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.initialValueLbl, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.initialValueEdit, 2, 1, 1, 1)
+        self.gridLayout.addWidget(self.groupBox, 3, 0, 1, 2)
+        self.gridLayout.addItem(self.spacerItem, 3, 0, 1, 2)
+        self.gridLayout.addWidget(self.OK, 4, 1, 1, 1)
+
+        self.groupLayout = QtWidgets.QGridLayout(self.groupBox, objectName="groupLayout")
+        self.groupLayout.addWidget(self.limitLbl, 0, 0, 1, 1)
+        self.groupLayout.addWidget(self.limitEdit, 0, 1, 1, 1)
+        self.groupLayout.addWidget(self.closingDayLbl, 1, 0, 1, 1)
+        self.groupLayout.addWidget(self.closingDayEdit, 1, 1, 1, 1)
+        self.groupLayout.addWidget(self.dueDatLbl, 2, 0, 1, 1)
+        self.groupLayout.addWidget(self.dueDatEdit, 2, 1, 1, 1)
+             
+    def accTypeSwitch(self):
+        self.CCRadio.setChecked(not self.accRadio.isChecked())
+        self.HideShowBill()
+
+    def HideShowBill(self):
         if self.accRadio.isChecked():
-            self.inputs['AccType'] = 'bank'
-        else: 
-            self.inputs['AccType'] = 'creditCard'
-        self.accept()
+            self.groupBox.hide()
+        else:
+            self.groupBox.show()
+   
+    def getInputs(self):
+        try:
+            self.inputs['NewAcc'] = self.newEdit.text()
+            self.inputs['InitialValue'] = float(self.initialValueEdit.text())
+            if self.accRadio.isChecked():
+                self.inputs['AccType'] = 'bank'
+            else: 
+                self.inputs['AccType'] = 'creditCard'
+                self.inputs['LimitValue'] = float(self.limitEdit.text())
+                self.inputs['DueDay'] = int(self.dueDatEdit.text())
+                self.inputs['ClosingDay'] = int(self.closingDayEdit.text())
+            self.accept()
+        except:
+            print('Números errados')
+
+class RemoveAccount(QtWidgets.QDialog):
+    def __init__(self,parent, ACCoptions, CCoptions):
+        super().__init__()
+        self.mainWin = parent
+        self.setWindowTitle("Remover Conta")
+        self.inputs = {}
+        self.resize(237,90)
+        self.setObjectName("RemoveAccount")
+
+        ## Initialization ==
+        self.ACCoptions = ACCoptions
+        self.CCoptions = CCoptions
+        
+        ## Creation ==
+        self.nameLbl = QtWidgets.QLabel(self, objectName="nameLbl", text="Nome", alignment=QtCore.Qt.AlignRight)
+        self.OK = QtWidgets.QPushButton(self, objectName="OK", text="OK")
+        self.AccRadio = QtWidgets.QRadioButton(self, objectName="AccRadio", text="Conta")
+        self.CCRadio = QtWidgets.QRadioButton(self, objectName="CCRadio", text="Cartão de Crédito")
+        self.comboBox = QtWidgets.QComboBox(self, objectName="comboBox")
+
+        ## Customization ==
+        self.nameLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.AccRadio.setChecked(True)
+        self.comboBox.addItems(self.ACCoptions)  
+        self.OK.clicked.connect(self.getInputs)
+
+        self.AccRadio.toggled.connect(self.accTypeSwitch)
+
+        ## Layout ==
+        self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
+        self.gridLayout.addWidget(self.AccRadio, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.CCRadio, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.nameLbl, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.comboBox, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.OK, 2, 1, 1, 1)
+
+    def accTypeSwitch(self):
+        self.CCRadio.setChecked(not self.AccRadio.isChecked())
+        self.ChangeOptions()
+
+    def ChangeOptions(self):
+        self.comboBox.clear()
+        if self.AccRadio.isChecked():
+            options = self.ACCoptions
+        else:
+            options = self.CCoptions
+        self.comboBox.addItems(options)
+   
+    def getInputs(self):
+        try:
+            self.inputs['AccName'] = self.comboBox.currentText()
+            if self.AccRadio.isChecked():
+                self.inputs['AccType'] = 'bank'
+            else: 
+                self.inputs['AccType'] = 'creditCard'
+            self.accept()
+        except:
+            print('Números errados')
+
+class TransferWindow(QtWidgets.QDialog):
+    def __init__(self, parent, options):
+        super().__init__()
+        self.resize(303, 131)
+        self.setWindowTitle('Transferência')
+        self.setObjectName("TransferWindow")
+        self.inputs = {}
+        ## Initialization ==
+        ## Creation ==
+        self.originLbl = QtWidgets.QLabel(self, objectName="originLbl", text="Origem")
+        self.destinLbl = QtWidgets.QLabel(self, objectName="destinLbl", text="Destino")
+        self.dateLbl = QtWidgets.QLabel(self, objectName="dateLbl", text="Data")
+        self.valueLbl = QtWidgets.QLabel(self, objectName="valueLbl", text="Valor (R$)")
+        self.sourceCombo = QtWidgets.QComboBox(self, objectName="sourceCombo")
+        self.destCombo = QtWidgets.QComboBox(self, objectName="destCombo")
+        self.valueEdit = QtWidgets.QLineEdit(self, objectName="valueEdit", placeholderText="00.0", alignment=QtCore.Qt.AlignCenter)
+        self.dateEdit = QtWidgets.QDateEdit(self, date=QtCore.QDate.currentDate(), objectName="dateEdit")
+        self.OK = QtWidgets.QPushButton(self, objectName="OK", text="OK")
+
+        ## Customization ==
+        self.originLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.destinLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.dateLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.valueLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+
+        self.dateEdit.setCalendarPopup(True)
+        self.sourceCombo.addItems(options)  
+        self.destCombo.addItems(options)  
+        self.OK.clicked.connect(self.getInputs)
+
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.dateEdit.sizePolicy().hasHeightForWidth())
+        self.dateEdit.setSizePolicy(sizePolicy)
+
+        ## Layout ==
+        self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
+        self.gridLayout.addWidget(self.originLbl, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.destinLbl, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.sourceCombo, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.destCombo, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.valueLbl, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.dateLbl, 2, 1, 1, 1)
+        self.gridLayout.addWidget(self.valueEdit, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.dateEdit, 3, 1, 1, 1)
+        self.gridLayout.addWidget(self.OK, 4, 1, 1, 1)
+
+    def getInputs(self):
+        # try:
+            self.inputs['srcName'] = self.sourceCombo.currentText()
+            self.inputs['dstName'] = self.destCombo.currentText()
+            self.inputs['Date'] = self.dateEdit.date().toString('dd/MM/yyyy')
+            self.inputs['Value'] = float(self.valueEdit.text())
+            self.accept()
+        # except:
+        #     print('Números errados')
 
 class CategoryWindow(QtWidgets.QDialog):
     def __init__(self, parent):
