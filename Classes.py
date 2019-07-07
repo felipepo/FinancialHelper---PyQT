@@ -38,10 +38,10 @@ class Categories():
 
 class Account():
     #Class to create the accounts
-    def __init__(self, parent, name=None):
+    def __init__(self, parent, name=None, initialValue = 0):
         self.parent = parent
         self.name = name
-        self.totalAmount = 0
+        self.totalAmount = initialValue
         self.transactions = {}
 
     def SetTotal(self, newTotal):
@@ -166,19 +166,20 @@ class AllAccounts():
             self.categoriesTotal[mon_year] = {}
             self.categoriesTotal[mon_year][category] = float(value)
 
-    def AddAcc(self, accName, bank_or_creditCard = "bank"):
-        if bank_or_creditCard == "bank":
+    def AddAcc(self, accData):
+        accName = accData["NewAcc"]
+        if accData['AccType'] == "bank":
             if accName in self.accountsObjs:
                 return False #Didn't add a new account
             else:
-                self.accountsObjs[accName] = Account(self, accName)
+                self.accountsObjs[accName] = Account(self, accName, accData["InitialValue"])
                 self.accountsObjs[accName].name = accName
                 return True #Added a new account
-        elif bank_or_creditCard == "creditCard":
+        else:
             if accName in self.creditCardObjs:
                 return False #Didn't add a new credit card
             else:
-                self.creditCardObjs[accName] = CreditCard(self, accName)
+                self.creditCardObjs[accName] = CreditCard(self, accName, accData["InitialValue"])
                 self.creditCardObjs[accName].name = accName
                 return True #Added a new credit card
         
@@ -199,9 +200,11 @@ class AllAccounts():
 #=========================================================================================
 class CreditCard(Account):
     #Class to create the credit cards accounts
-    def __init__(self, parent, name=None):
-        super().__init__(parent, name)
+    def __init__(self, parent, name=None, initialValue=0, closingDay='0', dueDay='0'):
+        super().__init__(parent, name, initialValue)
         self.limit = 0
+        self.closingDay = closingDay
+        self.dueDay = dueDay
 
 #=========================================================================================     
 if __name__ == "__main__":

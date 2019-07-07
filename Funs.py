@@ -103,6 +103,8 @@ def debugAccounts(Accounts):
         print("-----")
         print(acc)
         print(Accounts.creditCardObjs[acc].totalAmount)
+        print(Accounts.creditCardObjs[acc].dueDay)
+        print(Accounts.creditCardObjs[acc].closingDay)
         value = ""
         category = ""
         date = ""

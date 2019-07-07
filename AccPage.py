@@ -146,11 +146,18 @@ class CardArea(QtWidgets.QScrollArea):
                 transData = Funs.generateData()
                 if transData['AccType'] == 'bank':
                     if transData['Account'] not in list(self.accPage.mainWin.allAcc.accountsObjs.keys()):
-                        self.accPage.mainWin.allAcc.AddAcc(transData['Account'])
+                        accData = {
+                            'NewAcc':transData['Account'],
+                            'InitialValue':transData['InitialValue'],
+                            'AccType':transData['AccType'],
+                            'DueDay':transData['DueDay'],
+                            'ClosingDay':transData['ClosingDay']
+                            }
+                        self.accPage.mainWin.allAcc.AddAcc(accData)
                         self.accPage.mainWin.homePage.accGroupBox.comboBox.addItem(transData['Account'])
                 else:
                     if transData['Account'] not in list(self.accPage.mainWin.allAcc.creditCardObjs.keys()):
-                        self.accPage.mainWin.allAcc.AddAcc(transData['Account'], transData['AccType'])
+                        self.accPage.mainWin.allAcc.AddAcc(accData)
                         self.accPage.mainWin.homePage.CCGroupBox.comboBox.addItem(transData['Account'])
                 transID = self.accPage.mainWin.allAcc.AddTransaction(transData)
                 if transData['AccType'] == 'bank':

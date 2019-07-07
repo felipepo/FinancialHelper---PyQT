@@ -141,39 +141,76 @@ class AddAccount(QtWidgets.QDialog):
         self.setObjectName("AddAccount")
         self.setWindowTitle("Nova Conta")
         self.inputs = {}
-        self.resize(275, 90)
+        self.resize(306, 207)
 
         ## Creation ==
         self.OK = QtWidgets.QPushButton(self, text="OK", objectName="OK")
         self.CCRadio = QtWidgets.QRadioButton(self, text="Cartão de Crédito", objectName="CCRadio")
         self.newEdit = QtWidgets.QLineEdit(self, objectName="newEdit")
         self.accRadio = QtWidgets.QRadioButton(self, text="Conta", objectName="accRadio")
-        self.label = QtWidgets.QLabel(self, text="Nome", objectName="label")
+        self.nameLbl = QtWidgets.QLabel(self, text="Nome", objectName="nameLbl")
+        self.initialValueLbl = QtWidgets.QLabel(self, objectName="initialValueLbl", text="Valor Inicial (R$)")
+        self.initialValueEdit = QtWidgets.QLineEdit(self, objectName="newEdit", placeholderText="00.0", alignment=QtCore.Qt.AlignCenter)
+        self.groupBox = QtWidgets.QGroupBox(self, objectName="groupBox", title="Fatura")
+        self.closingDayLbl = QtWidgets.QLabel(self.groupBox, objectName="closingDayLbl", text="Dia de Fechamento")
+        self.dueDatLbl = QtWidgets.QLabel(self.groupBox, objectName="dueDatLbl", text="Dia de Vencimento")
+        self.closingDayEdit = QtWidgets.QLineEdit(self.groupBox, objectName="newEdit", placeholderText="00", alignment=QtCore.Qt.AlignCenter)
+        self.dueDatEdit = QtWidgets.QLineEdit(self.groupBox, objectName="newEdit", placeholderText="00", alignment=QtCore.Qt.AlignCenter)
+        self.spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
         ## Customization ==
         self.accRadio.setChecked(True)
-        self.label.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.groupBox.hide()
+        self.nameLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.initialValueLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.closingDayLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
+        self.dueDatLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
         self.OK.clicked.connect(self.getInputs)
         self.newEdit.setFocus()
 
+        self.accRadio.toggled.connect(self.accTypeSwitch)
+
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        self.gridLayout.addWidget(self.OK, 2, 1, 1, 1)
-        self.gridLayout.addWidget(self.CCRadio, 1, 1, 1, 1)
-        self.gridLayout.addWidget(self.newEdit, 2, 0, 1, 1)
-        self.gridLayout.addWidget(self.accRadio, 0, 1, 1, 1)
-        self.gridLayout.addWidget(self.label, 1, 0, 1, 1)
-        
-    def UpdateStyle(self):
-        pass
-        
-    def getInputs(self):
-        self.inputs['NewAcc'] = self.newEdit.text()
+        self.gridLayout.addWidget(self.accRadio, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.CCRadio, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.nameLbl, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.newEdit, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.initialValueLbl, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.initialValueEdit, 2, 1, 1, 1)
+        self.gridLayout.addWidget(self.groupBox, 3, 0, 1, 2)
+        self.gridLayout.addItem(self.spacerItem, 3, 0, 1, 2)
+        self.gridLayout.addWidget(self.OK, 4, 1, 1, 1)
+
+        self.groupLayout = QtWidgets.QGridLayout(self.groupBox, objectName="groupLayout")
+        self.groupLayout.addWidget(self.closingDayLbl, 0, 0, 1, 1)
+        self.groupLayout.addWidget(self.closingDayEdit, 0, 1, 1, 1)
+        self.groupLayout.addWidget(self.dueDatLbl, 1, 0, 1, 1)
+        self.groupLayout.addWidget(self.dueDatEdit, 1, 1, 1, 1)
+             
+    def accTypeSwitch(self):
+        self.CCRadio.setChecked(not self.accRadio.isChecked())
+        self.HideShowBill()
+
+    def HideShowBill(self):
         if self.accRadio.isChecked():
-            self.inputs['AccType'] = 'bank'
-        else: 
-            self.inputs['AccType'] = 'creditCard'
-        self.accept()
+            self.groupBox.hide()
+        else:
+            self.groupBox.show()
+   
+    def getInputs(self):
+        try:
+            self.inputs['NewAcc'] = self.newEdit.text()
+            self.inputs['InitialValue'] = float(self.initialValueEdit.text())
+            if self.accRadio.isChecked():
+                self.inputs['AccType'] = 'bank'
+            else: 
+                self.inputs['AccType'] = 'creditCard'
+                self.inputs['DueDay'] = int(self.dueDatEdit.text())
+                self.inputs['ClosingDay'] = int(self.closingDayEdit.text())
+            self.accept()
+        except:
+            print('Números errados')
 
 class CategoryWindow(QtWidgets.QDialog):
     def __init__(self, parent):

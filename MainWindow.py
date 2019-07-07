@@ -204,7 +204,7 @@ class ToolBar(QtWidgets.QToolBar):
         while mayProceed == False:
             wind = NewWindows.AddAccount(self)
             if wind.exec_():
-                addedFlag = self.mainWin.allAcc.AddAcc(wind.inputs['NewAcc'], wind.inputs['AccType'])
+                addedFlag = self.mainWin.allAcc.AddAcc(wind.inputs)
                 if addedFlag:
                     mayProceed = True
                     if wind.inputs['AccType'] == 'bank':
