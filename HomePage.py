@@ -48,9 +48,10 @@ class GroupBox(QtWidgets.QGroupBox):
         self.comboBox.currentIndexChanged.connect(self.UpdateValue)
 
         if self.title() == "Conta":
-            valueStr = str(self.homepage.mainWin.allAcc.accountsObjs[self.comboBox.currentText()].totalAmount)
+            value = self.homepage.mainWin.allAcc.accountsObjs[self.comboBox.currentText()].totalAmount
         else:
-            valueStr = str(self.homepage.mainWin.allAcc.creditCardObjs[self.comboBox.currentText()].totalAmount)
+            value = self.homepage.mainWin.allAcc.creditCardObjs[self.comboBox.currentText()].totalAmount
+        valueStr = "{:.{}f}".format(value, 2)
         self.valueLbl.setText(valueStr)
 
         ## Layout ==
@@ -62,9 +63,10 @@ class GroupBox(QtWidgets.QGroupBox):
     def UpdateValue(self):
         acc = self.comboBox.currentText()
         if self.title() == "Conta":
-            valueStr = str(self.homepage.mainWin.allAcc.accountsObjs[acc].totalAmount)
+            value = self.homepage.mainWin.allAcc.accountsObjs[acc].totalAmount
         else:
-            valueStr = str(self.homepage.mainWin.allAcc.creditCardObjs[acc].totalAmount)
+            value = self.homepage.mainWin.allAcc.creditCardObjs[acc].totalAmount
+        valueStr = "{:.{}f}".format(value, 2)
         self.valueLbl.setText(valueStr)
 
 class BudgetGroupBox(QtWidgets.QGroupBox):

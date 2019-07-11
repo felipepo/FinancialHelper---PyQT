@@ -18,6 +18,7 @@ class Create(QtWidgets.QWidget):
         self.graphicsView.setMaximumSize(QtCore.QSize(16777215, 500))
 
         ## Customization ==
+        
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
         
@@ -183,18 +184,15 @@ class CardArea(QtWidgets.QScrollArea):
             self.row = self.row + 1
 
     def UpdateCard(self, transData, transID):
-        self.card[transID].categoryLbl.setText(transData['Category'])
-        self.card[transID].valueLbl.setText(str(transData['Value']))
-        self.card[transID].dateLbl.setText(transData['Date'])
-        self.card[transID].commLbl.setText(transData['Comment'])
-        self.card[transID].accLbl.setText(transData['Account'])
-        self.card[transID].setObjectName(unidecode.unidecode(transData['Category']))
-        self.card[transID].setStyle(self.card[transID].style())
+        self.card[transID].Update(transData)
 
     def HideCard(self):
         pass
 
     def RemoveCard(self, transID):
+        accType = self.card[transID].type
+        accType = self.card[transID].type
+        self.accPage.mainWin.allAcc.RemoveTransaction(acc, accType, transID)
         del self.card[transID]
     
     def HideAllCards(self):
@@ -234,6 +232,11 @@ class Card(QtWidgets.QFrame):
         self.cardArea = parent
         self.Id = transID
         self.type = transData["AccType"]
+        self.acc = transData["Account"]
+        self.comment = transData["Comment"]
+        self.value = transData["Value"]
+        self.date = transData["Date"]
+        self.category = transData["Category"]
         ## Initialization ==
         self.setMinimumSize(QtCore.QSize(parent.cardWidth, 100))
         self.setMaximumSize(QtCore.QSize(parent.cardWidth, 100))
@@ -242,12 +245,12 @@ class Card(QtWidgets.QFrame):
         self.setFrameShadow(QtWidgets.QFrame.Raised)
 
         ## Creation ==
-        self.categoryLbl = QtWidgets.QLabel(self, text=transData["Category"], objectName="categoryLbl")
-        self.valueLbl = QtWidgets.QLabel(self, text=str(transData["Value"]), objectName="valueLbl")
+        self.categoryLbl = QtWidgets.QLabel(self, text=self.category, objectName="categoryLbl")
+        self.valueLbl = QtWidgets.QLabel(self, text=str(self.value), objectName="valueLbl")
         self.currencyLbl = QtWidgets.QLabel(self, text="R$", objectName="currencyLbl")
-        self.dateLbl = QtWidgets.QLabel(self, text=transData["Date"], objectName="dateLbl")
-        self.commLbl = QtWidgets.QLabel(self, text=transData["Comment"], objectName="commLbl")
-        self.accLbl = QtWidgets.QLabel(self, text=transData["Account"], objectName="accLbl")
+        self.dateLbl = QtWidgets.QLabel(self, text=self.date, objectName="dateLbl")
+        self.commLbl = QtWidgets.QLabel(self, text=self.comment, objectName="commLbl")
+        self.accLbl = QtWidgets.QLabel(self, text=self.acc, objectName="accLbl")
         self.editButton = QtWidgets.QPushButton(self, objectName="editButton")
 
         ## Customization ==
@@ -260,7 +263,7 @@ class Card(QtWidgets.QFrame):
         self.currencyLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.accLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
 
-        self.editButton.clicked.connect(self.Update)
+        self.editButton.clicked.connect(self.UpdateWindow)
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
         self.gridLayout.setContentsMargins(9,9,9,9)
@@ -283,7 +286,7 @@ class Card(QtWidgets.QFrame):
         self.gridLayout.addWidget(self.commLbl, 2, 0, 1, 6)
         self.gridLayout.addWidget(self.editButton, 2, 6, 1, 1, alignment = QtCore.Qt.AlignRight)
 
-    def Update(self):
+    def UpdateWindow(self):
         mayProceed = False
         while mayProceed == False:
             accOptions = list(self.cardArea.accPage.mainWin.allAcc.accountsObjs.keys())
@@ -291,24 +294,39 @@ class Card(QtWidgets.QFrame):
             ccOptions = list(self.cardArea.accPage.mainWin.allAcc.creditCardObjs.keys())
             del ccOptions[0]
             catOptions = list(self.cardArea.accPage.mainWin.allCategories.category.keys())
-            transData = {
-                'Value': float(self.valueLbl.text()),
-                'Comment': self.commLbl.text(),
-                'Account': self.accLbl.text(),
-                'Category': self.categoryLbl.text(),
-                'AccType': self.type
+            prevTransData = {
+                'Value': float(self.value),
+                'Comment': self.comment,
+                'Account': self.acc,
+                'Category': self.category,
+                'AccType': self.type,
+                'Date': self.date
             }
-            wind = NewWindows.Transaction(self, accOptions, ccOptions, catOptions, transData)
+            wind = NewWindows.Transaction(self, accOptions, ccOptions, catOptions, prevTransData)
             if wind.exec_():
-                updatedFlag = self.cardArea.accPage.mainWin.allAcc.UpdateTransaction(self.Id, wind.inputs, wind.inputs['Account'], self.accLbl.text(), wind.inputs['AccType'])
+                updatedFlag = self.cardArea.accPage.mainWin.allAcc.UpdateTransaction(self.Id, prevTransData, wind.inputs)
                 if updatedFlag == 'OK':
-                    if wind.inputs['AccType'] == 'bank':
-                        self.cardArea.accPage.mainWin.homePage.accGroupBox.UpdateValue()
-                    else:
-                        self.cardArea.accPage.mainWin.homePage.CCGroupBox.UpdateValue()
+                    self.cardArea.accPage.mainWin.homePage.accGroupBox.UpdateValue()
+                    self.cardArea.accPage.mainWin.homePage.CCGroupBox.UpdateValue()
                     mayProceed = True
-                    self.cardArea.accPage.mainWin.accPage.cardArea.UpdateCard(wind.inputs, self.Id)                    
+                    self.Update(wind.inputs)                    
                 else:
                     print('Problema na conta')
             else: 
                 mayProceed = True
+
+    def Update(self, transData):
+        self.type = transData["AccType"]
+        self.acc = transData["Account"]
+        self.comment = transData["Comment"]
+        self.value = transData["Value"]
+        self.date = transData["Date"]
+        self.category = transData["Category"]
+
+        self.categoryLbl.setText(transData['Category'])
+        self.valueLbl.setText(str(transData['Value']))
+        self.dateLbl.setText(transData['Date'])
+        self.commLbl.setText(transData['Comment'])
+        self.accLbl.setText(transData['Account'])
+        self.setObjectName(unidecode.unidecode(transData['Category']))
+        self.setStyle(self.style())
