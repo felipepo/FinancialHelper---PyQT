@@ -128,29 +128,63 @@ def getSpace(targetStr):
         spaces = spaces + " "
     return spaces
 
+def generateTrans():
+    pass
+
+def generateCatg():
+    catgData = {}
+    catgType = (1, 2)
+    category = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros")
+    color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
+
+    catgData={
+        'Catg_ID': 1,
+        'Type': random.choice(catgType),
+        'Name': random.choice(category),
+        'Color': color
+    }
+    return catgData
+
+def generateAcc():
+    accData = {}
+    accType = (1, 2)
+    accName = ("BB", "NuBank", "Santander","Inter")
+
+    accData={
+        'Type': random.choice(accType),
+        'Name': random.choice(accName),
+        'Total': 0
+    }
+    return accData
+    
 def generateData():
     transData = {}
-    category = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros")
-    conta = ("BB", "NuBank", "Santander","Inter")
-    cartoes = ("Santander", "Inter")
-    tipo = ("bank", "creditCard")
+    category = 0,
+    conta = 0,
+    cartoes = 0,
+    tipo = (1, 2)
     Comment = ("Comentário mais longo", "Curto", "Esse seria um comentário imenso")
     acctype = random.choice(tipo)
     if acctype == "bank":
         acc = random.choice(conta)
     else:
         acc = random.choice(cartoes)
-    transData={
-        'Value':round(random.uniform(-500,500), 2),
-        'Category':random.choice(category),
-        'Account':acc,
-        'Comment':random.choice(Comment),
-        'Date':'10/10/2010',
-        'AccType':acctype
-    }
+        transData={
+            'Catg_ID':0,
+            'Acc_ID':0,            
+            'Value':round(random.uniform(-500,500), 2),
+            'Category':random.choice(category),
+            'Account':acc,
+            'Comment':random.choice(Comment),
+            'Date':'10/10/2010',
+            'AccType':acctype
+        }
     return transData
 
 if __name__ == "__main__":
-    for i in range(60):
-        test = generateData()
-        print(test['Value'])
+    for i in range(3):
+        # test = generateData()
+        # print(test['Value'])
+        test = generateAcc()
+        test = generateCatg()
+        print(test)
