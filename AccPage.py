@@ -121,51 +121,17 @@ class CardArea(QtWidgets.QScrollArea):
 
         ## Creation ==
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        if self.accPage.mainWin.SimulateData == 0:
-            if self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions or self.accPage.mainWin.allAcc.creditCardObjs['Todas'].transactions:
-                for iFrame in list(self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions.keys()):
-                    currTransData = self.accPage.mainWin.allAcc.accountsObjs['Todas'].transactions[iFrame]
-                    transData["Value"] = currTransData.value
-                    transData["Category"] = currTransData.category
-                    transData["Account"] = currTransData.bankAccount
-                    transData["Comment"] = currTransData.comment
-                    transData["Date"] = currTransData.date
-                    transData["AccType"] = "bank"
-                    self.AddCard(transData, currTransData.transID)
-                for iFrame in list(self.accPage.mainWin.allAcc.creditCardObjs['Todas'].transactions.keys()):
-                    currTransData = self.accPage.mainWin.allAcc.creditCardObjs['Todas'].transactions[iFrame]
-                    transData["Value"] = currTransData.value
-                    transData["Category"] = currTransData.category
-                    transData["Account"] = currTransData.bankAccount
-                    transData["Comment"] = currTransData.comment
-                    transData["Date"] = currTransData.date
-                    transData["AccType"] = "creditCard"
-                    self.AddCard(transData, currTransData.transID)
-        else:
-            for iFrame in range(60):
-                transData = Funs.generateData()
-                accData = {
-                    'NewAcc':transData['Account'],
-                    'InitialValue':transData['InitialValue'],
-                    'AccType':transData['AccType'],
-                    'DueDay':transData['DueDay'],
-                    'LimitValue':transData['LimitValue'],
-                    'ClosingDay':transData['ClosingDay']
-                    }
-                if transData['AccType'] == 'bank':
-                    if transData['Account'] not in list(self.accPage.mainWin.allAcc.accountsObjs.keys()):
-                        self.accPage.mainWin.allAcc.AddAcc(accData)
-                        self.accPage.mainWin.homePage.accGroupBox.comboBox.addItem(transData['Account'])
-                else:
-                    if transData['Account'] not in list(self.accPage.mainWin.allAcc.creditCardObjs.keys()):
-                        self.accPage.mainWin.allAcc.AddAcc(accData)
-                        self.accPage.mainWin.homePage.CCGroupBox.comboBox.addItem(transData['Account'])
-                transID = self.accPage.mainWin.allAcc.AddTransaction(transData)
-                if transData['AccType'] == 'bank':
-                    self.accPage.mainWin.homePage.accGroupBox.UpdateValue()
-                else:
-                    self.accPage.mainWin.homePage.CCGroupBox.UpdateValue()
-                self.AddCard(transData, transID)
+        allTransaction = self.accPage.mainWin.DataBase.ExtractTable.readAll()
+        for iTrans in allTransaction:
+            currCatg = self.accPage.mainWin.DataBase.CategoryTable.readById(iTrans[1])
+            currAcc = self.accPage.mainWin.DataBase.AccountTable.readById(iTrans[2])
+            transData["Category"] = currCatg[1]
+            transData["AccName"] = currAcc[2]
+            transData["Date"] = iTrans[3]
+            transData["Value"] = iTrans[4]
+            transData["Comment"] = iTrans[5]
+            transData["AccType"] = currAcc[1]
+            self.AddCard(transData, iTrans[0])
 
         ## Customization ==
         ## Layout ==
@@ -232,7 +198,7 @@ class Card(QtWidgets.QFrame):
         self.cardArea = parent
         self.Id = transID
         self.type = transData["AccType"]
-        self.acc = transData["Account"]
+        self.acc = transData["AccName"]
         self.comment = transData["Comment"]
         self.value = transData["Value"]
         self.date = transData["Date"]
@@ -317,7 +283,7 @@ class Card(QtWidgets.QFrame):
 
     def Update(self, transData):
         self.type = transData["AccType"]
-        self.acc = transData["Account"]
+        self.acc = transData["AccName"]
         self.comment = transData["Comment"]
         self.value = transData["Value"]
         self.date = transData["Date"]
@@ -327,6 +293,6 @@ class Card(QtWidgets.QFrame):
         self.valueLbl.setText(str(transData['Value']))
         self.dateLbl.setText(transData['Date'])
         self.commLbl.setText(transData['Comment'])
-        self.accLbl.setText(transData['Account'])
+        self.accLbl.setText(transData['AccName'])
         self.setObjectName(unidecode.unidecode(transData['Category']))
         self.setStyle(self.style())

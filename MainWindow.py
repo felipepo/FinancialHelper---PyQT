@@ -4,6 +4,7 @@ import AccPage
 import NewWindows
 import Classes
 import Funs
+import SQLDB
 from InterfaceStyle import Style
 
 class Create(QtWidgets.QMainWindow):
@@ -22,36 +23,14 @@ class Create(QtWidgets.QMainWindow):
         self.setIconSize(QtCore.QSize(32, 32))
         self.SimulateData = SimulateData
 
-        ## Creation ==        
+        ## Creation ==      
+        self.DataBase = SQLDB.Create(2)  
 
-        # Create Object with all accounts
-        try:
-            categoryData = Funs.loadData("Categories")
-            accountData = Funs.loadData("Data") #Loads the data from file
-            self.allAcc = accountData #Creates object from loaded data
-            self.allCategories = categoryData
-        except:
-            self.allAcc = Classes.AllAccounts() #Creates object from scratch
-            dataBank = {
-                'NewAcc':'Todas',
-                'InitialValue':0,
-                'AccType':"bank"
-                }
-            dataCredit = {
-                'NewAcc':'Todas',
-                'InitialValue':0,
-                'AccType':"creditCard",
-                'DueDay':0,
-                'LimitValue':0,
-                'ClosingDay':0
-                }
-            self.allAcc.AddAcc(dataBank)
-            self.allAcc.AddAcc(dataCredit)
-            self.allCategories = Classes.Categories()
-            Funs.saveData('Data', self.allAcc)
-            Funs.saveData('Categories', self.allCategories)
-
-        self.styleObj = Style.Create(self.allCategories)
+        firstRun = self.DataBase.CategoryTable.readAll()
+        if not firstRun:
+            pass
+            
+        self.styleObj = Style.Create(self.DataBase.CategoryTable)
         self.setStyleSheet(self.styleObj.InterfaceStyle)
         self.centralwidget = QtWidgets.QWidget(self, objectName="centralwidget", styleSheet="")
         self.showHideSide = QtWidgets.QPushButton(self.centralwidget, text="<<", objectName="showHideSide")
@@ -114,6 +93,10 @@ class Create(QtWidgets.QMainWindow):
 
     def UpdateStyle(self):
         pass
+
+    def closeEvent(self, *args, **kwargs):
+        super(QtWidgets.QMainWindow, self).closeEvent(*args, **kwargs)
+        self.DataBase.close_db()
 
 class SideFrame(QtWidgets.QFrame):
     def __init__(self, parent):
@@ -198,19 +181,21 @@ class ToolBar(QtWidgets.QToolBar):
     def addTransaction(self):
         mayProceed = False
         while mayProceed == False:
-            accOptions = list(self.mainWin.allAcc.accountsObjs.keys())
-            del accOptions[0]
-            ccOptions = list(self.mainWin.allAcc.creditCardObjs.keys())
-            del ccOptions[0]
-            catOptions = list(self.mainWin.allCategories.category.keys())
-            wind = NewWindows.Transaction(self, accOptions, ccOptions, catOptions)
+            debitOptions = self.mainWin.DataBase.AllAccounts["debit"]
+            creditOptions = self.mainWin.DataBase.AllAccounts["credit"]
+            catgOptions = self.mainWin.DataBase.AllCategories
+            wind = NewWindows.Transaction(self, debitOptions, creditOptions, catgOptions)
             if wind.exec_():
-                transID = self.mainWin.allAcc.AddTransaction(wind.inputs)
+                targetCatg = self.mainWin.DataBase.CategoryTable.readByName(wind.inputs["Category"])
+                targetAcc = self.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
+                transInfo = {"Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
+                transID = self.mainWin.DataBase.NewTransaction(transInfo)
                 if transID != 'Error':
-                    if wind.inputs['AccType'] == 'bank':
-                        self.mainWin.homePage.accGroupBox.UpdateValue()
+                    self.mainWin.DataBase.ResetValues()
+                    if wind.inputs['AccType'] == 1:
+                        self.mainWin.homePage.debitGroupBox.UpdateValue()
                     else:
-                        self.mainWin.homePage.CCGroupBox.UpdateValue()
+                        self.mainWin.homePage.creditGroupBox.UpdateValue()
                     mayProceed = True
                     self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
                 else:
@@ -221,37 +206,41 @@ class ToolBar(QtWidgets.QToolBar):
     def transfer(self):
         mayProceed = False
         while mayProceed == False:
-            accOptions = list(self.mainWin.allAcc.accountsObjs.keys())
-            del accOptions[0]
-            wind = NewWindows.TransferWindow(self, accOptions)
+            debitOptions = self.mainWin.DataBase.AllAccounts["debit"][:]
+            wind = NewWindows.TransferWindow(self, debitOptions)
             if wind.exec_():
+                transferCatg = self.mainWin.DataBase.CategoryTable.readByName("Transferência")
+                srcData = self.mainWin.DataBase.AccountTable.readByUnique(1, wind.inputs["srcName"])
+                dstData = self.mainWin.DataBase.AccountTable.readByUnique(1, wind.inputs["dstName"])
                 sourceData = {
-                    'Category':'Transferência',
+                    'Catg_ID':transferCatg[0],
+                    'Acc_ID':srcData[0],
+                    'Category':"Transferência",
                     'Date':wind.inputs['Date'],
-                    'Account':wind.inputs['srcName'],
+                    'AccName':wind.inputs['srcName'],
                     'Comment':'Transferência p/ '+wind.inputs['dstName'],
-                    'AccType':'bank',
-                    'Value':wind.inputs['Value']*(-1),
-                    'TransType':'Expense'
+                    'AccType':1,
+                    'Value':wind.inputs['Value']*(-1)
                 }
                 destData = {
-                    'Category':'Transferência',
+                    'Catg_ID':transferCatg[0],
+                    'Acc_ID':dstData[0],
+                    'Category':"Transferência",
                     'Date':wind.inputs['Date'],
-                    'Account':wind.inputs['dstName'],
+                    'AccName':wind.inputs['dstName'],
                     'Comment':'Transferência de '+wind.inputs['srcName'],
-                    'AccType':'bank',
-                    'Value':wind.inputs['Value'],
-                    'TransType':'Revenue'
+                    'AccType':1,
+                    'Value':wind.inputs['Value']
                 }
-                transID = self.mainWin.allAcc.AddTransaction(sourceData)
+                transID = self.mainWin.DataBase.NewTransaction(sourceData)
                 if transID != 'Error':
-                    self.mainWin.homePage.accGroupBox.UpdateValue()
                     self.mainWin.accPage.cardArea.AddCard(sourceData, transID)
                 else:
                     print('Problema na conta')
-                transID = self.mainWin.allAcc.AddTransaction(destData)
+                transID = self.mainWin.DataBase.NewTransaction(destData)
                 if transID != 'Error':
-                    self.mainWin.homePage.accGroupBox.UpdateValue()
+                    self.mainWin.DataBase.ResetValues()
+                    self.mainWin.homePage.debitGroupBox.UpdateValue()
                     mayProceed = True
                     self.mainWin.accPage.cardArea.AddCard(destData, transID)
                 else:
@@ -268,11 +257,11 @@ class ToolBar(QtWidgets.QToolBar):
                 if addedFlag:
                     mayProceed = True
                     if wind.inputs['AccType'] == 'bank':
-                        self.mainWin.homePage.accGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
-                        self.mainWin.homePage.accGroupBox.UpdateValue()
+                        self.mainWin.homePage.debitGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+                        self.mainWin.homePage.debitGroupBox.UpdateValue()
                     else:
-                        self.mainWin.homePage.CCGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
-                        self.mainWin.homePage.CCGroupBox.UpdateValue()
+                        self.mainWin.homePage.creditGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+                        self.mainWin.homePage.creditGroupBox.UpdateValue()
                 else:
                     print('acc ja existe')
             else: 
@@ -292,10 +281,10 @@ class ToolBar(QtWidgets.QToolBar):
                     mayProceed = True
                     if wind.inputs['AccType'] == 'bank':
                         itemToRemove = accOptions.index(wind.inputs['AccName']) + 1
-                        self.mainWin.homePage.accGroupBox.comboBox.removeItem(itemToRemove)
+                        self.mainWin.homePage.debitGroupBox.comboBox.removeItem(itemToRemove)
                     else:
                         itemToRemove = ccOptions.index(wind.inputs['AccName']) + 1
-                        self.mainWin.homePage.CCGroupBox.comboBox.removeItem(itemToRemove)
+                        self.mainWin.homePage.creditGroupBox.comboBox.removeItem(itemToRemove)
                 else:
                     print('acc ja existe')
             else: 

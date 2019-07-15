@@ -10,19 +10,19 @@ class Create(QtWidgets.QWidget):
         ## Creation ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
         self.payGroupBox = QtWidgets.QGroupBox(self, title = "Pagamentos", objectName="payGroupBox")
-        self.accGroupBox = GroupBox(self, "Conta")
-        self.CCGroupBox = GroupBox(self, "Cartão de Crédito")
+        self.debitGroupBox = GroupBox(self, "Conta")
+        self.creditGroupBox = GroupBox(self, "Cartão de Crédito")
         self.budgetGroupBox = BudgetGroupBox(self, "Orçamento")
         self.graphicsView = QtWidgets.QGraphicsView(self, objectName="graphicsView")
 
         ## Customization ==
-        self.accGroupBox.setObjectName("accGroupBox")
-        self.CCGroupBox.setObjectName("CCGroupBox")
+        self.debitGroupBox.setObjectName("debitGroupBox")
+        self.creditGroupBox.setObjectName("creditGroupBox")
         self.budgetGroupBox.setObjectName("budgetGroupBox")
 
         ## Layout ==
-        self.gridLayout.addWidget(self.accGroupBox, 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.CCGroupBox, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.debitGroupBox, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.creditGroupBox, 1, 0, 1, 1)
         self.gridLayout.addWidget(self.graphicsView, 0, 1, 2, 5)
         self.gridLayout.addWidget(self.budgetGroupBox, 2, 0, 1, 3)
         self.gridLayout.addWidget(self.payGroupBox, 2, 3, 1, 3)
@@ -43,16 +43,15 @@ class GroupBox(QtWidgets.QGroupBox):
         self.valueLbl = QtWidgets.QLabel(self, objectName="valueLbl")
 
         ## Customizaion ==
-        options = list(self.homepage.mainWin.allAcc.accountsObjs.keys())
+        if self.title() == "Conta":
+            options = self.homepage.mainWin.DataBase.AllAccounts["debit"][:]
+        else:
+            options = self.homepage.mainWin.DataBase.AllAccounts["credit"][:]
+
+        options.insert(0,"Todas")
         self.comboBox.addItems(options)
         self.comboBox.currentIndexChanged.connect(self.UpdateValue)
-
-        if self.title() == "Conta":
-            value = self.homepage.mainWin.allAcc.accountsObjs[self.comboBox.currentText()].totalAmount
-        else:
-            value = self.homepage.mainWin.allAcc.creditCardObjs[self.comboBox.currentText()].totalAmount
-        valueStr = "{:.{}f}".format(value, 2)
-        self.valueLbl.setText(valueStr)
+        self.UpdateValue()
 
         ## Layout ==
         self.gridLayout.addWidget(self.Label, 0, 0, 1, 1)
@@ -63,9 +62,9 @@ class GroupBox(QtWidgets.QGroupBox):
     def UpdateValue(self):
         acc = self.comboBox.currentText()
         if self.title() == "Conta":
-            value = self.homepage.mainWin.allAcc.accountsObjs[acc].totalAmount
+            value = self.homepage.mainWin.DataBase.Totals['debit'][acc]
         else:
-            value = self.homepage.mainWin.allAcc.creditCardObjs[acc].totalAmount
+            value = self.homepage.mainWin.DataBase.Totals['credit'][acc]
         valueStr = "{:.{}f}".format(value, 2)
         self.valueLbl.setText(valueStr)
 

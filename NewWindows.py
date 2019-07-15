@@ -4,10 +4,10 @@ import unidecode
 import Funs
 
 class Transaction(QtWidgets.QDialog):
-    def __init__(self, parent,ACCoptions,CCoptions,CAToptions, transData={}):
+    def __init__(self, parent,debitOptions,creditOptions,CAToptions, transData={}):
         super().__init__(parent)
-        self.ACCoptions = ACCoptions
-        self.CCoptions = CCoptions
+        self.debitOptions = debitOptions
+        self.creditOptions = creditOptions
         self.CAToptions = CAToptions
         self.caller = parent
         ## Initialization ==
@@ -27,14 +27,14 @@ class Transaction(QtWidgets.QDialog):
         self.accountCombo = QtWidgets.QComboBox(self, objectName="accountCombo")
         self.commentEdit = QtWidgets.QLineEdit(self, objectName="commentEdit")
         self.okButton = QtWidgets.QPushButton(self, objectName="okButton", text="OK")
-        self.accRadio = QtWidgets.QRadioButton(self, checked=True, objectName="accRadio", text="Conta")
+        self.debitRadio = QtWidgets.QRadioButton(self, checked=True, objectName="debitRadio", text="Conta")
         self.CCRadio = QtWidgets.QRadioButton(self, objectName="CCRadio", text="Cartão")
         self.groupBox = QtWidgets.QGroupBox(self, objectName="groupBox", title="Tipo de Transação")
         self.revenueRadio = QtWidgets.QRadioButton(self.groupBox, objectName="revenueRadio", text="Receita")
         self.expenseRadio = QtWidgets.QRadioButton(self.groupBox, checked=True, objectName="expenseRadio", text="Despesa")
 
         ## Customization ==
-        self.accountCombo.addItems(self.ACCoptions)        
+        self.accountCombo.addItems(self.debitOptions)        
         self.categoryCombo.addItems(self.CAToptions)
 
         self.valueLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
@@ -57,7 +57,7 @@ class Transaction(QtWidgets.QDialog):
 
         self.okButton.clicked.connect(self.getInputs)
         self.dateEdit.setCalendarPopup(True)
-        self.accRadio.toggled.connect(self.accTypeSwitch)
+        self.debitRadio.toggled.connect(self.accTypeSwitch)
         self.CCRadio.toggled.connect(self.CCTypeSwitch)
         if transData:
             if "-" in str(transData['Value']):
@@ -69,7 +69,7 @@ class Transaction(QtWidgets.QDialog):
             self.commentEdit.setText(transData['Comment'])
             self.categoryCombo.setCurrentText(transData['Category'])
             if transData['AccType'] == "bank":
-                self.accRadio.setChecked(True)
+                self.debitRadio.setChecked(True)
             else:
                 self.CCRadio.setChecked(True)
             self.accountCombo.setCurrentText(transData['Account'])
@@ -86,7 +86,7 @@ class Transaction(QtWidgets.QDialog):
         self.gridLayout.addWidget(self.valueLbl, 3, 0, 1, 2)
         self.gridLayout.addWidget(self.accLbl, 3, 2, 1, 2)
         self.gridLayout.addWidget(self.valueEdit, 4, 0, 2, 2)
-        self.gridLayout.addWidget(self.accRadio, 4, 2, 1, 1)
+        self.gridLayout.addWidget(self.debitRadio, 4, 2, 1, 1)
         self.gridLayout.addWidget(self.CCRadio, 4, 3, 1, 1)
         self.gridLayout.addWidget(self.accountCombo, 5, 2, 1, 2)
         self.gridLayout.addWidget(self.commentLbl, 6, 0, 1, 1)
@@ -99,36 +99,34 @@ class Transaction(QtWidgets.QDialog):
         self.horizontalLayout.addWidget(self.revenueRadio)
 
     def accTypeSwitch(self):
-        self.CCRadio.setChecked(not self.accRadio.isChecked())
+        self.CCRadio.setChecked(not self.debitRadio.isChecked())
         self.UpdateAccounts()
 
     def CCTypeSwitch(self):
-        self.accRadio.setChecked(not self.CCRadio.isChecked())
+        self.debitRadio.setChecked(not self.CCRadio.isChecked())
         self.UpdateAccounts()
 
     def UpdateAccounts(self):
         self.accountCombo.clear()
-        if self.accRadio.isChecked():
-            options = self.ACCoptions
+        if self.debitRadio.isChecked():
+            options = self.debitOptions
         else:
-            options = self.CCoptions
+            options = self.creditOptions
         self.accountCombo.addItems(options)
 
     def getInputs(self):
         try:
             self.inputs['Category'] = self.categoryCombo.currentText()
             self.inputs['Date'] = self.dateEdit.date().toString('dd/MM/yyyy')
-            self.inputs['Account'] = self.accountCombo.currentText()
+            self.inputs['AccName'] = self.accountCombo.currentText()
             self.inputs['Comment'] = self.commentEdit.text()
-            if self.accRadio.isChecked():
-                self.inputs['AccType'] = 'bank'
+            if self.debitRadio.isChecked():
+                self.inputs['AccType'] = 1
             else: 
-                self.inputs['AccType'] = 'creditCard'
+                self.inputs['AccType'] = 2
             if self.expenseRadio.isChecked():
-                self.inputs['TransType'] = 'Expense'
                 self.inputs['Value'] = float("-" + self.valueEdit.text())
             else:
-                self.inputs['TransType'] = 'Revenue'
                 self.inputs['Value'] = float(self.valueEdit.text())
             self.accept()
         except:
@@ -147,7 +145,7 @@ class AddAccount(QtWidgets.QDialog):
         self.OK = QtWidgets.QPushButton(self, text="OK", objectName="OK")
         self.CCRadio = QtWidgets.QRadioButton(self, text="Cartão de Crédito", objectName="CCRadio")
         self.newEdit = QtWidgets.QLineEdit(self, objectName="newEdit", alignment=QtCore.Qt.AlignCenter)
-        self.accRadio = QtWidgets.QRadioButton(self, text="Conta", objectName="accRadio")
+        self.debitRadio = QtWidgets.QRadioButton(self, text="Conta", objectName="debitRadio")
         self.nameLbl = QtWidgets.QLabel(self, text="Nome", objectName="nameLbl", alignment=QtCore.Qt.AlignRight)
         self.initialValueLbl = QtWidgets.QLabel(self, objectName="initialValueLbl", text="Valor Inicial (R$)")
         self.initialValueEdit = QtWidgets.QLineEdit(self, objectName="newEdit", placeholderText="00.0", alignment=QtCore.Qt.AlignCenter)
@@ -161,7 +159,7 @@ class AddAccount(QtWidgets.QDialog):
         self.spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
         ## Customization ==
-        self.accRadio.setChecked(True)
+        self.debitRadio.setChecked(True)
         self.groupBox.hide()
         self.nameLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
         self.initialValueLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
@@ -171,11 +169,11 @@ class AddAccount(QtWidgets.QDialog):
         self.OK.clicked.connect(self.getInputs)
         self.newEdit.setFocus()
 
-        self.accRadio.toggled.connect(self.accTypeSwitch)
+        self.debitRadio.toggled.connect(self.accTypeSwitch)
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        self.gridLayout.addWidget(self.accRadio, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.debitRadio, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.CCRadio, 0, 1, 1, 1)
         self.gridLayout.addWidget(self.nameLbl, 1, 0, 1, 1)
         self.gridLayout.addWidget(self.newEdit, 1, 1, 1, 1)
@@ -194,11 +192,11 @@ class AddAccount(QtWidgets.QDialog):
         self.groupLayout.addWidget(self.dueDatEdit, 2, 1, 1, 1)
              
     def accTypeSwitch(self):
-        self.CCRadio.setChecked(not self.accRadio.isChecked())
+        self.CCRadio.setChecked(not self.debitRadio.isChecked())
         self.HideShowBill()
 
     def HideShowBill(self):
-        if self.accRadio.isChecked():
+        if self.debitRadio.isChecked():
             self.groupBox.hide()
         else:
             self.groupBox.show()
@@ -207,7 +205,7 @@ class AddAccount(QtWidgets.QDialog):
         try:
             self.inputs['NewAcc'] = self.newEdit.text()
             self.inputs['InitialValue'] = float(self.initialValueEdit.text())
-            if self.accRadio.isChecked():
+            if self.debitRadio.isChecked():
                 self.inputs['AccType'] = 'bank'
             else: 
                 self.inputs['AccType'] = 'creditCard'
@@ -219,7 +217,7 @@ class AddAccount(QtWidgets.QDialog):
             print('Números errados')
 
 class RemoveAccount(QtWidgets.QDialog):
-    def __init__(self,parent, ACCoptions, CCoptions):
+    def __init__(self,parent, debitOptions, creditOptions):
         super().__init__()
         self.mainWin = parent
         self.setWindowTitle("Remover Conta")
@@ -228,48 +226,48 @@ class RemoveAccount(QtWidgets.QDialog):
         self.setObjectName("RemoveAccount")
 
         ## Initialization ==
-        self.ACCoptions = ACCoptions
-        self.CCoptions = CCoptions
+        self.debitOptions = debitOptions
+        self.creditOptions = creditOptions
         
         ## Creation ==
         self.nameLbl = QtWidgets.QLabel(self, objectName="nameLbl", text="Nome", alignment=QtCore.Qt.AlignRight)
         self.OK = QtWidgets.QPushButton(self, objectName="OK", text="OK")
-        self.AccRadio = QtWidgets.QRadioButton(self, objectName="AccRadio", text="Conta")
+        self.debitRadio = QtWidgets.QRadioButton(self, objectName="debitRadio", text="Conta")
         self.CCRadio = QtWidgets.QRadioButton(self, objectName="CCRadio", text="Cartão de Crédito")
         self.comboBox = QtWidgets.QComboBox(self, objectName="comboBox")
 
         ## Customization ==
         self.nameLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
-        self.AccRadio.setChecked(True)
-        self.comboBox.addItems(self.ACCoptions)  
+        self.debitRadio.setChecked(True)
+        self.comboBox.addItems(self.debitOptions)  
         self.OK.clicked.connect(self.getInputs)
 
-        self.AccRadio.toggled.connect(self.accTypeSwitch)
+        self.debitRadio.toggled.connect(self.accTypeSwitch)
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        self.gridLayout.addWidget(self.AccRadio, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.debitRadio, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.CCRadio, 0, 1, 1, 1)
         self.gridLayout.addWidget(self.nameLbl, 1, 0, 1, 1)
         self.gridLayout.addWidget(self.comboBox, 1, 1, 1, 1)
         self.gridLayout.addWidget(self.OK, 2, 1, 1, 1)
 
     def accTypeSwitch(self):
-        self.CCRadio.setChecked(not self.AccRadio.isChecked())
+        self.CCRadio.setChecked(not self.debitRadio.isChecked())
         self.ChangeOptions()
 
     def ChangeOptions(self):
         self.comboBox.clear()
-        if self.AccRadio.isChecked():
-            options = self.ACCoptions
+        if self.debitRadio.isChecked():
+            options = self.debitOptions
         else:
-            options = self.CCoptions
+            options = self.creditOptions
         self.comboBox.addItems(options)
    
     def getInputs(self):
         try:
             self.inputs['AccName'] = self.comboBox.currentText()
-            if self.AccRadio.isChecked():
+            if self.debitRadio.isChecked():
                 self.inputs['AccType'] = 'bank'
             else: 
                 self.inputs['AccType'] = 'creditCard'
@@ -284,6 +282,7 @@ class TransferWindow(QtWidgets.QDialog):
         self.setWindowTitle('Transferência')
         self.setObjectName("TransferWindow")
         self.inputs = {}
+        self.options = options
         ## Initialization ==
         ## Creation ==
         self.originLbl = QtWidgets.QLabel(self, objectName="originLbl", text="Origem")
@@ -303,9 +302,11 @@ class TransferWindow(QtWidgets.QDialog):
         self.valueLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
 
         self.dateEdit.setCalendarPopup(True)
-        self.sourceCombo.addItems(options)  
-        self.destCombo.addItems(options)  
+        self.sourceCombo.addItems(self.options)  
+        self.ExcludeInputs()
         self.OK.clicked.connect(self.getInputs)
+
+        self.sourceCombo.currentIndexChanged.connect(self.ExcludeInputs)
 
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -324,6 +325,14 @@ class TransferWindow(QtWidgets.QDialog):
         self.gridLayout.addWidget(self.valueEdit, 3, 0, 1, 1)
         self.gridLayout.addWidget(self.dateEdit, 3, 1, 1, 1)
         self.gridLayout.addWidget(self.OK, 4, 1, 1, 1)
+
+    def ExcludeInputs(self):
+        self.destCombo.clear()
+        textToExclude = self.sourceCombo.currentText()
+        index  = self.options.index(textToExclude)
+        tempOptions = self.options[:]
+        del tempOptions[index]
+        self.destCombo.addItems(tempOptions)
 
     def getInputs(self):
         # try:

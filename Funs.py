@@ -41,6 +41,14 @@ def GetMY(date):
     month = months[int(splitDate[1])-1]
     year = splitDate[2]
     return month, year
+#=========================================================================================
+def GetMonth(month):
+    if type(month) is int:
+        result = {1:"Janeiro", 2:"Fevereiro", 3:"Março", 4:"Abril", 5:"Maio", 6:"Junho", 7:"Julho", 8:"Agosto", 9:"Setembro", 10:"Outubro", 11:"Novembro", 12:"Dezembro"}
+        return result[month]
+    else:
+        result = {"Janeiro":1, "Fevereiro":2, "Março":3, "Abril":4, "Maio":5, "Junho":6, "Julho":7, "Agosto":8, "Setembro":9, "Outubro":10, "Novembro":11, "Dezembro":12}
+        return result[month]
 
 #=========================================================================================
 def saveData(fileName, data):
@@ -160,41 +168,57 @@ def getSpace(targetStr):
         spaces = spaces + " "
     return spaces
 
-def generateTrans():
-    pass
-
 def generateCatg():
     catgData = {}
-    catgType = (1, 2)
-    category = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros")
+    category = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros", "Transferência")
     color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
 
     catgData={
-        'Catg_ID': 1,
-        'Type': random.choice(catgType),
         'Name': random.choice(category),
         'Color': color
     }
     return catgData
 
+def generateCatgTotal(Catg_ID_list):
+    catgTotalData = {}
+    month = random.randint(1,12)
+    year = random.randint(2017,2019)
+
+    catgTotalData={
+        'Catg_ID': random.choice(Catg_ID_list),
+        'Total': round(random.uniform(-500,500), 2),
+        'Month': month,
+        'Year': year
+    }
+    return catgTotalData
+
 def generateAcc():
     accData = {}
-    accType = (1, 2)
+    limit = None
+    dueday = None
+    closingday = None
+    accType = (1, 2) # 1 = Debit; 2 = Credit
     accName = ("BB", "NuBank", "Santander","Inter")
+    currType = random.choice(accType)
+    if currType == 2:
+        limit = round(random.uniform(-500,500), 2)
+        dueday = random.randint(1,28)
+        closingday = dueday - 10
+        if (dueday - 10) < 1:
+            closingday = closingday + 28
 
     accData={
-        'Type': random.choice(accType),
+        'Type': currType,
         'Name': random.choice(accName),
-        'Total': 0
+        'Total': 0,#round(random.uniform(-500,500), 2),
+        'Limit':limit,
+        'DueDay':dueday,
+        'ClosingDay':closingday
     }
     return accData
-    
-def generateData():
+
+def generateTrans(Catg_ID_list, Acc_ID_list):
     transData = {}
-    category = 0,
-    conta = 0,
-    cartoes = 0,
-    tipo = (1, 2)
     Comment = ("Comentário mais longo", "Curto", "Esse seria um comentário imenso")
     month = random.randint(1,12)
     year = random.randint(2017,2019)
@@ -205,48 +229,19 @@ def generateData():
     else:
         day = random.randint(1,30)
     date = str(day)+"/"+str(month)+"/"+str(year)
-    acctype = random.choice(tipo)
-    if acctype == "bank":
-        acc = random.choice(conta)
-    else:
-        acc = random.choice(cartoes)
-<<<<<<< HEAD
-        transData={
-            'Catg_ID':0,
-            'Acc_ID':0,            
-            'Value':round(random.uniform(-500,500), 2),
-            'Category':random.choice(category),
-            'Account':acc,
-            'Comment':random.choice(Comment),
-            'Date':'10/10/2010',
-            'AccType':acctype
-        }
-    return transData
-
-if __name__ == "__main__":
-    for i in range(3):
-        # test = generateData()
-        # print(test['Value'])
-        test = generateAcc()
-        test = generateCatg()
-        print(test)
-=======
     transData={
+        'Catg_ID': random.choice(Catg_ID_list),
+        'Acc_ID': random.choice(Acc_ID_list),
         'Value':round(random.uniform(-500,500), 2),
-        'Category':random.choice(category),
-        'Account':acc,
         'Comment':random.choice(Comment),
-        'Date':date,
-        'InitialValue':round(random.uniform(-500,500), 2),
-        'LimitValue':round(random.uniform(-500,500), 2),
-        'DueDay':random.randint(1,28),
-        'ClosingDay':random.randint(1,28),
-        'AccType':acctype
+        'Date':date
     }
     return transData
 
 if __name__ == "__main__":
     for i in range(60):
-        test = generateData()
-        print(test['Date'])
->>>>>>> master
+        # test = generateTrans(tuple(range(8)),tuple(range(8)))
+        test = generateCatgTotal(tuple(range(40)))
+        # print(test['Date'])
+        # test = generateAcc()
+        print(test)

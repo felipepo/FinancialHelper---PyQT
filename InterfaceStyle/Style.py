@@ -1,4 +1,5 @@
 import unidecode
+import random
 # import os.path
 # QssExist = os.path.exists("InterfaceStyle/Style.qss")
 
@@ -44,20 +45,20 @@ class Create():
 
     def appendStyle(self,styledict):
         # Add to Category Class
-        self.allCategories.Add(styledict['idStr'][0], styledict['propertyDic']['background-color'])
+        self.allCategories.insert(styledict['idStr'][0], styledict['propertyDic']['background-color'])
         # Add to QSS
         self.InterfaceStyle = self.InterfaceStyle + self.createStyle(styledict)
 
     def renameStyle(self, oldName, newName):
         # Change in Category Class
-        self.allCategories.Rename(oldName, newName)
+        catgData = self.allCategories.readByName(oldName)
+        self.allCategories.updateById(catgData[0], newName, catgData[2])
         # Change in QSS
         self.InterfaceStyle = self.InterfaceStyle.replace(oldName, newName)
-        pass
 
     def removeStyle(self, styleName):
         # Remove in Category Class
-        self.allCategories.Remove(styleName)
+        self.allCategories.deleteByName(styleName)
         # Remove in QSS
 
     def createStyle(self, stylesDict):
@@ -82,7 +83,7 @@ class Create():
 
     def defaultStyle(self):
         # Set the default style for the interface
-
+        defaultCatgs = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros", "Transferência")
         styleList =[]
         # QPushButton
         # QFrame
@@ -92,7 +93,8 @@ class Create():
         # QTabWidget
         # QStackedWidget
         # Card    
-        for iCategory in list(self.allCategories.category.keys()):
+        for iCategory in defaultCatgs:
+            color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
             currCat = unidecode.unidecode(iCategory)
             styleList.append({
                 'selectorStr':["QFrame", "QLabel"],
@@ -101,7 +103,7 @@ class Create():
                 'descendantStr':["", ''],
                 'childStr':["", ''],
                 'propStr':[{}, {}],
-                'propertyDic':{'background-color':self.allCategories.category[iCategory]}
+                'propertyDic':{'background-color':color}
             })    
 
         return styleList
