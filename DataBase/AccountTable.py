@@ -81,7 +81,9 @@ class Create():
     def deleteById(self, Acc_ID):
         with self.conn:
             self.cursor.execute("DELETE FROM Account WHERE Acc_ID = :Acc_ID", {"Acc_ID": Acc_ID})
+        return True
 
     def deleteByUnique(self, Type, Name):
         with self.conn:
             self.cursor.execute("DELETE FROM Account WHERE Type = :Type AND Name = :Name", {"Type": Type, "Name": Name})
+        return True

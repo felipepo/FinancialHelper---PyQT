@@ -34,7 +34,8 @@ class Create(QtWidgets.QMainWindow):
 
         firstRun = self.DataBase.CategoryTable.readAll()
         if not firstRun:
-            CreteDefaultCategories()
+            # CreteDefaultCategories()
+            pass
             
         self.styleObj = Style.Create(self.DataBase.CategoryTable)
         self.setStyleSheet(self.styleObj.InterfaceStyle)
@@ -259,14 +260,15 @@ class ToolBar(QtWidgets.QToolBar):
         while mayProceed == False:
             wind = AccountWindow.New(self)
             if wind.exec_():
-                addedFlag = self.mainWin.DataBase.AddAcc(wind.inputs)
+                addedFlag = self.mainWin.DataBase.AccountTable.insert(wind.inputs)
                 if addedFlag:
                     mayProceed = True
-                    if wind.inputs['AccType'] == 'bank':
-                        self.mainWin.homePage.debitGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+                    self.mainWin.DataBase.ResetValues()
+                    if wind.inputs['Type'] == 1:
+                        self.mainWin.homePage.debitGroupBox.comboBox.addItem(wind.inputs['Name'])
                         self.mainWin.homePage.debitGroupBox.UpdateValue()
                     else:
-                        self.mainWin.homePage.creditGroupBox.comboBox.addItem(wind.inputs['NewAcc'])
+                        self.mainWin.homePage.creditGroupBox.comboBox.addItem(wind.inputs['Name'])
                         self.mainWin.homePage.creditGroupBox.UpdateValue()
                 else:
                     print('acc ja existe')
@@ -276,20 +278,19 @@ class ToolBar(QtWidgets.QToolBar):
     def removeAccount(self):
         mayProceed = False
         while mayProceed == False:
-            accOptions = list(self.mainWin.allAcc.accountsObjs.keys())
-            del accOptions[0]
-            ccOptions = list(self.mainWin.allAcc.creditCardObjs.keys())
-            del ccOptions[0]
-            wind = AccountWindow.Remove(self, accOptions, ccOptions)
+            debitOptions = self.mainWin.DataBase.AllAccounts["debit"]
+            creditOptions = self.mainWin.DataBase.AllAccounts["credit"]
+            wind = AccountWindow.Remove(self, debitOptions, creditOptions)
             if wind.exec_():
-                removedFlag = self.mainWin.allAcc.DelAcc(wind.inputs['AccName'],wind.inputs['AccType'])
+                removedFlag = self.mainWin.DataBase.AccountTable.deleteByUnique(wind.inputs['Type'], wind.inputs['Name'])
                 if removedFlag:
                     mayProceed = True
-                    if wind.inputs['AccType'] == 'bank':
-                        itemToRemove = accOptions.index(wind.inputs['AccName']) + 1
+                    self.mainWin.DataBase.ResetValues()
+                    if wind.inputs['Type'] == 1:
+                        itemToRemove = debitOptions.index(wind.inputs['Name']) + 1
                         self.mainWin.homePage.debitGroupBox.comboBox.removeItem(itemToRemove)
                     else:
-                        itemToRemove = ccOptions.index(wind.inputs['AccName']) + 1
+                        itemToRemove = creditOptions.index(wind.inputs['Name']) + 1
                         self.mainWin.homePage.creditGroupBox.comboBox.removeItem(itemToRemove)
                 else:
                     print('acc ja existe')

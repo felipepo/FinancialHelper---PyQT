@@ -74,15 +74,18 @@ class New(QtWidgets.QDialog):
    
     def getInputs(self):
         try:
-            self.inputs['NewAcc'] = self.newEdit.text()
-            self.inputs['InitialValue'] = float(self.initialValueEdit.text())
+            self.inputs['Name'] = self.newEdit.text()
+            self.inputs['Total'] = 0 if self.initialValueEdit.text() == "" else float(self.initialValueEdit.text())
             if self.debitRadio.isChecked():
-                self.inputs['AccType'] = 'bank'
+                self.inputs['Type'] = 1
+                self.inputs['Limit'] = None
+                self.inputs['DueDay'] = None
+                self.inputs['ClosingDay'] = None
             else: 
-                self.inputs['AccType'] = 'creditCard'
-                self.inputs['LimitValue'] = float(self.limitEdit.text())
-                self.inputs['DueDay'] = int(self.dueDatEdit.text())
-                self.inputs['ClosingDay'] = int(self.closingDayEdit.text())
+                self.inputs['Type'] = 2
+                self.inputs['Limit'] = 0 if self.limitEdit.text() == "" else float(self.limitEdit.text())
+                self.inputs['DueDay'] = 0 if self.dueDatEdit.text() == "" else int(self.dueDatEdit.text())
+                self.inputs['ClosingDay'] = 0 if self.closingDayEdit.text() == "" else int(self.closingDayEdit.text())
             self.accept()
         except:
             print('Números errados')
@@ -137,11 +140,8 @@ class Remove(QtWidgets.QDialog):
    
     def getInputs(self):
         try:
-            self.inputs['AccName'] = self.comboBox.currentText()
-            if self.debitRadio.isChecked():
-                self.inputs['AccType'] = 'bank'
-            else: 
-                self.inputs['AccType'] = 'creditCard'
+            self.inputs['Name'] = self.comboBox.currentText()
+            self.inputs['Type'] = 1 if self.debitRadio.isChecked() else 2
             self.accept()
         except:
             print('Números errados')

@@ -1,10 +1,10 @@
 import sqlite3
 import Funs
 from sqlite3 import Error
-import AccountTable
-import CategoryTable
-import CategoryTotalTable
-import ExtractTable
+from DataBase import AccountTable
+from DataBase import CategoryTable
+from DataBase import CategoryTotalTable
+from DataBase import ExtractTable
 
 class Create():
     def __init__(self, inMemory):
@@ -96,7 +96,7 @@ class Create():
         print("Closed Database")
 
 if __name__ == "__main__":
-    inMemory = 2
+    inMemory = 1
     create_Data = 1
     sql_db = Create(inMemory)
 
