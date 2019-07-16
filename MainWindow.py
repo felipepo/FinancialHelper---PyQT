@@ -1,7 +1,10 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 import HomePage
 import AccPage
-import NewWindows
+from DialogWindows import AccountWindow
+from DialogWindows import CategoryWindow
+from DialogWindows import TransactionWindow
+from DialogWindows import TransferWindow
 import Classes
 import Funs
 import SQLDB
@@ -24,11 +27,14 @@ class Create(QtWidgets.QMainWindow):
         self.SimulateData = SimulateData
 
         ## Creation ==      
-        self.DataBase = SQLDB.Create(2)  
+        if SimulateData == 1:
+            self.DataBase = SQLDB.Create(2)  
+        else:
+            self.DataBase = SQLDB.Create(1)
 
         firstRun = self.DataBase.CategoryTable.readAll()
         if not firstRun:
-            pass
+            CreteDefaultCategories()
             
         self.styleObj = Style.Create(self.DataBase.CategoryTable)
         self.setStyleSheet(self.styleObj.InterfaceStyle)
@@ -184,7 +190,7 @@ class ToolBar(QtWidgets.QToolBar):
             debitOptions = self.mainWin.DataBase.AllAccounts["debit"]
             creditOptions = self.mainWin.DataBase.AllAccounts["credit"]
             catgOptions = self.mainWin.DataBase.AllCategories
-            wind = NewWindows.Transaction(self, debitOptions, creditOptions, catgOptions)
+            wind = TransactionWindow.Create(self, debitOptions, creditOptions, catgOptions)
             if wind.exec_():
                 targetCatg = self.mainWin.DataBase.CategoryTable.readByName(wind.inputs["Category"])
                 targetAcc = self.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
@@ -207,7 +213,7 @@ class ToolBar(QtWidgets.QToolBar):
         mayProceed = False
         while mayProceed == False:
             debitOptions = self.mainWin.DataBase.AllAccounts["debit"][:]
-            wind = NewWindows.TransferWindow(self, debitOptions)
+            wind = TransferWindow.Create(self, debitOptions)
             if wind.exec_():
                 transferCatg = self.mainWin.DataBase.CategoryTable.readByName("Transferência")
                 srcData = self.mainWin.DataBase.AccountTable.readByUnique(1, wind.inputs["srcName"])
@@ -251,9 +257,9 @@ class ToolBar(QtWidgets.QToolBar):
     def addAccount(self):
         mayProceed = False
         while mayProceed == False:
-            wind = NewWindows.AddAccount(self)
+            wind = AccountWindow.New(self)
             if wind.exec_():
-                addedFlag = self.mainWin.allAcc.AddAcc(wind.inputs)
+                addedFlag = self.mainWin.DataBase.AddAcc(wind.inputs)
                 if addedFlag:
                     mayProceed = True
                     if wind.inputs['AccType'] == 'bank':
@@ -274,7 +280,7 @@ class ToolBar(QtWidgets.QToolBar):
             del accOptions[0]
             ccOptions = list(self.mainWin.allAcc.creditCardObjs.keys())
             del ccOptions[0]
-            wind = NewWindows.RemoveAccount(self, accOptions, ccOptions)
+            wind = AccountWindow.Remove(self, accOptions, ccOptions)
             if wind.exec_():
                 removedFlag = self.mainWin.allAcc.DelAcc(wind.inputs['AccName'],wind.inputs['AccType'])
                 if removedFlag:
@@ -328,7 +334,7 @@ class MenuBar(QtWidgets.QMenuBar):
         print("Saved")
     
     def configCategory(self):
-        wind = NewWindows.CategoryWindow(self.mainWin)
+        wind = CategoryWindow.Create(self.mainWin)
         if wind.exec_():
             pass
 

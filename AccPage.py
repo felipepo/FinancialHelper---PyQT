@@ -2,7 +2,7 @@ from PySide2 import QtWidgets, QtCore, QtGui
 import math
 import Funs
 import unidecode
-import NewWindows
+from DialogWindows import TransactionWindow
 
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
@@ -268,7 +268,7 @@ class Card(QtWidgets.QFrame):
                 'AccType': self.type,
                 'Date': self.date
             }
-            wind = NewWindows.Transaction(self, accOptions, ccOptions, catOptions, prevTransData)
+            wind = TransactionWindow.Create(self, accOptions, ccOptions, catOptions, prevTransData)
             if wind.exec_():
                 updatedFlag = self.cardArea.accPage.mainWin.allAcc.UpdateTransaction(self.Id, prevTransData, wind.inputs)
                 if updatedFlag == 'OK':
