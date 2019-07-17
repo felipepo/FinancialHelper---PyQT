@@ -26,10 +26,7 @@ class Create():
         getStr = "SELECT Type, Name FROM Account"
         acc = {'credit':[], 'debit':[]}
         for data in self.cursor.execute(getStr):
-            if data[0] == 2:
-                acc['credit'].append(data[1])
-            else:
-                acc['debit'].append(data[1])
+            acc['debit'].append(data[1]) if data[0] == 1 else acc['credit'].append(data[1])
         return acc
     
     def get_totals(self):

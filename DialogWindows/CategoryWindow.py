@@ -4,16 +4,17 @@ import unidecode
 import Funs
 
 class Create(QtWidgets.QDialog):
-    def __init__(self, parent):
+    def __init__(self, mainWin):
         super().__init__()
-        self.mainWin = parent
-        self.allCategories = parent.allCategories
-        self.styleObj = copy.deepcopy(parent.styleObj)
+        self.mainWin = mainWin
+        self.DataBase = mainWin.DataBase
+        # self.styleObj = copy.deepcopy(mainWin.styleObj)
+        self.inputs = {}
         ## Initialization ==
         self.setObjectName('CategoryWindow')
         self.setWindowTitle("Configuração Categorias")
         self.resize(319, 256)
-        self.setStyleSheet(self.styleObj.InterfaceStyle)
+        # self.setStyleSheet(self.styleObj.InterfaceStyle)
 
         ## Creation ==
         self.tabWidget = QtWidgets.QTabWidget(self, objectName="tabWidget")
@@ -49,34 +50,23 @@ class Create(QtWidgets.QDialog):
 
     def Apply(self):
         # Edit category color 
+        # self.inputs["EditData"] = 
         self.mainWin.styleObj.InterfaceStyle = self.styleObj.InterfaceStyle
 
         # Append new Category
         if self.addTab.newEntry.text():
-            self.mainWin.styleObj.appendStyle(self.addTab.getStyle())
+            self.inputs["AppendData"] = self.addTab.getStyle()
 
         # Remove Category
         if self.removeTab.catCombo.currentText():
-            self.mainWin.styleObj.removeStyle(self.removeTab.catCombo.currentText())
+            self.inputs["RemoveData"] = self.removeTab.catCombo.currentText()
         
         # Rename Category
         if self.renameTab.newEntry.text():
             oldName = self.renameTab.catCombo.currentText()
             newName = self.renameTab.newEntry.text()
-            self.mainWin.styleObj.renameStyle(oldName, newName)
-            for iAcc in list(self.mainWin.allAcc.accountsObjs.keys()):
-                for iTrans in list(self.mainWin.allAcc.accountsObjs[iAcc].transactions.keys()):
-                    if self.mainWin.allAcc.accountsObjs[iAcc].transactions[iTrans].category == oldName:
-                        self.mainWin.allAcc.accountsObjs[iAcc].transactions[iTrans].category = newName
-
-            for iAcc in list(self.mainWin.allAcc.creditCardObjs.keys()):
-                for iTrans in list(self.mainWin.allAcc.creditCardObjs[iAcc].transactions.keys()):
-                    if self.mainWin.allAcc.creditCardObjs[iAcc].transactions[iTrans].category == oldName:
-                        self.mainWin.allAcc.creditCardObjs[iAcc].transactions[iTrans].category = newName
-
-        self.mainWin.setStyleSheet(self.mainWin.styleObj.InterfaceStyle)
-        
-        self.close()
+            self.inputs["RenameData"] = {"oldName": oldName, "newName":newName}
+        self.accept()
 
     def Exit(self):
         self.close()
@@ -145,7 +135,7 @@ class RemoveTab(QtWidgets.QWidget):
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
         ## Customization ==
-        options = list(parent.allCategories.category.keys())
+        options = list(parent.DataBase.CategoryTable.get_names()[:])
         options.insert(0,'')
         self.catCombo.addItems(options)
 
@@ -169,7 +159,7 @@ class RenameTab(QtWidgets.QWidget):
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
         ## Customization ==
-        options = list(parent.allCategories.category.keys())
+        options = list(parent.DataBase.CategoryTable.get_names()[:])
         options.insert(0,'')
         self.catCombo.addItems(options)
 
@@ -195,7 +185,7 @@ class EditTab(QtWidgets.QWidget):
         self.cardTemplate = CardTemplate(self, {'Category':'','Value':'00.0','Date':'10/10/2010','Comment':'Template', 'Account':'Conta'})
 
         ## Customization ==
-        options = list(parent.allCategories.category.keys())
+        options = parent.DataBase.CategoryTable.get_names()[:]
         self.catCombo.addItems(options)
         self.catCombo.currentIndexChanged.connect(self.UpdateTemplate)
         self.cardTemplate.setObjectName(unidecode.unidecode(self.catCombo.currentText()))

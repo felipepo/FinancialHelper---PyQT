@@ -5,7 +5,6 @@ from DialogWindows import AccountWindow
 from DialogWindows import CategoryWindow
 from DialogWindows import TransactionWindow
 from DialogWindows import TransferWindow
-import Classes
 import Funs
 import SQLDB
 from InterfaceStyle import Style
@@ -27,10 +26,7 @@ class Create(QtWidgets.QMainWindow):
         self.SimulateData = SimulateData
 
         ## Creation ==      
-        if SimulateData == 1:
-            self.DataBase = SQLDB.Create(2)  
-        else:
-            self.DataBase = SQLDB.Create(1)
+        self.DataBase = SQLDB.Create(2) if SimulateData == 1 else SQLDB.Create(1)
 
         firstRun = self.DataBase.CategoryTable.readAll()
         if not firstRun:
@@ -310,6 +306,8 @@ class MenuBar(QtWidgets.QMenuBar):
         self.setObjectName("menubar")
         FileButtons = {"Save", "Save As..."}
         EditButtons = {"Categorias"}
+        AccButtons = {"Adicionar", "Remover", "Renomear", "Definir Valor Atual"}
+        ToolsButtons = {"Exportar"}
 
         ## Creation ==
         self.menuFile = QtWidgets.QMenu(self, objectName="MenuFile", title="File")
@@ -323,6 +321,19 @@ class MenuBar(QtWidgets.QMenuBar):
             self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
             self.menuEdit.addAction(self.button[button])
         self.addAction(self.menuEdit.menuAction())
+        
+        self.menuAcc = QtWidgets.QMenu(self, objectName="menuAcc", title="Contas")
+        for button in AccButtons:
+            self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
+            self.menuAcc.addAction(self.button[button])
+        self.addAction(self.menuAcc.menuAction())
+        
+        self.menuTools = QtWidgets.QMenu(self, objectName="menuTools", title="Ferramentas")
+        for button in ToolsButtons:
+            self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
+            self.menuTools.addAction(self.button[button])
+        self.addAction(self.menuTools.menuAction())
+        
         ## Customization ==
         self.button["Save"].triggered.connect(self.save)
         self.button["Categorias"].triggered.connect(self.configCategory)
@@ -337,7 +348,19 @@ class MenuBar(QtWidgets.QMenuBar):
     def configCategory(self):
         wind = CategoryWindow.Create(self.mainWin)
         if wind.exec_():
-            pass
+            if "AppendData" in wind.inputs:
+                self.mainWin.styleObj.appendStyle(wind.inputs["AppendData"])
+            if "RemoveData" in wind.inputs:
+                self.mainWin.styleObj.removeStyle(wind.inputs["RemoveData"])
+            if "RenameData" in wind.inputs:
+                oldName = wind.inputs["RenameData"]['oldName']
+                newName = wind.inputs["RenameData"]['newName']
+                self.mainWin.styleObj.renameStyle(oldName, newName)
+                for iCatg in self.mainWin.DataBase.CategoryTable.get_ids():
+                    currCatg = self.mainWin.DataBase.CategoryTable.readById(iCatg)
+                    if currCatg[1] == oldName:
+                        self.mainWin.DataBase.CategoryTable.updateById(iCatg, newName, currCatg[2])
+        self.mainWin.setStyleSheet(self.mainWin.styleObj.InterfaceStyle)
 
 class SideButton(QtWidgets.QPushButton):
     def __init__(self, pageNumber, parent, text = ""):

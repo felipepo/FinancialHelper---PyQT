@@ -67,10 +67,7 @@ class New(QtWidgets.QDialog):
         self.HideShowBill()
 
     def HideShowBill(self):
-        if self.debitRadio.isChecked():
-            self.groupBox.hide()
-        else:
-            self.groupBox.show()
+        self.groupBox.hide() if self.debitRadio.isChecked() else self.groupBox.show()
    
     def getInputs(self):
         try:
@@ -132,10 +129,7 @@ class Remove(QtWidgets.QDialog):
 
     def ChangeOptions(self):
         self.comboBox.clear()
-        if self.debitRadio.isChecked():
-            options = self.debitOptions
-        else:
-            options = self.creditOptions
+        options = self.debitOptions if self.debitRadio.isChecked() else self.creditOptions
         self.comboBox.addItems(options)
    
     def getInputs(self):

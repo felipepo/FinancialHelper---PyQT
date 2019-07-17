@@ -122,6 +122,8 @@ if __name__ == "__main__":
         for _ in range(10):
             transInfo = Funs.generateTrans(Catg_ID_list, Acc_ID_list)
             sql_db.NewTransaction(transInfo)
+
+        print(list(sql_db.CategoryTable.get_names()))
     else:
         transInfo = {"Trans_ID":2, "Acc_ID":3, "Catg_ID":6, "Comment":"Atualizado", "Date":"18/2/2019", "Value":0}
         sql_db.UpdateTransaction(transInfo)
