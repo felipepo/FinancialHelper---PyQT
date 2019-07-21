@@ -68,7 +68,7 @@ class Create(QtWidgets.QDialog):
                 self.valueEdit.setText(str(transData['Value']))
             self.commentEdit.setText(transData['Comment'])
             self.categoryCombo.setCurrentText(transData['Category'])
-            if transData['AccType'] == "bank":
+            if transData['AccType'] == 1:
                 self.debitRadio.setChecked(True)
             else:
                 self.CCRadio.setChecked(True)

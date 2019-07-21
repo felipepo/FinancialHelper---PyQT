@@ -8,13 +8,13 @@ class Create(QtWidgets.QDialog):
         super().__init__()
         self.mainWin = mainWin
         self.DataBase = mainWin.DataBase
-        # self.styleObj = copy.deepcopy(mainWin.styleObj)
+        self.styleSTR = mainWin.styleObj.InterfaceStyle
         self.inputs = {}
         ## Initialization ==
         self.setObjectName('CategoryWindow')
         self.setWindowTitle("Configuração Categorias")
         self.resize(319, 256)
-        # self.setStyleSheet(self.styleObj.InterfaceStyle)
+        self.setStyleSheet(self.styleSTR)
 
         ## Creation ==
         self.tabWidget = QtWidgets.QTabWidget(self, objectName="tabWidget")
@@ -37,7 +37,7 @@ class Create(QtWidgets.QDialog):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.removeTab), "Remover")
         self.tabWidget.setCurrentIndex(0)
 
-        self.exitButton.clicked.connect(self.Exit)
+        self.exitButton.clicked.connect(self.CloseWindow)
         self.apllyButton.clicked.connect(self.Apply)
 
         ## Layout == 
@@ -49,26 +49,36 @@ class Create(QtWidgets.QDialog):
         self.gridLayout.addWidget(self.exitButton, 1, 2, 1, 1)
 
     def Apply(self):
-        # Edit category color 
-        # self.inputs["EditData"] = 
-        self.mainWin.styleObj.InterfaceStyle = self.styleObj.InterfaceStyle
-
-        # Append new Category
-        if self.addTab.newEntry.text():
-            self.inputs["AppendData"] = self.addTab.getStyle()
-
+        mayProceed = 1
         # Remove Category
         if self.removeTab.catCombo.currentText():
-            self.inputs["RemoveData"] = self.removeTab.catCombo.currentText()
-        
-        # Rename Category
-        if self.renameTab.newEntry.text():
-            oldName = self.renameTab.catCombo.currentText()
-            newName = self.renameTab.newEntry.text()
-            self.inputs["RenameData"] = {"oldName": oldName, "newName":newName}
-        self.accept()
+            # Confirm if the user really wants to delete category
+            # Do you really want to delete category "X"? Keep in mind that this will delete all its data
+            # and all transactions related to it will be changed to "Outros"
+            if mayProceed:
+                self.inputs["RemoveData"] = self.removeTab.catCombo.currentText()
 
-    def Exit(self):
+        if mayProceed:
+            # Edit category color 
+            self.inputs["EditData"] = self.styleSTR
+
+            # Append new Category
+            if self.addTab.newEntry.text():
+                self.inputs["AppendData"] = {}
+                self.inputs["AppendData"]["Name"] = self.addTab.newEntry.text()
+                self.inputs["AppendData"]["rgb"] = self.addTab.rgb
+                temp = self.addTab.getStyle()
+                self.inputs["AppendData"]["StyleFrame"] = temp["Frame"]
+                self.inputs["AppendData"]["StyleLabel"] = temp["Label"]
+
+            # Rename Category
+            if self.renameTab.newEntry.text():
+                oldName = self.renameTab.catCombo.currentText()
+                newName = self.renameTab.newEntry.text()
+                self.inputs["RenameData"] = {"oldName": oldName, "newName":newName}
+            self.accept()
+
+    def CloseWindow(self):
         self.close()
 
 class AddTab(QtWidgets.QWidget):
@@ -90,13 +100,17 @@ class AddTab(QtWidgets.QWidget):
 
         self.showColor.mousePressEvent = self.GetColor
 
+        self.showColor.setMinimumSize(QtCore.QSize(24, 24))
+        self.showColor.setMaximumSize(QtCore.QSize(24, 24))
+        self.showColor.setStyleSheet('border:2px solid black')
+
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
         
         self.gridLayout.addWidget(self.catLbl, 0, 0, 1, 2)
         self.gridLayout.addWidget(self.newEntry, 1, 0, 1, 3)
         self.gridLayout.addWidget(self.colorLbl, 2, 0, 1, 1)
-        self.gridLayout.addWidget(self.showColor, 2, 1, 1, 1)
+        self.gridLayout.addWidget(self.showColor, 2, 1, 1, 1, alignment = QtCore.Qt.AlignLeft)
         self.gridLayout.addWidget(self.cardTemplate, 3, 0, 1, 3)
 
     def UpdateTemplate(self):
@@ -113,15 +127,25 @@ class AddTab(QtWidgets.QWidget):
 
     def getStyle(self):
         category = self.newEntry.text()
-        styleDict = {
-            'selectorStr':['QFrame', 'QLabel'],
-            'idStr':[category, 'Color'+category],
-            'classStr':["", ""],
-            'descendantStr':["", ""],
-            'childStr':["", ""],
-            'propStr':[{}, {}],
+        frameStyle = {
+            'selectorStr':['QFrame'],
+            'idStr':[category],
+            'classStr':[""],
+            'descendantStr':[""],
+            'childStr':[""],
+            'propStr':[{}],
             'propertyDic':{'background-color':self.rgb}
         }
+        labelStyle = {
+            'selectorStr':['QLabel'],
+            'idStr':['Color'+category],
+            'classStr':[""],
+            'descendantStr':[""],
+            'childStr':[""],
+            'propStr':[{}],
+            'propertyDic':{'background-color':self.rgb, "border": "2px solid black"}
+        }
+        styleDict = {"Frame":frameStyle,"Label":labelStyle}
         return styleDict
 
 class RemoveTab(QtWidgets.QWidget):
@@ -214,8 +238,9 @@ class EditTab(QtWidgets.QWidget):
         if color.isValid():
             rgb =  'rgb('+str(color.red())+', '+str(color.green())+', '+str(color.blue())+')'
             backRGB = 'background-color: '+rgb
-            self.parent.styleObj.InterfaceStyle = self.parent.styleObj.InterfaceStyle.replace(prevBackRGB,backRGB)
-            self.parent.setStyleSheet(self.parent.styleObj.InterfaceStyle)
+            self.parent.styleSTR = self.parent.styleSTR.replace(prevBackRGB,backRGB)
+            self.parent.setStyleSheet(self.parent.styleSTR)
+            self.UpdateTemplate()
 
     def UpdateTemplate(self):
         self.cardTemplate.categoryLbl.setText(self.catCombo.currentText())

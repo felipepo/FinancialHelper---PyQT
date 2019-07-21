@@ -26,12 +26,18 @@ class Create(QtWidgets.QMainWindow):
         self.SimulateData = SimulateData
 
         ## Creation ==      
-        self.DataBase = SQLDB.Create(2) if SimulateData == 1 else SQLDB.Create(1)
+        if SimulateData == 1:
+            self.DataBase = SQLDB.Create(1)
+            self.DataBase.simulateData()
+        else:
+            self.DataBase = SQLDB.Create(2)
 
         firstRun = self.DataBase.CategoryTable.readAll()
         if not firstRun:
             # CreteDefaultCategories()
-            pass
+            defaultCatg = Funs.generateCatg(rand="off")
+            for iCatg in list(defaultCatg.keys()):
+                self.DataBase.CategoryTable.insert(iCatg, defaultCatg[iCatg])
             
         self.styleObj = Style.Create(self.DataBase.CategoryTable)
         self.setStyleSheet(self.styleObj.InterfaceStyle)
@@ -194,7 +200,7 @@ class ToolBar(QtWidgets.QToolBar):
                 transInfo = {"Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
                 transID = self.mainWin.DataBase.NewTransaction(transInfo)
                 if transID != 'Error':
-                    self.mainWin.DataBase.ResetValues()
+                    self.mainWin.DataBase.ReGetValues()
                     if wind.inputs['AccType'] == 1:
                         self.mainWin.homePage.debitGroupBox.UpdateValue()
                     else:
@@ -242,7 +248,7 @@ class ToolBar(QtWidgets.QToolBar):
                     print('Problema na conta')
                 transID = self.mainWin.DataBase.NewTransaction(destData)
                 if transID != 'Error':
-                    self.mainWin.DataBase.ResetValues()
+                    self.mainWin.DataBase.ReGetValues()
                     self.mainWin.homePage.debitGroupBox.UpdateValue()
                     mayProceed = True
                     self.mainWin.accPage.cardArea.AddCard(destData, transID)
@@ -259,7 +265,7 @@ class ToolBar(QtWidgets.QToolBar):
                 addedFlag = self.mainWin.DataBase.AccountTable.insert(wind.inputs)
                 if addedFlag:
                     mayProceed = True
-                    self.mainWin.DataBase.ResetValues()
+                    self.mainWin.DataBase.ReGetValues()
                     if wind.inputs['Type'] == 1:
                         self.mainWin.homePage.debitGroupBox.comboBox.addItem(wind.inputs['Name'])
                         self.mainWin.homePage.debitGroupBox.UpdateValue()
@@ -281,7 +287,7 @@ class ToolBar(QtWidgets.QToolBar):
                 removedFlag = self.mainWin.DataBase.AccountTable.deleteByUnique(wind.inputs['Type'], wind.inputs['Name'])
                 if removedFlag:
                     mayProceed = True
-                    self.mainWin.DataBase.ResetValues()
+                    self.mainWin.DataBase.ReGetValues()
                     if wind.inputs['Type'] == 1:
                         itemToRemove = debitOptions.index(wind.inputs['Name']) + 1
                         self.mainWin.homePage.debitGroupBox.comboBox.removeItem(itemToRemove)
@@ -348,10 +354,15 @@ class MenuBar(QtWidgets.QMenuBar):
     def configCategory(self):
         wind = CategoryWindow.Create(self.mainWin)
         if wind.exec_():
+            self.mainWin.styleObj.InterfaceStyle = wind.inputs["EditData"]
             if "AppendData" in wind.inputs:
-                self.mainWin.styleObj.appendStyle(wind.inputs["AppendData"])
+                self.mainWin.styleObj.appendStyle(wind.inputs["AppendData"]["StyleFrame"])
+                self.mainWin.styleObj.appendStyle(wind.inputs["AppendData"]["StyleLabel"])
+                self.mainWin.DataBase.CategoryTable.insert(wind.inputs["AppendData"]["Name"], wind.inputs["AppendData"]["rgb"])
             if "RemoveData" in wind.inputs:
-                self.mainWin.styleObj.removeStyle(wind.inputs["RemoveData"])
+                removedCatg = wind.inputs["RemoveData"]
+                self.mainWin.DataBase.RemoveCategory(removedCatg)
+                self.mainWin.styleObj.removeStyle(removedCatg)
             if "RenameData" in wind.inputs:
                 oldName = wind.inputs["RenameData"]['oldName']
                 newName = wind.inputs["RenameData"]['newName']
@@ -360,7 +371,11 @@ class MenuBar(QtWidgets.QMenuBar):
                     currCatg = self.mainWin.DataBase.CategoryTable.readById(iCatg)
                     if currCatg[1] == oldName:
                         self.mainWin.DataBase.CategoryTable.updateById(iCatg, newName, currCatg[2])
-        self.mainWin.setStyleSheet(self.mainWin.styleObj.InterfaceStyle)
+            self.mainWin.setStyleSheet(self.mainWin.styleObj.InterfaceStyle)
+            self.mainWin.styleObj.createQSSFile()
+            self.mainWin.setStyle(self.mainWin.style())
+            self.mainWin.DataBase.ReGetValues()
+            self.mainWin.accPage.cardArea.UpdateALLCards()
 
 class SideButton(QtWidgets.QPushButton):
     def __init__(self, pageNumber, parent, text = ""):

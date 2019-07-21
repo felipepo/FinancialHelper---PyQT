@@ -152,6 +152,22 @@ class CardArea(QtWidgets.QScrollArea):
     def UpdateCard(self, transData, transID):
         self.card[transID].Update(transData)
 
+    def UpdateALLCards(self):
+        for iCard in self.card:
+            currCard = self.accPage.mainWin.DataBase.ExtractTable.readById(self.card[iCard].Id)
+            currCard = Funs.trans_dictFromlist(currCard)
+            catgName = self.accPage.mainWin.DataBase.CategoryTable.readById(currCard["Catg_ID"])
+            accName = self.accPage.mainWin.DataBase.AccountTable.readById(currCard["Acc_ID"])
+            transData = {
+                "AccType": accName[1],
+                "AccName":accName[2],
+                "Comment":currCard["Comment"],
+                "Value":currCard["Value"],
+                "Date":currCard["Date"],
+                "Category":catgName[1]
+            }
+            self.card[currCard["Trans_ID"]].Update(transData)
+
     def HideCard(self):
         pass
 
@@ -255,11 +271,9 @@ class Card(QtWidgets.QFrame):
     def UpdateWindow(self):
         mayProceed = False
         while mayProceed == False:
-            accOptions = list(self.cardArea.accPage.mainWin.allAcc.accountsObjs.keys())
-            del accOptions[0]
-            ccOptions = list(self.cardArea.accPage.mainWin.allAcc.creditCardObjs.keys())
-            del ccOptions[0]
-            catOptions = list(self.cardArea.accPage.mainWin.allCategories.category.keys())
+            debitOptions = self.cardArea.accPage.mainWin.DataBase.AllAccounts["debit"]
+            creditOptions = self.cardArea.accPage.mainWin.DataBase.AllAccounts["credit"]
+            catgOptions = self.cardArea.accPage.mainWin.DataBase.AllCategories
             prevTransData = {
                 'Value': float(self.value),
                 'Comment': self.comment,
@@ -268,14 +282,18 @@ class Card(QtWidgets.QFrame):
                 'AccType': self.type,
                 'Date': self.date
             }
-            wind = TransactionWindow.Create(self, accOptions, ccOptions, catOptions, prevTransData)
+            wind = TransactionWindow.Create(self, debitOptions, creditOptions, catgOptions, prevTransData)
             if wind.exec_():
-                updatedFlag = self.cardArea.accPage.mainWin.allAcc.UpdateTransaction(self.Id, prevTransData, wind.inputs)
+                targetCatg = self.cardArea.accPage.mainWin.DataBase.CategoryTable.readByName(wind.inputs["Category"])
+                targetAcc = self.cardArea.accPage.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
+                transInfo = {"Trans_ID":self.Id, "Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
+                updatedFlag = self.cardArea.accPage.mainWin.DataBase.UpdateTransaction(transInfo)
                 if updatedFlag == 'OK':
-                    self.cardArea.accPage.mainWin.homePage.accGroupBox.UpdateValue()
-                    self.cardArea.accPage.mainWin.homePage.CCGroupBox.UpdateValue()
+                    self.cardArea.accPage.mainWin.DataBase.ReGetValues()  
+                    self.cardArea.accPage.mainWin.homePage.debitGroupBox.UpdateValue()
+                    self.cardArea.accPage.mainWin.homePage.creditGroupBox.UpdateValue()
                     mayProceed = True
-                    self.Update(wind.inputs)                    
+                    self.Update(wind.inputs)                  
                 else:
                     print('Problema na conta')
             else: 

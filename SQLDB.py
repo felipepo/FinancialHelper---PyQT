@@ -8,10 +8,7 @@ from DataBase import ExtractTable
 
 class Create():
     def __init__(self, inMemory):
-        if inMemory == 1:
-            self.db_file = ':memory:'
-        else:
-            self.db_file = 'DataBase/Data.db'
+        self.db_file = ':memory:' if inMemory == 1 else 'DataBase/Data.db'
         try:
             self.conn = sqlite3.connect(self.db_file)
             self.cursor = self.conn.cursor()
@@ -31,14 +28,16 @@ class Create():
             # Store some data
             self.AllAccounts = self.AccountTable.get_names()
             self.AllCategories = self.CategoryTable.get_names()
+            self.AllTransactions = self.ExtractTable.get_ids()
             self.Totals = self.AccountTable.get_totals()
         except Error as e:
             print(e)
             print("Não criou conexão")
 
-    def ResetValues(self):
+    def ReGetValues(self):
         self.AllAccounts = self.AccountTable.get_names()
         self.AllCategories = self.CategoryTable.get_names()
+        self.AllTransactions = self.ExtractTable.get_ids()
         self.Totals = self.AccountTable.get_totals()
 
     def NewTransaction(self, transInfo):
@@ -80,7 +79,34 @@ class Create():
         else:
             catgTotalUpdt = {"Catg_ID":transInfo["Catg_ID"], "Month":month, "Year":year, "Total":transInfo["Value"]+targetCategoryTotal[0]}
             self.CategoryTotalTable.updateByUnique(catgTotalUpdt)
+        return "OK"
 
+    def RemoveCategory(self, catName):
+        # Get categories
+        removedCatgData = self.CategoryTable.readByName(catName)
+        outros = self.CategoryTable.readByName("Outros")
+        allTrans = self.ExtractTable.readAll()
+        for iTrans in allTrans:
+            if iTrans[1] == removedCatgData[0]:
+                transInfo = list(iTrans)
+                transInfo[1] = outros[0]
+                transInfo = Funs.trans_dictFromlist(transInfo)
+                self.UpdateTransaction(transInfo)
+                break
+        allCatgTotal = self.CategoryTotalTable.readAll()
+        for iCatg in allCatgTotal:
+            if iCatg[1] == removedCatgData[0]:
+                outrosTotal = self.CategoryTotalTable.readByUnique(outros[0], iCatg[3], iCatg[4])
+                self.CategoryTotalTable.deleteByUnique(removedCatgData[0], iCatg[3], iCatg[4])
+                if outrosTotal is None:
+                    catgTotalUpdt = {"Catg_ID":outros[0], "Month":iCatg[3], "Year":iCatg[4], "Total":iCatg[2]}
+                    self.CategoryTotalTable.insert(catgTotalUpdt)
+                else:
+                    outrosTotal = Funs.catgTotal_dictFromlist(outrosTotal)
+                    outrosTotal["Total"] = outrosTotal["Total"] + iCatg[2]
+                    self.CategoryTotalTable.updateByUnique(outrosTotal)
+        
+        
     def create_table(self, create_table_sql):
         """ create a table from the create_table_sql statement
         """
@@ -95,33 +121,33 @@ class Create():
         self.conn.close()
         print("Closed Database")
 
+    def simulateData(self):
+        for _ in range(30):
+            accInfo = Funs.generateAcc()
+            self.AccountTable.insert(accInfo)
+
+        # Create categories
+        # catgInfo -> Name, Color
+        for _ in range(10):
+            catgInfo = Funs.generateCatg()
+            self.CategoryTable.insert(catgInfo["Name"], catgInfo["Color"])
+
+        Catg_ID_list = self.CategoryTable.get_ids()
+        Acc_ID_list = self.AccountTable.get_ids()
+
+        # Create transactions
+        # transInfo -> Acc_ID, Catg_ID, Comment, Date, Value
+        for _ in range(10):
+            transInfo = Funs.generateTrans(Catg_ID_list, Acc_ID_list)
+            self.NewTransaction(transInfo)
+
 if __name__ == "__main__":
     inMemory = 1
     create_Data = 1
     sql_db = Create(inMemory)
 
     if create_Data == 1:
-
-        # Create Accounts
-        # AccInfo -> Name, Type, Total, Limit, DueDay, ClosingDay
-        for _ in range(30):
-            accInfo = Funs.generateAcc()
-            accID = sql_db.AccountTable.insert(accInfo)
-
-        # Create categories
-        # catgInfo -> Name, Color
-        for _ in range(10):
-            catgInfo = Funs.generateCatg()
-            catgID = sql_db.CategoryTable.insert(catgInfo["Name"], catgInfo["Color"])
-
-        Catg_ID_list = sql_db.CategoryTable.get_ids()
-        Acc_ID_list = sql_db.AccountTable.get_ids()
-
-        # Create transactions
-        # transInfo -> Acc_ID, Catg_ID, Comment, Date, Value
-        for _ in range(10):
-            transInfo = Funs.generateTrans(Catg_ID_list, Acc_ID_list)
-            sql_db.NewTransaction(transInfo)
+        sql_db.simulateData()
 
         print(list(sql_db.CategoryTable.get_names()))
     else:

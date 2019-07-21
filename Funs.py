@@ -164,15 +164,20 @@ def getSpace(targetStr):
         spaces = spaces + " "
     return spaces
 
-def generateCatg():
+def generateCatg(rand="on"):
     catgData = {}
     category = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros", "Transferência")
-    color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
 
-    catgData={
-        'Name': random.choice(category),
-        'Color': color
-    }
+    if rand == "on":
+        color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        catgData={
+            'Name': random.choice(category),
+            'Color': color
+        }
+    else:
+        for iColor in category:
+            color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
+            catgData[iColor] = color
     return catgData
 
 def generateCatgTotal(Catg_ID_list):
@@ -233,6 +238,27 @@ def generateTrans(Catg_ID_list, Acc_ID_list):
         'Date':date
     }
     return transData
+
+def trans_dictFromlist(transList):
+    transDict = {
+        'Trans_ID': transList[0],
+        'Catg_ID': transList[1],
+        'Acc_ID': transList[2],
+        'Date': transList[3],
+        'Value': transList[4],
+        'Comment': transList[5]
+    }
+    return transDict
+
+def catgTotal_dictFromlist(catgTotalList):
+    catgTotalDict = {
+        'Total_Catg_ID': catgTotalList[0],
+        'Catg_ID': catgTotalList[1],
+        'Total': catgTotalList[2],
+        'Month': catgTotalList[3],
+        'Year': catgTotalList[4]
+    }
+    return catgTotalDict
 
 if __name__ == "__main__":
     for i in range(60):

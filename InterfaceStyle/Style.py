@@ -44,15 +44,9 @@ class Create():
             fh.write(self.InterfaceStyle)
 
     def appendStyle(self,styledict):
-        # Add to Category Class
-        self.allCategories.insert(styledict['idStr'][0], styledict['propertyDic']['background-color'])
-        # Add to QSS
         self.InterfaceStyle = self.InterfaceStyle + self.createStyle(styledict)
 
     def renameStyle(self, oldName, newName):
-        # Change in Category Class
-        catgData = self.allCategories.readByName(oldName)
-        self.allCategories.updateById(catgData[0], newName, catgData[2])
         # Change in QSS
         self.InterfaceStyle = self.InterfaceStyle.replace(oldName, newName)
 
@@ -97,14 +91,23 @@ class Create():
             color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
             currCat = unidecode.unidecode(iCategory)
             styleList.append({
-                'selectorStr':["QFrame", "QLabel"],
-                'idStr':[currCat, 'Color'+currCat],
+                'selectorStr':["QFrame"],
+                'idStr':[currCat],
                 'classStr':["", ''],
                 'descendantStr':["", ''],
                 'childStr':["", ''],
                 'propStr':[{}, {}],
                 'propertyDic':{'background-color':color}
             })    
+            styleList.append({
+                'selectorStr':["QLabel"],
+                'idStr':['Color'+currCat],
+                'classStr':[""],
+                'descendantStr':[""],
+                'childStr':[""],
+                'propStr':[{}],
+                'propertyDic':{'background-color':color, "border":"2px solid black"}
+            }) 
 
         return styleList
 
