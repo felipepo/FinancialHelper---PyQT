@@ -38,19 +38,61 @@ class FilterFrame(QtWidgets.QFrame):
         self.setObjectName("FilterFrame")
 
         ## Creation ==
-        self.button_1 = QtWidgets.QPushButton(self, text="Button1", objectName="button1")
-        self.button_2 = QtWidgets.QPushButton(self, text="Button2", objectName="button2")
         self.filterGroup = FilterGroup(self)
+        self.setValueGroup = SetValueGroup(self)
 
         ## Customization ==
-        self.button_1.clicked.connect(self.accPage.cardArea.HideAllCards)
-        self.button_2.clicked.connect(self.accPage.cardArea.ShowAllCards)
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        self.gridLayout.addWidget(self.filterGroup,0,0,1,2)
-        self.gridLayout.addWidget(self.button_1,1,0,1,1)
-        self.gridLayout.addWidget(self.button_2,1,1,1,1)
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout.addWidget(self.setValueGroup,0,0,1,2)
+        self.gridLayout.addWidget(self.filterGroup,1,0,1,2)
+
+class SetValueGroup(QtWidgets.QGroupBox):
+    def __init__(self, parent):
+        ## Initialization ==
+        super().__init__(parent)
+        self.filterFrame=parent
+        self.setTitle("Conta")
+        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setObjectName("SetValueGroup")
+        
+        ## Creation ==
+        self.accName = QtWidgets.QLabel(self, text="Nome", objectName="NameLbl")
+        self.nameDropDown = QtWidgets.QComboBox(self, objectName="nameDropDown")
+        self.valLbl = QtWidgets.QLabel(self, text="Definir valor atual", objectName="valLbl")
+        self.finalValue = QtWidgets.QLineEdit(self, placeholderText="00.0", alignment=QtCore.Qt.AlignCenter, objectName="finalValue")
+        self.button_2 = QtWidgets.QPushButton(self, text="Aplicar", objectName="button2")
+        
+        ## Customization ==
+        self.button_2.clicked.connect(self.SetFinalValue)
+        
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        self.finalValue.setSizePolicy(sizePolicy)
+        self.nameDropDown.setSizePolicy(sizePolicy)
+
+        ## Layout ==
+        self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
+        self.gridLayout.addWidget(self.accName,0,0,1,1)
+        self.gridLayout.addWidget(self.nameDropDown,0,1,1,1)
+        self.gridLayout.addWidget(self.valLbl,1,0,1,1)
+        self.gridLayout.addWidget(self.finalValue,1,1,1,1)
+        self.gridLayout.addWidget(self.button_2,2,1,1,1)
+
+    def SetFinalValue(self):
+        accType = 1 if self.debitRadio.isChecked() else 2
+        Acc_ID = self.filterFrame.accPage.mainWin.DataBase.AccountTable.readByUnique(accType, self.nameDropDown.currentText())
+        Catg_ID = self.filterFrame.accPage.mainWin.DataBase.CategoryTable.readByName("Outros")
+        transData = {
+            "Catg_ID": Catg_ID[0],
+            "Acc_ID": Acc_ID[0],
+            "Date": QtCore.QDate.currentDate(),
+            "Value": float(self.finalValue.text()),
+            "Comment": "Atualização do valor final"
+        }
+        self.filterFrame.accPage.mainWin.DataBase.NewTransaction(transData)
+        self.filterFrame.accPage.cardArea.AddCard(transData, transID)
 
 class FilterGroup(QtWidgets.QGroupBox):
     def __init__(self, parent):

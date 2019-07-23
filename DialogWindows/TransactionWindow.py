@@ -21,7 +21,7 @@ class Create(QtWidgets.QDialog):
         self.dateLbl = QtWidgets.QLabel(self, text="Data", objectName="dateLbl")
         self.commentLbl = QtWidgets.QLabel(self, text="Comentário", objectName="commentLbl")
         self.accLbl = QtWidgets.QLabel(self, text="Fonte/Destino", objectName="accLbl")
-        self.valueEdit = QtWidgets.QLineEdit(self, objectName="valueEdit")
+        self.valueEdit = QtWidgets.QLineEdit(self, placeholderText="00.0", alignment=QtCore.Qt.AlignCenter, objectName="valueEdit")
         self.categoryCombo = QtWidgets.QComboBox(self, objectName="categoryCombo")
         self.dateEdit = QtWidgets.QDateEdit(self, date=QtCore.QDate.currentDate(), objectName="dateEdit")
         self.accountCombo = QtWidgets.QComboBox(self, objectName="accountCombo")
