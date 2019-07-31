@@ -41,7 +41,7 @@ class Create():
         self.Totals = self.AccountTable.get_totals()
 
     def NewTransaction(self, transInfo):
-        self.ExtractTable.insert(transInfo)
+        newTransID = self.ExtractTable.insert(transInfo)
         # Update Accounts Table
         targetAcc = self.AccountTable.readById(transInfo["Acc_ID"])
         accUpdt = {"Name":targetAcc[2], "Type":targetAcc[1], "Total":targetAcc[3]+transInfo["Value"], "Limit":targetAcc[4], "DueDay":targetAcc[5], "ClosingDay":targetAcc[6]}
@@ -58,6 +58,7 @@ class Create():
         else:
             catgTotalUpdt = {"Catg_ID":transInfo["Catg_ID"], "Month":month, "Year":year, "Total":transInfo["Value"]+targetCategoryTotal[2]}
             self.CategoryTotalTable.updateByUnique(catgTotalUpdt)
+        return newTransID
     
     def UpdateTransaction(self, transInfo):
         targetTrans = self.ExtractTable.readById(transInfo["Trans_ID"])

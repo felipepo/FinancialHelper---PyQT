@@ -54,7 +54,7 @@ class SetValueGroup(QtWidgets.QGroupBox):
         ## Initialization ==
         super().__init__(parent)
         self.filterFrame=parent
-        self.setTitle("Conta")
+        self.setTitle("Cartão de Crédito")
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setObjectName("SetValueGroup")
         
@@ -180,7 +180,7 @@ class CardArea(QtWidgets.QScrollArea):
         allTransaction = self.accPage.mainWin.DataBase.ExtractTable.readAll()
         for iTrans in allTransaction:
             currAcc = self.accPage.mainWin.DataBase.AccountTable.readById(iTrans[2])
-            if currAcc[1] == 1:
+            if currAcc[1] == 2:
                 currCatg = self.accPage.mainWin.DataBase.CategoryTable.readById(iTrans[1])
                 transData["Category"] = currCatg[1]
                 transData["AccName"] = currAcc[2]

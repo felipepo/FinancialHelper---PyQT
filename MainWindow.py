@@ -1,6 +1,7 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 import HomePage
 import AccPage
+import CreditCardPage
 from DialogWindows import AccountWindow
 from DialogWindows import CategoryWindow
 from DialogWindows import TransactionWindow
@@ -52,10 +53,12 @@ class Create(QtWidgets.QMainWindow):
         # Pages
         self.homePage = HomePage.Create(self)
         self.accPage = AccPage.Create(self)
+        self.creditCardPage = CreditCardPage.Create(self)
 
         ## Customization ==
         self.stackFrame.addWidget(self.homePage)
         self.stackFrame.addWidget(self.accPage)
+        self.stackFrame.addWidget(self.creditCardPage)
         self.stackFrame.setCurrentIndex(0)
 
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar)
@@ -206,7 +209,10 @@ class ToolBar(QtWidgets.QToolBar):
                     else:
                         self.mainWin.homePage.creditGroupBox.UpdateValue()
                     mayProceed = True
-                    self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
+                    if wind.inputs["AccType"] == 1:
+                        self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
+                    else:
+                        self.mainWin.creditCardPage.cardArea.AddCard(wind.inputs, transID)
                 else:
                     print('Problema na conta')
             else: 
@@ -268,6 +274,7 @@ class ToolBar(QtWidgets.QToolBar):
                     self.mainWin.DataBase.ReGetValues()
                     if wind.inputs['Type'] == 1:
                         self.mainWin.homePage.debitGroupBox.comboBox.addItem(wind.inputs['Name'])
+                        self.mainWin.accPage.filterFrame.setValueGroup.nameDropDown.addItem(wind.inputs['Name'])
                         self.mainWin.homePage.debitGroupBox.UpdateValue()
                     else:
                         self.mainWin.homePage.creditGroupBox.comboBox.addItem(wind.inputs['Name'])
@@ -291,6 +298,7 @@ class ToolBar(QtWidgets.QToolBar):
                     if wind.inputs['Type'] == 1:
                         itemToRemove = debitOptions.index(wind.inputs['Name']) + 1
                         self.mainWin.homePage.debitGroupBox.comboBox.removeItem(itemToRemove)
+                        self.mainWin.accPage.filterFrame.setValueGroup.nameDropDown.removeItem(itemToRemove-1)
                     else:
                         itemToRemove = creditOptions.index(wind.inputs['Name']) + 1
                         self.mainWin.homePage.creditGroupBox.comboBox.removeItem(itemToRemove)
