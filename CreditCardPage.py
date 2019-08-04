@@ -44,8 +44,8 @@ class ControlFrame(QtWidgets.QFrame):
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout.addWidget(self.setValueGroup,0,0,1,2)
-        self.gridLayout.addWidget(self.filterGroup,1,0,1,2)
+        self.gridLayout.addWidget(self.filterGroup,0,0,1,2)
+        self.gridLayout.addWidget(self.setValueGroup,1,0,1,2)
 
 class SetValueGroup(QtWidgets.QGroupBox):
     def __init__(self, parent):
@@ -139,29 +139,50 @@ class FilterGroup(QtWidgets.QGroupBox):
         self.setTitle("Filtros")
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setObjectName("FilterGroup")
-        self.filterNames = ["Ano", "Mês", "Categoria"]
-        self.filter = {}
-        self.row=0
-        self.col=0
-        self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
+        self.controlFrame = parent
+        self.months = ("Todos", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro")
 
         ## Creation ==
-        vertSpacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        for iFilter in self.filterNames:
-            self.filter[iFilter] = Filter(self, iFilter)
-            self.gridLayout.addWidget(self.filter[iFilter].filterLbl, self.row,self.col,1,1)
-            self.gridLayout.addWidget(self.filter[iFilter].chooseCombo, self.row,self.col+1,1,1)
-            self.updatePosition()
+        self.nameLbl = QtWidgets.QLabel(self, text="Nome", objectName="nameLbL")
+        self.yearLbl = QtWidgets.QLabel(self, text="Ano", objectName="yearLbl")
+        self.monthLbl = QtWidgets.QLabel(self, text="Mês", objectName="monthLbl")
+        self.categoryLbl = QtWidgets.QLabel(self, text="Categoria", objectName="categoryLbl")
+        self.nameCombo = QtWidgets.QComboBox(self, objectName="ComboBox")
+        self.yearCombo = QtWidgets.QComboBox(self, objectName="ComboBox")
+        self.monthCombo = QtWidgets.QComboBox(self, objectName="ComboBox")
+        self.categoryCombo = QtWidgets.QComboBox(self, objectName="ComboBox")
+        self.applyFilter = QtWidgets.QPushButton(self, text="Aplicar", objectName="Button")
+        # vertSpacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
         ## Customization ==
+        self.applyFilter.clicked.connect(self.updateFilters)
+        self.getComboValues()
+        self.monthCombo.addItems(self.months)
+
         ## Layout ==
-        self.gridLayout.addItem(vertSpacerItem, self.row+1, 0, 1, 1)
+        self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
+        self.gridLayout.addWidget(self.nameLbl, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.nameCombo, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.yearLbl, 0, 2, 1, 1)
+        self.gridLayout.addWidget(self.yearCombo, 0, 3, 1, 1)
+        self.gridLayout.addWidget(self.monthLbl, 0, 4, 1, 1)
+        self.gridLayout.addWidget(self.monthCombo, 0, 5, 1, 1)
+        self.gridLayout.addWidget(self.categoryLbl, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.categoryCombo, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.applyFilter, 1, 5, 1, 1)
+        # self.gridLayout.addItem(vertSpacerItem, 1, 0, 1, 1)
     
     def addFilter(self, filterName="", options=[]):
         self.filter[filterName]=options
 
-    def updateFilter(self):
-        pass
+    def updateFilters(self):
+        self.controlFrame.creditPage.cardArea.filters["Month"] = self.monthCombo.currentText()
+        self.controlFrame.creditPage.cardArea.filters["Year"] = self.yearCombo.currentText()
+        self.controlFrame.creditPage.cardArea.filters["AccName"] = self.nameCombo.currentText()
+        self.controlFrame.creditPage.cardArea.filters["Category"] = self.categoryCombo.currentText()
+
+        self.controlFrame.creditPage.cardArea.HideAllCards()
+        self.controlFrame.creditPage.cardArea.initializeCards()
 
     def updatePosition(self):
         self.col = self.col + 2
@@ -169,9 +190,21 @@ class FilterGroup(QtWidgets.QGroupBox):
             self.col = 0
             self.row = self.row + 1
 
-class Filter():
-    def __init__(self, parent, filterName="", options=[]):
-        self.filterName = filterName
-        self.filterLbl = QtWidgets.QLabel(parent, text=filterName, objectName=filterName)
-        self.options = options
-        self.chooseCombo = QtWidgets.QComboBox(parent, objectName=filterName+"Combo")
+    def getComboValues(self):
+        catgTable = self.controlFrame.creditPage.mainWin.DataBase.CategoryTotalTable.readAll()
+        years = ["Todos"]
+        for iRow in catgTable:
+            currYear = str(iRow[4])
+            if currYear not in years:
+                years.append(currYear)
+        allCategories = list(self.controlFrame.creditPage.mainWin.DataBase.AllCategories)
+        allCategories.insert(0, "Todas")
+        allAccounts = self.controlFrame.creditPage.mainWin.DataBase.AllAccounts["credit"][:]
+        allAccounts.insert(0, "Todas")
+        self.nameCombo.clear()
+        self.yearCombo.clear()
+        self.categoryCombo.clear()
+
+        self.nameCombo.addItems(allAccounts)
+        self.yearCombo.addItems(years)
+        self.categoryCombo.addItems(allCategories)

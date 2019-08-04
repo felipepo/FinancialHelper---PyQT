@@ -24,21 +24,8 @@ class Create(QtWidgets.QMainWindow):
         self.setIconSize(QtCore.QSize(32, 32))
         self.SimulateData = SimulateData
 
+        self.initialize()
         ## Creation ==      
-        if SimulateData == 1:
-            self.DataBase = SQLDB.Create(1)
-            self.DataBase.simulateData(nTrans=40, nAcc=10, nCatg=10)
-        else:
-            self.DataBase = SQLDB.Create(2)
-
-        firstRun = self.DataBase.CategoryTable.readAll()
-        if not firstRun:
-            defaultCatg = Funs.generateCatg(rand="off")
-            for iCatg in list(defaultCatg.keys()):
-                self.DataBase.CategoryTable.insert(iCatg, defaultCatg[iCatg])
-            
-        self.styleObj = Style.Create(self.DataBase.CategoryTable)
-        self.setStyleSheet(self.styleObj.InterfaceStyle)
         self.centralwidget = QtWidgets.QWidget(self, objectName="centralwidget", styleSheet="")
         self.showHideSide = QtWidgets.QPushButton(self.centralwidget, text="<<", objectName="showHideSide")
         self.stackFrame = QtWidgets.QStackedWidget(self.centralwidget, objectName="stackFrame", styleSheet="")
@@ -87,6 +74,23 @@ class Create(QtWidgets.QMainWindow):
 
         self.resized.connect(self.accPage.cardArea.Reshape)
 
+    def initialize(self):
+        if self.SimulateData == 1:
+            self.DataBase = SQLDB.Create(1)
+            self.DataBase.simulateData(nTrans=40, nAcc=10, nCatg=10)
+        else:
+            self.DataBase = SQLDB.Create(2)
+
+        firstRun = self.DataBase.CategoryTable.readAll()
+        if not firstRun:
+            defaultCatg = Funs.generateCatg(rand="off")
+            for iCatg in list(defaultCatg.keys()):
+                self.DataBase.CategoryTable.insert(iCatg, defaultCatg[iCatg])
+            
+        self.styleObj = Style.Create(self.DataBase.CategoryTable)
+        self.setStyleSheet(self.styleObj.InterfaceStyle)
+        self.setStyle(self.style())
+        
     def showHide(self):
         currText = self.showHideSide.text()
         if currText == "<<":

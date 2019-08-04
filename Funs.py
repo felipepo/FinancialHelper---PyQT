@@ -261,6 +261,8 @@ def checkFilter(transData, filters):
         passedTest = 0
     if transData["AccName"] != filters["AccName"] and filters["AccName"] != "Todas":
         passedTest = 0
+    if transData["Category"] != filters["Category"] and filters["Category"] != "Todas":
+        passedTest = 0
     return passedTest
 
 

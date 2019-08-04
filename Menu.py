@@ -49,6 +49,7 @@ class MenuBar(QtWidgets.QMenuBar):
         os.remove('DataBase/Data.db')
         print("Saved")
         os.remove('InterfaceStyle/Style.qss')
+        self.mainWin.initialize()
     
     def configCategory(self):
         wind = CategoryWindow.Create(self.mainWin)
