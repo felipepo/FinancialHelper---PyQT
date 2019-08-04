@@ -1,7 +1,7 @@
 from PySide2 import QtCore, QtGui, QtWidgets
 import copy
-import unidecode
 import Funs
+import Card
 
 class Create(QtWidgets.QDialog):
     def __init__(self, mainWin):
@@ -87,13 +87,15 @@ class AddTab(QtWidgets.QWidget):
         self.setObjectName('AddTab')        
         ## Initialization ==
         self.rgb = ''
+        self.cardWidth = 300
 
         ## Creation ==
         self.catLbl = QtWidgets.QLabel(self, objectName="catLbL", text="Categoria")
         self.newEntry = QtWidgets.QLineEdit(self, objectName="newEntry")
         self.colorLbl = QtWidgets.QLabel(self, objectName="colorLbl", text="Cor")
         self.showColor = QtWidgets.QLabel(self, objectName="-")
-        self.cardTemplate = CardTemplate(self, {'Category':'','Value':'00.0','Date':'10/10/2010','Comment':'Template', 'Account':'Conta'})
+        templateData = {'Category':'','Value':'00.0','Date':'10/10/2010','Comment':'Template', 'AccName':'Conta', 'AccType':1}
+        self.cardTemplate = Card.Card(self, templateData, 'Template')
 
         ## Customization ==
         self.newEntry.textChanged.connect(self.UpdateTemplate)
@@ -115,6 +117,8 @@ class AddTab(QtWidgets.QWidget):
 
     def UpdateTemplate(self):
         self.cardTemplate.categoryLbl.setText(self.newEntry.text())
+        if Funs.testCategoryName(self.newEntry.text()) == "Not OK":
+            print('Chars ".", "/" and "&" are not accepted!')
         
     def GetColor(self, *args):
         color = QtWidgets.QColorDialog.getColor()
@@ -126,7 +130,7 @@ class AddTab(QtWidgets.QWidget):
             self.rgb = rgb
 
     def getStyle(self):
-        category = self.newEntry.text()
+        category = Funs.formatCategoryName(self.newEntry.text())
         frameStyle = {
             'selectorStr':['QFrame'],
             'idStr':[category],
@@ -199,6 +203,7 @@ class EditTab(QtWidgets.QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
+        self.cardWidth = 300
         self.setObjectName('EditTab')
         ## Initialization ==
         ## Creation ==
@@ -206,19 +211,20 @@ class EditTab(QtWidgets.QWidget):
         self.catCombo = QtWidgets.QComboBox(self, objectName="catCombo")
         self.colorLbl = QtWidgets.QLabel(self, objectName="colorLbl", text="Cor")
         self.showColor = QtWidgets.QLabel(self)
-        self.cardTemplate = CardTemplate(self, {'Category':'','Value':'00.0','Date':'10/10/2010','Comment':'Template', 'Account':'Conta'})
+        templateData = {'Category':'','Value':'00.0','Date':'10/10/2010','Comment':'Template', 'AccName':'Conta', 'AccType':1}
+        self.cardTemplate = Card.Card(self, templateData, 'Template')
 
         ## Customization ==
         options = parent.DataBase.CategoryTable.get_names()[:]
         self.catCombo.addItems(options)
         self.catCombo.currentIndexChanged.connect(self.UpdateTemplate)
-        self.cardTemplate.setObjectName(unidecode.unidecode(self.catCombo.currentText()))
+        self.cardTemplate.setObjectName(Funs.formatCategoryName(self.catCombo.currentText()))
         self.UpdateTemplate()
 
         self.showColor.setMinimumSize(QtCore.QSize(24, 24))
         self.showColor.setMaximumSize(QtCore.QSize(24, 24))
 
-        self.showColor.setObjectName('Color'+unidecode.unidecode(self.catCombo.currentText()))
+        self.showColor.setObjectName('Color'+Funs.formatCategoryName(self.catCombo.currentText()))
         self.showColor.mousePressEvent = self.GetColor
 
         ## Layout ==
@@ -244,48 +250,8 @@ class EditTab(QtWidgets.QWidget):
 
     def UpdateTemplate(self):
         self.cardTemplate.categoryLbl.setText(self.catCombo.currentText())
-        self.cardTemplate.setObjectName(unidecode.unidecode(self.catCombo.currentText()))
+        self.cardTemplate.setObjectName(Funs.formatCategoryName(self.catCombo.currentText()))
         self.cardTemplate.setStyle(self.cardTemplate.style())
         
-        self.showColor.setObjectName('Color'+unidecode.unidecode(self.catCombo.currentText()))
+        self.showColor.setObjectName('Color'+Funs.formatCategoryName(self.catCombo.currentText()))
         self.showColor.setStyle(self.cardTemplate.style())
-
-class CardTemplate(QtWidgets.QFrame):
-    def __init__(self, parent, transData):
-        super().__init__(parent)
-        ## Initialization ==
-        self.setMinimumSize(QtCore.QSize(200, 100))
-        self.setMaximumSize(QtCore.QSize(2000, 1000))
-        self.setFrameShape(QtWidgets.QFrame.Panel)
-        self.setFrameShadow(QtWidgets.QFrame.Raised)
-
-        ## Creation ==
-        self.categoryLbl = QtWidgets.QLabel(self, text=transData["Category"], objectName="categoryLbl")
-        self.valueLbl = QtWidgets.QLabel(self, text=str(transData["Value"]), objectName="valueLbl")
-        self.currencyLbl = QtWidgets.QLabel(self, text="R$", objectName="currencyLbl")
-        self.dateLbl = QtWidgets.QLabel(self, text=transData["Date"], objectName="dateLbl")
-        self.commLbl = QtWidgets.QLabel(self, text=transData["Comment"], objectName="commLbl")
-        self.accLbl = QtWidgets.QLabel(self, text=transData["Account"], objectName="accLbl")
-        self.editButton = QtWidgets.QPushButton(self, objectName="editButton")
-
-        ## Customization ==
-        self.editButton.setCursor(QtCore.Qt.PointingHandCursor)
-        self.editButton.setIcon(QtGui.QIcon('Icons/EditTransfer.png'))
-        self.editButton.setIconSize(QtCore.QSize(24,24))
-        self.editButton.setMinimumSize(QtCore.QSize(24, 24))
-        self.editButton.setMaximumSize(QtCore.QSize(24, 24))
-
-        self.currencyLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.accLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-
-        ## Layout ==
-        self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        #self.gridLayout.setContentsMargins(3,3,3,3)
-
-        self.gridLayout.addWidget(self.categoryLbl, 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.dateLbl, 0, 2, 1, 1)
-        self.gridLayout.addWidget(self.currencyLbl, 1, 0, 1, 1)
-        self.gridLayout.addWidget(self.valueLbl, 1, 1, 1, 1)
-        self.gridLayout.addWidget(self.accLbl, 1, 2, 1, 1)
-        self.gridLayout.addWidget(self.commLbl, 2, 0, 1, 2)
-        self.gridLayout.addWidget(self.editButton, 2, 2, 1, 1, alignment = QtCore.Qt.AlignRight)

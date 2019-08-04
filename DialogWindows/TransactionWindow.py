@@ -1,6 +1,5 @@
 from PySide2 import QtCore, QtGui, QtWidgets
 import copy
-import unidecode
 import Funs
 
 class Create(QtWidgets.QDialog):

@@ -1,4 +1,4 @@
-import unidecode
+import Funs
 import random
 # import os.path
 # QssExist = os.path.exists("InterfaceStyle/Style.qss")
@@ -89,7 +89,7 @@ class Create():
         # Card    
         for iCategory in defaultCatgs:
             color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
-            currCat = unidecode.unidecode(iCategory)
+            currCat = Funs.formatCategoryName(iCategory)
             styleList.append({
                 'selectorStr':["QFrame"],
                 'idStr':[currCat],

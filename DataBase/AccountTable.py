@@ -22,23 +22,30 @@ class Create():
         IDs = tuple(ID[0] for ID in self.cursor.execute(getStr))
         return IDs
 
-    def get_names(self):
+    def get_names(self, getdeleted = 'off'):
         getStr = "SELECT Type, Name FROM Account"
         acc = {'credit':[], 'debit':[]}
         for data in self.cursor.execute(getStr):
-            acc['debit'].append(data[1]) if data[0] == 1 else acc['credit'].append(data[1])
+            accountName = data[1]
+            if getdeleted == 'off':
+                if 'DELETED' not in accountName:
+                    acc['debit'].append(accountName) if data[0] == 1 else acc['credit'].append(accountName)
+            else:
+                if 'DELETED' in accountName:
+                    acc['debit'].append(accountName) if data[0] == 1 else acc['credit'].append(accountName)
         return acc
     
     def get_totals(self):
         getStr = "SELECT Type, Total, Name FROM Account"
         total = {'credit':{"Todas":0}, 'debit':{"Todas":0}}
         for data in self.cursor.execute(getStr):
-            if data[0] == 2:
-                total['credit']["Todas"] = total['credit']["Todas"] + data[1]
-                total['credit'][data[2]] = data[1]
-            else:
-                total['debit']["Todas"] = total['debit']["Todas"] + data[1]
-                total['debit'][data[2]] = data[1]
+            if 'DELETED' not in data[2]:
+                if data[0] == 2:
+                    total['credit']["Todas"] = total['credit']["Todas"] + data[1]
+                    total['credit'][data[2]] = data[1]
+                else:
+                    total['debit']["Todas"] = total['debit']["Todas"] + data[1]
+                    total['debit'][data[2]] = data[1]
         return total
     
     def insert(self, accInfo):
@@ -67,8 +74,9 @@ class Create():
         return self.cursor.fetchone() # - Fetch the next row in result. If there is no row available, returns one
 
     def updateById(self, accInfo):
-        self.cursor.execute("""UPDATE Account SET Type = :Type, Name = :Name, Total = :Total, LimitVal = :Limit, DueDay = :DueDay, ClosingDay = :ClosingDay
-                    WHERE Acc_ID = :Acc_ID""", accInfo)
+        with self.conn:
+            self.cursor.execute("""UPDATE Account SET Type = :Type, Name = :Name, Total = :Total, LimitVal = :Limit, DueDay = :DueDay, ClosingDay = :ClosingDay
+                        WHERE Acc_ID = :Acc_ID""", accInfo)
 
     def updateByUnique(self, accInfo):
         with self.conn:

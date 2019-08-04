@@ -3,6 +3,8 @@ import time
 import re
 import os,binascii
 import random
+import sys
+import unidecode
 
 '''
 General Functions
@@ -20,6 +22,11 @@ def showdic(dict):
         # for y in dict[x]:
         #     print ('               ',y,':',dict[x][y])
    
+def formatCategoryName(name):
+    return unidecode.unidecode(name.replace(' ', '_'))
+
+def testCategoryName(name):
+    return "Not OK" if re.search(r"\.|\/|\&", name) else 'OK'
 #=========================================================================================     
 def AddTransaction(objAcc, category, value, date, comment, bankAccount):
     month, year = GetMY(date)
@@ -260,10 +267,25 @@ def catgTotal_dictFromlist(catgTotalList):
     }
     return catgTotalDict
 
+def account_dictFromlist(accountList):
+    accDict = {
+        'Acc_ID':accountList[0],
+        'Type':accountList[1],
+        'Name':accountList[2],
+        'Total':accountList[3],
+        'Limit':accountList[4],
+        'DueDay':accountList[5],
+        'ClosingDay':accountList[6]
+    }
+    return accDict
+
 if __name__ == "__main__":
-    for i in range(60):
-        # test = generateTrans(tuple(range(8)),tuple(range(8)))
-        test = generateCatgTotal(tuple(range(40)))
-        # print(test['Date'])
-        # test = generateAcc()
-        print(test)
+    print(testCategoryName('Cartão po'))
+    # print(formatCategoryName('Remédio Cartão'))
+    # sys.path.append("C:/Users/felip/AppData/Roaming/Python/Python37/Scripts")
+    # for i in range(60):
+    #     test = generateTrans(tuple(range(8)),tuple(range(8)))
+    #     test = generateCatgTotal(tuple(range(40)))
+    #     print(test['Date'])
+    #     test = generateAcc()
+    #     print(test)

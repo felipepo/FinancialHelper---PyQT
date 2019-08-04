@@ -1,112 +1,77 @@
 QFrame#Feira {
-    background-color: rgb(135, 160, 219);
+    background-color: rgb(164, 169, 232);
 }
 QLabel#ColorFeira {
-    background-color: rgb(135, 160, 219);
+    background-color: rgb(164, 169, 232);
     border: 2px solid black;
 }
 QFrame#Transporte {
-    background-color: rgb(77, 183, 9);
+    background-color: rgb(4, 192, 232);
 }
 QLabel#ColorTransporte {
-    background-color: rgb(77, 183, 9);
+    background-color: rgb(4, 192, 232);
     border: 2px solid black;
 }
 QFrame#Remedio {
-    background-color: rgb(105, 153, 86);
+    background-color: rgb(117, 186, 254);
 }
 QLabel#ColorRemedio {
-    background-color: rgb(105, 153, 86);
+    background-color: rgb(117, 186, 254);
     border: 2px solid black;
 }
-QFrame#Gym {
-    background-color: rgb(85, 255, 255);
+QFrame#Academia {
+    background-color: rgb(237, 72, 2);
 }
-QLabel#ColorGym {
-    background-color: rgb(85, 255, 255);
+QLabel#ColorAcademia {
+    background-color: rgb(237, 72, 2);
     border: 2px solid black;
 }
 QFrame#Aluguel {
-    background-color: rgb(238, 186, 185);
+    background-color: rgb(61, 194, 145);
 }
 QLabel#ColorAluguel {
-    background-color: rgb(238, 186, 185);
+    background-color: rgb(61, 194, 145);
     border: 2px solid black;
 }
 QFrame#Condominio {
-    background-color: rgb(65, 195, 63);
+    background-color: rgb(159, 190, 73);
 }
 QLabel#ColorCondominio {
-    background-color: rgb(65, 195, 63);
+    background-color: rgb(159, 190, 73);
     border: 2px solid black;
 }
 QFrame#Telefone {
-    background-color: rgb(174, 42, 192);
+    background-color: rgb(193, 179, 243);
 }
 QLabel#ColorTelefone {
-    background-color: rgb(174, 42, 192);
+    background-color: rgb(193, 179, 243);
     border: 2px solid black;
 }
 QFrame#Internet {
-    background-color: rgb(204, 63, 150);
+    background-color: rgb(16, 52, 160);
 }
 QLabel#ColorInternet {
-    background-color: rgb(204, 63, 150);
+    background-color: rgb(16, 52, 160);
     border: 2px solid black;
 }
 QFrame#Luz {
-    background-color: rgb(31, 70, 76);
+    background-color: rgb(37, 137, 87);
 }
 QLabel#ColorLuz {
-    background-color: rgb(31, 70, 76);
+    background-color: rgb(37, 137, 87);
     border: 2px solid black;
 }
 QFrame#Outros {
-    background-color: rgb(39, 165, 155);
+    background-color: rgb(183, 145, 207);
 }
 QLabel#ColorOutros {
-    background-color: rgb(39, 165, 155);
+    background-color: rgb(183, 145, 207);
     border: 2px solid black;
 }
 QFrame#Transferencia {
-    background-color: rgb(49, 106, 5);
+    background-color: rgb(126, 239, 143);
 }
 QLabel#ColorTransferencia {
-    background-color: rgb(49, 106, 5);
-    border: 2px solid black;
-}
-QFrame#CSTA {
-    background-color: rgb(85, 255, 255);
-}
-QLabel#ColorCSTA {
-    background-color: rgb(85, 255, 255);
-    border: 2px solid black;
-}
-QFrame#TESTE32 {
-    background-color: rgb(85, 170, 255);
-}
-QLabel#ColorTESTE32 {
-    background-color: rgb(85, 170, 255);
-    border: 2px solid black;
-}
-QFrame#CSAFE {
-    background-color: ;
-}
-QLabel#ColorCSAFE {
-    background-color: ;
-    border: 2px solid black;
-}
-QFrame#GARFA {
-    background-color: ;
-}
-QLabel#ColorGARFA {
-    background-color: ;
-    border: 2px solid black;
-}
-QFrame#TESTE3 {
-    background-color: rgb(85, 0, 255);
-}
-QLabel#ColorTESTE3 {
-    background-color: rgb(85, 0, 255);
+    background-color: rgb(126, 239, 143);
     border: 2px solid black;
 }
