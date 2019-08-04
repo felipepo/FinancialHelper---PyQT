@@ -27,7 +27,7 @@ class Create(QtWidgets.QMainWindow):
         ## Creation ==      
         if SimulateData == 1:
             self.DataBase = SQLDB.Create(1)
-            self.DataBase.simulateData()
+            self.DataBase.simulateData(nTrans=40, nAcc=10, nCatg=10)
         else:
             self.DataBase = SQLDB.Create(2)
 

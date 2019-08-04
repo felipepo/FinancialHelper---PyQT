@@ -122,14 +122,14 @@ class Create():
         self.conn.close()
         print("Closed Database")
 
-    def simulateData(self):
-        for _ in range(30):
+    def simulateData(self, nTrans=10, nAcc=10, nCatg=10):
+        for _ in range(nAcc):
             accInfo = Funs.generateAcc()
             self.AccountTable.insert(accInfo)
 
         # Create categories
         # catgInfo -> Name, Color
-        for _ in range(10):
+        for _ in range(nCatg):
             catgInfo = Funs.generateCatg()
             self.CategoryTable.insert(catgInfo["Name"], catgInfo["Color"])
 
@@ -138,7 +138,7 @@ class Create():
 
         # Create transactions
         # transInfo -> Acc_ID, Catg_ID, Comment, Date, Value
-        for _ in range(10):
+        for _ in range(nTrans):
             transInfo = Funs.generateTrans(Catg_ID_list, Acc_ID_list)
             self.NewTransaction(transInfo)
 

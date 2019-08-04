@@ -61,6 +61,12 @@ class SetValueGroup(QtWidgets.QGroupBox):
         self.nameDropDown = QtWidgets.QComboBox(self, objectName="nameDropDown")
         self.valLbl = QtWidgets.QLabel(self, text="Definir valor atual", objectName="valLbl")
         self.finalValue = QtWidgets.QLineEdit(self, placeholderText="00.0", alignment=QtCore.Qt.AlignCenter, objectName="finalValue")
+        self.limitLbl = QtWidgets.QLabel(self, text="Limite", objectName="limitLbl")
+        self.limitValue = QtWidgets.QLineEdit(self, placeholderText="00.0", alignment=QtCore.Qt.AlignCenter, objectName="limitValue")
+        self.dueLbl = QtWidgets.QLabel(self, text="Vencimeto", objectName="dueLbl")
+        self.DueDay = QtWidgets.QLineEdit(self, placeholderText="00", alignment=QtCore.Qt.AlignCenter, objectName="DueDay")
+        self.closingLbl = QtWidgets.QLabel(self, text="Fechamento", objectName="closingLbl")
+        self.ClosingDay = QtWidgets.QLineEdit(self, placeholderText="00", alignment=QtCore.Qt.AlignCenter, objectName="ClosingDay")
         self.applyButton = QtWidgets.QPushButton(self, text="Aplicar", objectName="button2")
         
         ## Customization ==
@@ -76,23 +82,42 @@ class SetValueGroup(QtWidgets.QGroupBox):
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        self.gridLayout.addWidget(self.accName,0,0,1,1)
-        self.gridLayout.addWidget(self.nameDropDown,0,1,1,1)
+        self.gridLayout.addWidget(self.accName,0,1,1,1)
+        self.gridLayout.addWidget(self.nameDropDown,0,2,1,1)
         self.gridLayout.addWidget(self.valLbl,1,0,1,1)
         self.gridLayout.addWidget(self.finalValue,1,1,1,1)
-        self.gridLayout.addWidget(self.applyButton,2,1,1,1)
+        self.gridLayout.addWidget(self.limitLbl,1,2,1,1)
+        self.gridLayout.addWidget(self.limitValue,1,3,1,1)
+        self.gridLayout.addWidget(self.dueLbl,2,0,1,1)
+        self.gridLayout.addWidget(self.DueDay,2,1,1,1)
+        self.gridLayout.addWidget(self.closingLbl,2,2,1,1)
+        self.gridLayout.addWidget(self.ClosingDay,2,3,1,1)
+        self.gridLayout.addWidget(self.applyButton,3,3,1,1)
 
     def UpdateEditBox(self):
         currAcc = self.nameDropDown.currentText()
         if currAcc:
-            currAccTotal = self.controlFrame.creditPage.mainWin.DataBase.Totals['credit'][currAcc]
-            self.finalValue.setText(str(currAccTotal))
+            currAccData = self.controlFrame.creditPage.mainWin.DataBase.AccountTable.readByUnique(2,currAcc)
+            self.finalValue.setText(str(currAccData[3]))
+            self.limitValue.setText(str(currAccData[4]))
+            self.DueDay.setText(str(currAccData[5]))
+            self.ClosingDay.setText(str(currAccData[6]))
 
     def SetFinalValue(self):
         accName = self.nameDropDown.currentText()
-        Acc_ID = self.controlFrame.creditPage.mainWin.DataBase.AccountTable.readByUnique(1, accName)
+        Acc_ID = self.controlFrame.creditPage.mainWin.DataBase.AccountTable.readByUnique(2, accName)
         Catg_ID = self.controlFrame.creditPage.mainWin.DataBase.CategoryTable.readByName("Outros")
         diffValue = float(self.finalValue.text()) - self.controlFrame.creditPage.mainWin.DataBase.Totals["credit"][accName]
+        accData = {
+            'Acc_ID':Acc_ID[0],
+            'Type':Acc_ID[1],
+            'Name':Acc_ID[2],
+            'Total':Acc_ID[3],
+            'Limit':int(self.limitValue.text()),
+            'DueDay':int(self.DueDay.text()),
+            'ClosingDay':int(self.ClosingDay.text())
+        }
+        self.controlFrame.creditPage.mainWin.DataBase.AccountTable.updateById(accData)
         if diffValue != 0:
             transData = {
                 "Catg_ID": Catg_ID[0],

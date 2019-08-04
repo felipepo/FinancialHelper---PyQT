@@ -177,7 +177,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -1312,6 +1312,68 @@
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_22">
+           <item row="0" column="0" colspan="2">
+            <widget class="QGroupBox" name="groupBox_4">
+             <property name="title">
+              <string>Filtros</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_24">
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_72">
+                <property name="text">
+                 <string>TextLabel</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="4">
+               <widget class="QComboBox" name="comboBox_9"/>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_74">
+                <property name="text">
+                 <string>TextLabel</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QComboBox" name="comboBox_10"/>
+              </item>
+              <item row="1" column="1">
+               <widget class="QComboBox" name="comboBox_8"/>
+              </item>
+              <item row="3" column="1">
+               <spacer name="verticalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="3" column="4">
+               <widget class="QPushButton" name="pushButton_7">
+                <property name="text">
+                 <string>PushButton</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QLabel" name="label_73">
+                <property name="text">
+                 <string>TextLabel</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
            <item row="1" column="0" colspan="2">
             <widget class="QGroupBox" name="groupBox_3">
              <property name="title">
@@ -1331,16 +1393,6 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="2">
-               <widget class="QLabel" name="label_70">
-                <property name="text">
-                 <string>Nome</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
               <item row="1" column="2">
                <widget class="QLabel" name="label_75">
                 <property name="text">
@@ -1357,9 +1409,6 @@
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
-              </item>
-              <item row="0" column="3">
-               <widget class="QComboBox" name="comboBox_7"/>
               </item>
               <item row="1" column="3">
                <widget class="QLineEdit" name="lineEdit_3">
@@ -1398,67 +1447,18 @@
               <item row="2" column="1">
                <widget class="QLineEdit" name="lineEdit_5"/>
               </item>
-             </layout>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QGroupBox" name="groupBox_4">
-             <property name="title">
-              <string>Filtros</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <layout class="QGridLayout" name="gridLayout_24">
-              <item row="2" column="1">
-               <widget class="QComboBox" name="comboBox_10"/>
-              </item>
-              <item row="3" column="4">
-               <widget class="QPushButton" name="pushButton_7">
+              <item row="0" column="1">
+               <widget class="QLabel" name="label_70">
                 <property name="text">
-                 <string>PushButton</string>
+                 <string>Nome</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_72">
-                <property name="text">
-                 <string>TextLabel</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="4">
-               <widget class="QComboBox" name="comboBox_9"/>
-              </item>
-              <item row="1" column="1">
-               <widget class="QComboBox" name="comboBox_8"/>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_74">
-                <property name="text">
-                 <string>TextLabel</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <spacer name="verticalSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="3">
-               <widget class="QLabel" name="label_73">
-                <property name="text">
-                 <string>TextLabel</string>
-                </property>
-               </widget>
+              <item row="0" column="2">
+               <widget class="QComboBox" name="comboBox_7"/>
               </item>
              </layout>
             </widget>

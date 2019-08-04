@@ -53,17 +53,23 @@ class ToolBar(QtWidgets.QToolBar):
                 targetCatg = self.mainWin.DataBase.CategoryTable.readByName(wind.inputs["Category"])
                 targetAcc = self.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
                 transInfo = {"Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
-                transID = self.mainWin.DataBase.NewTransaction(transInfo)
-                if transID != 'Error':
-                    self.mainWin.DataBase.ReGetValues()
-                    self.mainWin.updateValuePlaces()
-                    mayProceed = True
-                    if wind.inputs["AccType"] == 1:
-                        self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
-                    else:
-                        self.mainWin.creditCardPage.cardArea.AddCard(wind.inputs, transID)
+                if targetAcc[1] == 2:
+                    instalments = wind.inputs['Instalments']
+                    for iMonth in range(instalments):
+                        instalmentInfo = transInfo.copy()
+                        cardData = wind.inputs.copy()
+                        instalmentInfo["Comment"] = '(' + str(iMonth+1) + '/' + str(instalments) + ') ' + instalmentInfo["Comment"]
+                        instalmentInfo["Date"] = QtCore.QDate.fromString(instalmentInfo["Date"], 'dd/MM/yyyy').addDays((iMonth)*30).toString('dd/MM/yyyy')
+                        transID = self.mainWin.DataBase.NewTransaction(instalmentInfo)
+                        cardData["Comment"] = instalmentInfo["Comment"]
+                        cardData["Date"] = instalmentInfo["Date"]
+                        self.mainWin.creditCardPage.cardArea.AddCard(cardData, transID)
                 else:
-                    print('Problema na conta')
+                    transID = self.mainWin.DataBase.NewTransaction(transInfo)
+                    self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
+                self.mainWin.DataBase.ReGetValues()
+                self.mainWin.updateValuePlaces()
+                mayProceed = True
             else: 
                 mayProceed = True
 

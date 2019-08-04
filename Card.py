@@ -7,7 +7,7 @@ class CardArea(QtWidgets.QScrollArea):
     resized = QtCore.Signal()   
     def __init__(self,parent, debitOrCredit):
         super().__init__(parent)
-        self.accPage = parent
+        self.parentPage = parent
         ## Initialization ==
         self.width = 750
         self.cardWidth = 160
@@ -28,12 +28,12 @@ class CardArea(QtWidgets.QScrollArea):
 
         ## Creation ==
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        allTransaction = self.accPage.mainWin.DataBase.ExtractTable.readAll()
+        allTransaction = self.parentPage.mainWin.DataBase.ExtractTable.readAll()
         for iTrans in allTransaction:
-            currAcc = self.accPage.mainWin.DataBase.AccountTable.readById(iTrans[2])
+            currAcc = self.parentPage.mainWin.DataBase.AccountTable.readById(iTrans[2])
             if "DELETED" not in currAcc[2]:
                 if currAcc[1] == debitOrCredit:
-                    currCatg = self.accPage.mainWin.DataBase.CategoryTable.readById(iTrans[1])
+                    currCatg = self.parentPage.mainWin.DataBase.CategoryTable.readById(iTrans[1])
                     transData["Category"] = currCatg[1]
                     transData["AccName"] = currAcc[2]
                     transData["Date"] = iTrans[3]
@@ -64,11 +64,11 @@ class CardArea(QtWidgets.QScrollArea):
     def UpdateALLCards(self):
         cardsToBeRemoved = []
         for iCard in self.card:
-            currCard = self.accPage.mainWin.DataBase.ExtractTable.readById(self.card[iCard].Id)
+            currCard = self.parentPage.mainWin.DataBase.ExtractTable.readById(self.card[iCard].Id)
             currCard = Funs.trans_dictFromlist(currCard)
-            accName = self.accPage.mainWin.DataBase.AccountTable.readById(currCard["Acc_ID"])
+            accName = self.parentPage.mainWin.DataBase.AccountTable.readById(currCard["Acc_ID"])
             if "DELETED" not in accName[2]:
-                catgName = self.accPage.mainWin.DataBase.CategoryTable.readById(currCard["Catg_ID"])
+                catgName = self.parentPage.mainWin.DataBase.CategoryTable.readById(currCard["Catg_ID"])
                 transData = {
                     "AccType": accName[1],
                     "AccName":accName[2],
@@ -83,12 +83,15 @@ class CardArea(QtWidgets.QScrollArea):
         for iCard in cardsToBeRemoved:
                 self.RemoveCard(iCard)
 
-    def HideCard(self):
-        pass
+    def RemoveCardandTransaction(self, transID):
+        self.RemoveCard(transID)
+        self.parentPage.mainWin.DataBase.ExtractTable.deleteByID(transID)
 
     def RemoveCard(self, transID):
         self.card[transID].hide()
         del self.card[transID]
+        self.HideAllCards()
+        self.ShowAllCards()
     
     def HideAllCards(self):
         for iCard in list(self.card.keys()):
@@ -177,9 +180,9 @@ class Card(QtWidgets.QFrame):
     def UpdateWindow(self):
         mayProceed = False
         while mayProceed == False:
-            debitOptions = self.cardArea.accPage.mainWin.DataBase.AllAccounts["debit"]
-            creditOptions = self.cardArea.accPage.mainWin.DataBase.AllAccounts["credit"]
-            catgOptions = self.cardArea.accPage.mainWin.DataBase.AllCategories
+            debitOptions = self.cardArea.parentPage.mainWin.DataBase.AllAccounts["debit"]
+            creditOptions = self.cardArea.parentPage.mainWin.DataBase.AllAccounts["credit"]
+            catgOptions = self.cardArea.parentPage.mainWin.DataBase.AllCategories
             prevTransData = {
                 'Value': float(self.value),
                 'Comment': self.comment,
@@ -190,17 +193,21 @@ class Card(QtWidgets.QFrame):
             }
             wind = TransactionWindow.Create(self, debitOptions, creditOptions, catgOptions, prevTransData)
             if wind.exec_():
-                targetCatg = self.cardArea.accPage.mainWin.DataBase.CategoryTable.readByName(wind.inputs["Category"])
-                targetAcc = self.cardArea.accPage.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
-                transInfo = {"Trans_ID":self.Id, "Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
-                updatedFlag = self.cardArea.accPage.mainWin.DataBase.UpdateTransaction(transInfo)
-                if updatedFlag == 'OK':
-                    self.cardArea.accPage.mainWin.DataBase.ReGetValues()  
-                    self.cardArea.accPage.mainWin.updateValuePlaces()
-                    mayProceed = True
-                    self.Update(wind.inputs)                  
+                if "Remove" not in wind.inputs:
+                    targetCatg = self.cardArea.parentPage.mainWin.DataBase.CategoryTable.readByName(wind.inputs["Category"])
+                    targetAcc = self.cardArea.parentPage.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
+                    transInfo = {"Trans_ID":self.Id, "Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
+                    updatedFlag = self.cardArea.parentPage.mainWin.DataBase.UpdateTransaction(transInfo)
+                    if updatedFlag == 'OK':
+                        self.cardArea.parentPage.mainWin.DataBase.ReGetValues()  
+                        self.cardArea.parentPage.mainWin.updateValuePlaces()
+                        mayProceed = True
+                        self.Update(wind.inputs)                  
+                    else:
+                        print('Problema na conta')
                 else:
-                    print('Problema na conta')
+                    self.cardArea.RemoveCardandTransaction(self.Id)
+                    mayProceed = True
             else: 
                 mayProceed = True
 
