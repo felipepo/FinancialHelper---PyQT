@@ -1,0 +1,77 @@
+QFrame#Feira {
+    background-color: rgb(161, 77, 72);
+}
+QLabel#ColorFeira {
+    background-color: rgb(161, 77, 72);
+    border: 2px solid black;
+}
+QFrame#Transporte {
+    background-color: rgb(43, 189, 155);
+}
+QLabel#ColorTransporte {
+    background-color: rgb(43, 189, 155);
+    border: 2px solid black;
+}
+QFrame#Remedio {
+    background-color: rgb(94, 1, 201);
+}
+QLabel#ColorRemedio {
+    background-color: rgb(94, 1, 201);
+    border: 2px solid black;
+}
+QFrame#Academia {
+    background-color: rgb(190, 13, 42);
+}
+QLabel#ColorAcademia {
+    background-color: rgb(190, 13, 42);
+    border: 2px solid black;
+}
+QFrame#Aluguel {
+    background-color: rgb(133, 6, 255);
+}
+QLabel#ColorAluguel {
+    background-color: rgb(133, 6, 255);
+    border: 2px solid black;
+}
+QFrame#Condominio {
+    background-color: rgb(18, 141, 34);
+}
+QLabel#ColorCondominio {
+    background-color: rgb(18, 141, 34);
+    border: 2px solid black;
+}
+QFrame#Telefone {
+    background-color: rgb(49, 177, 100);
+}
+QLabel#ColorTelefone {
+    background-color: rgb(49, 177, 100);
+    border: 2px solid black;
+}
+QFrame#Internet {
+    background-color: rgb(92, 80, 26);
+}
+QLabel#ColorInternet {
+    background-color: rgb(92, 80, 26);
+    border: 2px solid black;
+}
+QFrame#Luz {
+    background-color: rgb(93, 190, 216);
+}
+QLabel#ColorLuz {
+    background-color: rgb(93, 190, 216);
+    border: 2px solid black;
+}
+QFrame#Outros {
+    background-color: rgb(220, 44, 211);
+}
+QLabel#ColorOutros {
+    background-color: rgb(220, 44, 211);
+    border: 2px solid black;
+}
+QFrame#Transferencia {
+    background-color: rgb(144, 48, 191);
+}
+QLabel#ColorTransferencia {
+    background-color: rgb(144, 48, 191);
+    border: 2px solid black;
+}

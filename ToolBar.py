@@ -50,16 +50,18 @@ class ToolBar(QtWidgets.QToolBar):
             catgOptions = self.mainWin.DataBase.AllCategories
             wind = TransactionWindow.Create(self, debitOptions, creditOptions, catgOptions)
             if wind.exec_():
+                instalments = wind.inputs['Instalments']
                 targetCatg = self.mainWin.DataBase.CategoryTable.readByName(wind.inputs["Category"])
                 targetAcc = self.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
+                wind.inputs["Value"] = wind.inputs["Value"]/instalments
                 transInfo = {"Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
                 if targetAcc[1] == 2:
-                    instalments = wind.inputs['Instalments']
                     for iMonth in range(instalments):
                         instalmentInfo = transInfo.copy()
                         cardData = wind.inputs.copy()
-                        instalmentInfo["Comment"] = '(' + str(iMonth+1) + '/' + str(instalments) + ') ' + instalmentInfo["Comment"]
-                        instalmentInfo["Date"] = QtCore.QDate.fromString(instalmentInfo["Date"], 'dd/MM/yyyy').addDays((iMonth)*30).toString('dd/MM/yyyy')
+                        if instalments > 1:
+                            instalmentInfo["Comment"] = '(' + str(iMonth+1) + '/' + str(instalments) + ') ' + instalmentInfo["Comment"]
+                            instalmentInfo["Date"] = QtCore.QDate.fromString(instalmentInfo["Date"], 'dd/MM/yyyy').addDays((iMonth)*30).toString('dd/MM/yyyy')
                         transID = self.mainWin.DataBase.NewTransaction(instalmentInfo)
                         cardData["Comment"] = instalmentInfo["Comment"]
                         cardData["Date"] = instalmentInfo["Date"]
@@ -130,6 +132,7 @@ class ToolBar(QtWidgets.QToolBar):
                     if wind.inputs['Type'] == 1:
                         self.mainWin.homePage.debitGroupBox.comboBox.addItem(wind.inputs['Name'])
                         self.mainWin.accPage.controlFrame.setValueGroup.nameDropDown.addItem(wind.inputs['Name'])
+                        self.mainWin.accPage.controlFrame.filterGroup.getComboValues()
                     else:
                         self.mainWin.homePage.creditGroupBox.comboBox.addItem(wind.inputs['Name'])
                         self.mainWin.creditCardPage.controlFrame.setValueGroup.nameDropDown.addItem(wind.inputs['Name'])

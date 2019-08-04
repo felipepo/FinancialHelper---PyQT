@@ -11,6 +11,7 @@ class CardArea(QtWidgets.QScrollArea):
         ## Initialization ==
         self.width = 750
         self.cardWidth = 160
+        self.debitOrCredit = debitOrCredit
         self.setMinimumSize(QtCore.QSize(self.width, 0))
         #self.setMaximumSize(QtCore.QSize(700, 16777215))
         self.setWidgetResizable(True)
@@ -24,15 +25,32 @@ class CardArea(QtWidgets.QScrollArea):
         self.col = 0
         self.setWidget(self.scrollAreaWidgetContents)
         self.card = {}
-        transData={}
 
         ## Creation ==
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.filters = {
+            "Month": Funs.GetMonth(QtCore.QDate.currentDate().month()),
+            "Year": QtCore.QDate.currentDate().year(),
+            "AccName": "Todas",
+            "Category": "Todas"
+        }
+        self.initializeCards()
+
+        ## Customization ==
+        ## Layout ==
+        self.gridLayout.addItem(spacerItem, self.row+1, 0, 1, 1)
+
+        self.resized.connect(self.Reshape)
+
+    def initializeCards(self):
+        transData={}
+        self.HideAllCards()
+        self.card = {}
         allTransaction = self.parentPage.mainWin.DataBase.ExtractTable.readAll()
         for iTrans in allTransaction:
             currAcc = self.parentPage.mainWin.DataBase.AccountTable.readById(iTrans[2])
             if "DELETED" not in currAcc[2]:
-                if currAcc[1] == debitOrCredit:
+                if currAcc[1] == self.debitOrCredit:
                     currCatg = self.parentPage.mainWin.DataBase.CategoryTable.readById(iTrans[1])
                     transData["Category"] = currCatg[1]
                     transData["AccName"] = currAcc[2]
@@ -41,12 +59,6 @@ class CardArea(QtWidgets.QScrollArea):
                     transData["Comment"] = iTrans[5]
                     transData["AccType"] = currAcc[1]
                     self.AddCard(transData, iTrans[0])
-
-        ## Customization ==
-        ## Layout ==
-        self.gridLayout.addItem(spacerItem, self.row+1, 0, 1, 1)
-
-        self.resized.connect(self.Reshape)
 
     def resizeEvent(self, event):
         self.resized.emit()
@@ -82,14 +94,21 @@ class CardArea(QtWidgets.QScrollArea):
                 cardsToBeRemoved.append(currCard["Trans_ID"])
         for iCard in cardsToBeRemoved:
                 self.RemoveCard(iCard)
+                self.UpdateArea()
 
     def RemoveCardandTransaction(self, transID):
         self.RemoveCard(transID)
+        self.parentPage.mainWin.DataBase.RemoveTransaction(transID)
         self.parentPage.mainWin.DataBase.ExtractTable.deleteByID(transID)
+        self.parentPage.mainWin.DataBase.ReGetValues()
+        self.parentPage.mainWin.updateValuePlaces()
+        self.UpdateArea()
 
     def RemoveCard(self, transID):
         self.card[transID].hide()
         del self.card[transID]
+
+    def UpdateArea(self):
         self.HideAllCards()
         self.ShowAllCards()
     
@@ -107,14 +126,12 @@ class CardArea(QtWidgets.QScrollArea):
             self.updatePosition()
     
     def AddCard(self, transData, transID):
-        self.card[transID] = Card(self, transData, transID)
-        self.card[transID].setObjectName(Funs.formatCategoryName(transData['Category']))
-        self.gridLayout.addWidget(self.card[transID], self.row, self.col, 1, 1)
-        self.updatePosition()
+        if Funs.checkFilter(transData, self.filters):
+            self.card[transID] = Card(self, transData, transID)
+            self.card[transID].setObjectName(Funs.formatCategoryName(transData['Category']))
+            self.gridLayout.addWidget(self.card[transID], self.row, self.col, 1, 1)
+            self.updatePosition()
     
-    def ShiftCards(self,tow=0,col=0):
-        pass
-
     def Reshape(self):
         # Minimun - 700 (Card - 150 *4 = 600)
         currWidth = self.frameGeometry().width()

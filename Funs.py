@@ -246,6 +246,24 @@ def generateTrans(Catg_ID_list, Acc_ID_list):
     }
     return transData
 
+def checkFilter(transData, filters):
+    # Tipos de filtros:
+    # Mês
+    # Ano
+    # Conta
+    # Categoria
+
+    passedTest = 1
+    month, year = GetMY(transData["Date"])
+    if month != filters["Month"] and filters["Month"] != "Todos":
+        passedTest = 0
+    if int(year) != filters["Year"] and filters["Year"] != "Todos":
+        passedTest = 0
+    if transData["AccName"] != filters["AccName"] and filters["AccName"] != "Todas":
+        passedTest = 0
+    return passedTest
+
+
 def trans_dictFromlist(transList):
     transDict = {
         'Trans_ID': transList[0],

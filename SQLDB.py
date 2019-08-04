@@ -8,7 +8,7 @@ from DataBase import ExtractTable
 
 class Create():
     def __init__(self, inMemory):
-        self.db_file = ':memory:' if inMemory == 1 else 'DataBase/Data.db'
+        self.db_file = 'DataBase/DataTest.db' if inMemory == 1 else 'DataBase/Data.db'
         try:
             self.conn = sqlite3.connect(self.db_file)
             self.cursor = self.conn.cursor()
@@ -39,6 +39,21 @@ class Create():
         self.AllCategories = self.CategoryTable.get_names()
         self.AllTransactions = self.ExtractTable.get_ids()
         self.Totals = self.AccountTable.get_totals()
+
+    def RemoveTransaction(self, transID):
+        transInfo = self.ExtractTable.readById(transID)
+        transInfo = Funs.trans_dictFromlist(transInfo)
+        targetAcc = self.AccountTable.readById(transInfo["Acc_ID"])
+        accUpdt = {"Name":targetAcc[2], "Type":targetAcc[1], "Total":targetAcc[3]-transInfo["Value"], "Limit":targetAcc[4], "DueDay":targetAcc[5], "ClosingDay":targetAcc[6]}
+        self.AccountTable.updateByUnique(accUpdt)
+
+        # Update Categories Table
+        month, year = Funs.GetMY(transInfo["Date"])
+        year = int(year)
+        month = Funs.GetMonth(month)
+        targetCategoryTotal = self.CategoryTotalTable.readByUnique(transInfo["Catg_ID"], month, year)
+        catgTotalUpdt = {"Catg_ID":transInfo["Catg_ID"], "Month":month, "Year":year, "Total":targetCategoryTotal[2]-transInfo["Value"]}
+        self.CategoryTotalTable.updateByUnique(catgTotalUpdt)
 
     def NewTransaction(self, transInfo):
         newTransID = self.ExtractTable.insert(transInfo)

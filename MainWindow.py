@@ -109,6 +109,7 @@ class Create(QtWidgets.QMainWindow):
         self.accPage.controlFrame.setValueGroup.UpdateEditBox()
         self.homePage.creditGroupBox.UpdateValue()
         self.creditCardPage.controlFrame.setValueGroup.UpdateEditBox()
+        self.accPage.controlFrame.filterGroup.getComboValues()
 
 class SideFrame(QtWidgets.QFrame):
     def __init__(self, parent):
