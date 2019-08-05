@@ -41,7 +41,7 @@ class ToolBar(QtWidgets.QToolBar):
 
     def goToHome(self):
         self.mainWin.stackFrame.setCurrentIndex(0)
-    
+
     def addTransaction(self):
         mayProceed = False
         while mayProceed == False:
@@ -72,13 +72,13 @@ class ToolBar(QtWidgets.QToolBar):
                 self.mainWin.DataBase.ReGetValues()
                 self.mainWin.updateValuePlaces()
                 mayProceed = True
-            else: 
+            else:
                 mayProceed = True
 
     def transfer(self):
         mayProceed = False
         while mayProceed == False:
-            debitOptions = self.mainWin.DataBase.AllAccounts["debit"][:]
+            debitOptions = self.mainWin.DataBase.Totals['debit']
             wind = TransferWindow.Create(self, debitOptions)
             if wind.exec_():
                 transferCatg = self.mainWin.DataBase.CategoryTable.readByName("Transferência")
@@ -117,7 +117,7 @@ class ToolBar(QtWidgets.QToolBar):
                     self.mainWin.accPage.cardArea.AddCard(destData, transID)
                 else:
                     print('Problema na conta')
-            else: 
+            else:
                 mayProceed = True
 
     def addAccount(self):
@@ -139,7 +139,7 @@ class ToolBar(QtWidgets.QToolBar):
                     self.mainWin.updateValuePlaces()
                 else:
                     print('acc ja existe')
-            else: 
+            else:
                 mayProceed = True
 
     def removeAccount(self):
@@ -174,7 +174,7 @@ class ToolBar(QtWidgets.QToolBar):
                     self.mainWin.creditCardPage.controlFrame.setValueGroup.nameDropDown.removeItem(itemToRemove-1)
                     self.mainWin.creditCardPage.cardArea.UpdateALLCards()
                 self.mainWin.updateValuePlaces()
-            else: 
+            else:
                 mayProceed = True
 
     def debug(self):

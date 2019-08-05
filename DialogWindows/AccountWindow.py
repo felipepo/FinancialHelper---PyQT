@@ -60,14 +60,14 @@ class New(QtWidgets.QDialog):
         self.groupLayout.addWidget(self.closingDayEdit, 1, 1, 1, 1)
         self.groupLayout.addWidget(self.dueDatLbl, 2, 0, 1, 1)
         self.groupLayout.addWidget(self.dueDatEdit, 2, 1, 1, 1)
-             
+
     def accTypeSwitch(self):
         self.CCRadio.setChecked(not self.debitRadio.isChecked())
         self.HideShowBill()
 
     def HideShowBill(self):
         self.groupBox.hide() if self.debitRadio.isChecked() else self.groupBox.show()
-   
+
     def getInputs(self):
         try:
             self.inputs['Name'] = self.newEdit.text()
@@ -77,7 +77,7 @@ class New(QtWidgets.QDialog):
                 self.inputs['Limit'] = None
                 self.inputs['DueDay'] = None
                 self.inputs['ClosingDay'] = None
-            else: 
+            else:
                 self.inputs['Type'] = 2
                 self.inputs['Limit'] = 0 if self.limitEdit.text() == "" else float(self.limitEdit.text())
                 self.inputs['DueDay'] = 0 if self.dueDatEdit.text() == "" else int(self.dueDatEdit.text())
@@ -98,7 +98,7 @@ class Remove(QtWidgets.QDialog):
         ## Initialization ==
         self.debitOptions = debitOptions
         self.creditOptions = creditOptions
-        
+
         ## Creation ==
         self.nameLbl = QtWidgets.QLabel(self, objectName="nameLbl", text="Nome", alignment=QtCore.Qt.AlignRight)
         self.OK = QtWidgets.QPushButton(self, objectName="OK", text="OK")
@@ -109,7 +109,7 @@ class Remove(QtWidgets.QDialog):
         ## Customization ==
         self.nameLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
         self.debitRadio.setChecked(True)
-        self.comboBox.addItems(self.debitOptions)  
+        self.comboBox.addItems(self.debitOptions)
         self.OK.clicked.connect(self.getInputs)
 
         self.debitRadio.toggled.connect(self.accTypeSwitch)
@@ -130,7 +130,7 @@ class Remove(QtWidgets.QDialog):
         self.comboBox.clear()
         options = self.debitOptions if self.debitRadio.isChecked() else self.creditOptions
         self.comboBox.addItems(options)
-   
+
     def getInputs(self):
         try:
             self.inputs['Name'] = self.comboBox.currentText()

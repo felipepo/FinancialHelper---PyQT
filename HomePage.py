@@ -1,5 +1,6 @@
 from PySide2 import QtWidgets, QtCore
 from DialogWindows import TransactionWindow
+import Funs
 
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
@@ -80,10 +81,14 @@ class GroupBox(QtWidgets.QGroupBox):
             if wind.exec_():
                 instalments = wind.inputs['Instalments']
                 targetCatg = self.homepage.mainWin.DataBase.CategoryTable.readByName(wind.inputs["Category"])
-                targetAcc = self.homepage.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
+                targetCredit = self.homepage.mainWin.DataBase.AccountTable.readByUnique(2, self.comboBox.currentText())
+                targetDebit = self.homepage.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
+                accData = Funs.account_dictFromlist(targetCredit)
+                accData["Total"] = accData["Total"] - wind.inputs["Value"]
+                self.homepage.mainWin.DataBase.AccountTable.updateById(accData)
                 wind.inputs["Value"] = wind.inputs["Value"]/instalments
-                transInfo = {"Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
-                if targetAcc[1] == 2:
+                transInfo = {"Catg_ID":targetCatg[0], "Acc_ID":targetDebit[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
+                if targetDebit[1] == 2:
                     for iMonth in range(instalments):
                         instalmentInfo = transInfo.copy()
                         cardData = wind.inputs.copy()
@@ -100,7 +105,7 @@ class GroupBox(QtWidgets.QGroupBox):
                 self.homepage.mainWin.DataBase.ReGetValues()
                 self.homepage.mainWin.updateValuePlaces()
                 mayProceed = True
-            else: 
+            else:
                 mayProceed = True
 
     def UpdateValue(self):

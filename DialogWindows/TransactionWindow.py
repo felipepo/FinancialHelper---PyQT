@@ -2,7 +2,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 
 class Create(QtWidgets.QDialog):
     def __init__(self, parent,debitOptions,creditOptions,CAToptions, transData={}):
-        super().__init__(parent)
+        super().__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
         self.debitOptions = debitOptions
         self.creditOptions = creditOptions
         self.CAToptions = CAToptions
@@ -34,7 +34,7 @@ class Create(QtWidgets.QDialog):
         self.delButton = QtWidgets.QPushButton(self, objectName="delButton")
 
         ## Customization ==
-        self.accountCombo.addItems(self.debitOptions)        
+        self.accountCombo.addItems(self.debitOptions)
         self.categoryCombo.addItems(self.CAToptions)
 
         self.valueLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
@@ -75,7 +75,7 @@ class Create(QtWidgets.QDialog):
                 self.CCRadio.setChecked(True)
             if "Account" in transData:
                 self.accountCombo.setCurrentText(transData['Account'])
-        
+
         self.delButton.setIcon(QtGui.QIcon('Icons/EditTransfer.png'))
         self.delButton.setIconSize(QtCore.QSize(24,24))
         self.delButton.setMinimumSize(QtCore.QSize(24, 24))
@@ -141,7 +141,7 @@ class Create(QtWidgets.QDialog):
             self.inputs['Instalments'] = self.instalments.value()
             if self.debitRadio.isChecked():
                 self.inputs['AccType'] = 1
-            else: 
+            else:
                 self.inputs['AccType'] = 2
             if self.expenseRadio.isChecked():
                 self.inputs['Value'] = float("-" + self.valueEdit.text())

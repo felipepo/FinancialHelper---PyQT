@@ -9,7 +9,7 @@ if __name__ == "__main__":
     SimulateData = 2
     app = MainWindow.Create(SimulateData)
     app.show()
-    
+
     financHelper.exec_()
 
     #pyside2-uic mainwindow.ui > ui_mainwindow.py
