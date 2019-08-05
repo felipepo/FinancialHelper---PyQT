@@ -2,7 +2,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 
 class Create(QtWidgets.QDialog):
     def __init__(self, parent,debitOptions,creditOptions,CAToptions, transData={}):
-        super().__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super().__init__(parent)
         self.debitOptions = debitOptions
         self.creditOptions = creditOptions
         self.CAToptions = CAToptions

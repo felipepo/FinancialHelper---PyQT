@@ -20,25 +20,25 @@ class MenuBar(QtWidgets.QMenuBar):
             self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
             self.menuFile.addAction(self.button[button])
         self.addAction(self.menuFile.menuAction())
-        
+
         self.menuEdit = QtWidgets.QMenu(self, objectName="MenuEdit", title="Editar")
         for button in EditButtons:
             self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
             self.menuEdit.addAction(self.button[button])
         self.addAction(self.menuEdit.menuAction())
-        
+
         self.menuAcc = QtWidgets.QMenu(self, objectName="menuAcc", title="Contas")
         for button in AccButtons:
             self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
             self.menuAcc.addAction(self.button[button])
         self.addAction(self.menuAcc.menuAction())
-        
+
         self.menuTools = QtWidgets.QMenu(self, objectName="menuTools", title="Ferramentas")
         for button in ToolsButtons:
             self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
             self.menuTools.addAction(self.button[button])
         self.addAction(self.menuTools.menuAction())
-        
+
         ## Customization ==
         self.button["Novo"].triggered.connect(self.newDB)
         self.button["Categorias"].triggered.connect(self.configCategory)
@@ -50,7 +50,7 @@ class MenuBar(QtWidgets.QMenuBar):
         print("Saved")
         os.remove('InterfaceStyle/Style.qss')
         self.mainWin.initialize()
-    
+
     def configCategory(self):
         wind = CategoryWindow.Create(self.mainWin)
         if wind.exec_():
@@ -62,7 +62,7 @@ class MenuBar(QtWidgets.QMenuBar):
             if "RemoveData" in wind.inputs:
                 removedCatg = wind.inputs["RemoveData"]
                 self.mainWin.DataBase.RemoveCategory(removedCatg)
-                self.mainWin.styleObj.removeStyle(removedCatg)
+                self.mainWin.DataBase.CategoryTable.deleteByName(removedCatg)
             if "RenameData" in wind.inputs:
                 oldName = wind.inputs["RenameData"]['oldName']
                 newName = wind.inputs["RenameData"]['newName']

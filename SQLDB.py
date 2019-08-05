@@ -74,7 +74,7 @@ class Create():
             catgTotalUpdt = {"Catg_ID":transInfo["Catg_ID"], "Month":month, "Year":year, "Total":transInfo["Value"]+targetCategoryTotal[2]}
             self.CategoryTotalTable.updateByUnique(catgTotalUpdt)
         return newTransID
-    
+
     def UpdateTransaction(self, transInfo):
         targetTrans = self.ExtractTable.readById(transInfo["Trans_ID"])
         valueDiff = transInfo["Value"] - targetTrans[4]
@@ -121,8 +121,8 @@ class Create():
                     outrosTotal = Funs.catgTotal_dictFromlist(outrosTotal)
                     outrosTotal["Total"] = outrosTotal["Total"] + iCatg[2]
                     self.CategoryTotalTable.updateByUnique(outrosTotal)
-        
-        
+
+
     def create_table(self, create_table_sql):
         """ create a table from the create_table_sql statement
         """
@@ -137,16 +137,10 @@ class Create():
         self.conn.close()
         print("Closed Database")
 
-    def simulateData(self, nTrans=10, nAcc=10, nCatg=10):
+    def simulateData(self, nTrans=10, nAcc=10):
         for _ in range(nAcc):
             accInfo = Funs.generateAcc()
             self.AccountTable.insert(accInfo)
-
-        # Create categories
-        # catgInfo -> Name, Color
-        for _ in range(nCatg):
-            catgInfo = Funs.generateCatg()
-            self.CategoryTable.insert(catgInfo["Name"], catgInfo["Color"])
 
         Catg_ID_list = self.CategoryTable.get_ids()
         Acc_ID_list = self.AccountTable.get_ids()

@@ -1,6 +1,7 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 import Funs
 import Card
+import Plotting
 
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
@@ -11,18 +12,20 @@ class Create(QtWidgets.QWidget):
         ## Creation ==
         self.cardArea = Card.CardArea(self, 2)
         self.controlFrame = ControlFrame(self)
-        self.graphicsView = QtWidgets.QGraphicsView(self, objectName="graphicsView")
-        self.graphicsView.setMinimumSize(QtCore.QSize(0, 200))
-        self.graphicsView.setMaximumSize(QtCore.QSize(16777215, 500))
+        self.bar_chart = Plotting.BarChart(self, self.mainWin.DataBase)
+        self.bar_chart.createGraph(self.cardArea.card)
 
         ## Customization ==
-        
+
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        
-        self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 2)
+
+        self.gridLayout.addWidget(self.bar_chart, 0, 0, 1, 2)
         self.gridLayout.addWidget(self.cardArea, 1, 0, 1, 1)
         self.gridLayout.addWidget(self.controlFrame, 1, 1, 1, 1)
+
+    def updateGraph(self):
+        self.bar_chart.updateGraph(self.cardArea.card)
 
 class ControlFrame(QtWidgets.QFrame):
     def __init__(self, parent):
@@ -55,7 +58,7 @@ class SetValueGroup(QtWidgets.QGroupBox):
         self.setTitle("Cartão de Crédito")
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setObjectName("SetValueGroup")
-        
+
         ## Creation ==
         self.accName = QtWidgets.QLabel(self, text="Nome", objectName="NameLbl")
         self.nameDropDown = QtWidgets.QComboBox(self, objectName="nameDropDown")
@@ -68,14 +71,14 @@ class SetValueGroup(QtWidgets.QGroupBox):
         self.closingLbl = QtWidgets.QLabel(self, text="Fechamento", objectName="closingLbl")
         self.ClosingDay = QtWidgets.QLineEdit(self, placeholderText="00", alignment=QtCore.Qt.AlignCenter, objectName="ClosingDay")
         self.applyButton = QtWidgets.QPushButton(self, text="Aplicar", objectName="button2")
-        
+
         ## Customization ==
         self.applyButton.clicked.connect(self.SetFinalValue)
         options = self.controlFrame.creditPage.mainWin.DataBase.AllAccounts["credit"][:]
         self.nameDropDown.addItems(options)
         self.nameDropDown.currentIndexChanged.connect(self.UpdateEditBox)
         self.UpdateEditBox()
-        
+
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.finalValue.setSizePolicy(sizePolicy)
         self.nameDropDown.setSizePolicy(sizePolicy)
@@ -171,7 +174,7 @@ class FilterGroup(QtWidgets.QGroupBox):
         self.gridLayout.addWidget(self.categoryCombo, 1, 1, 1, 1)
         self.gridLayout.addWidget(self.applyFilter, 1, 5, 1, 1)
         # self.gridLayout.addItem(vertSpacerItem, 1, 0, 1, 1)
-    
+
     def addFilter(self, filterName="", options=[]):
         self.filter[filterName]=options
 

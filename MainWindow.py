@@ -67,19 +67,21 @@ class Create(QtWidgets.QMainWindow):
         self.resized.connect(self.accPage.cardArea.Reshape)
 
     def initialize(self):
-        if self.SimulateData == 1:
-            self.DataBase = SQLDB.Create(1)
-            self.DataBase.simulateData(nTrans=40, nAcc=10, nCatg=10)
-        else:
-            self.DataBase = SQLDB.Create(2)
-
-        firstRun = self.DataBase.CategoryTable.readAll()
-        if not firstRun:
+        self.DataBase = SQLDB.Create(self.SimulateData)
+        allCategories = {}
+        emptyTable = self.DataBase.CategoryTable.readAll()
+        if not emptyTable:
             defaultCatg = Funs.generateCatg(rand="off")
+            allCategories = defaultCatg
             for iCatg in list(defaultCatg.keys()):
                 self.DataBase.CategoryTable.insert(iCatg, defaultCatg[iCatg])
+            if self.SimulateData == 1:
+                self.DataBase.simulateData(nTrans=40, nAcc=10)
+        else:
+            for iRow in emptyTable:
+                allCategories[iRow[1]] = iRow[2]
 
-        self.styleObj = Style.Create(self.DataBase.CategoryTable)
+        self.styleObj = Style.Create(allCategories)
         self.setStyleSheet(self.styleObj.InterfaceStyle)
         self.setStyle(self.style())
 
@@ -97,6 +99,8 @@ class Create(QtWidgets.QMainWindow):
         self.homePage.creditGroupBox.UpdateValue()
         self.creditCardPage.controlFrame.setValueGroup.UpdateEditBox()
         self.accPage.controlFrame.filterGroup.getComboValues()
+        self.accPage.updateGraph()
+        self.creditCardPage.updateGraph()
 
 class SideFrame(QtWidgets.QFrame):
     def __init__(self, parent):

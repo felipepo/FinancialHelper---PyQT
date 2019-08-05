@@ -53,7 +53,7 @@ class Create():
 
     def removeStyle(self, styleName):
         # Remove in Category Class
-        self.allCategories.deleteByName(styleName)
+        pass
         # Remove in QSS
 
     def createStyle(self, stylesDict):
@@ -78,7 +78,6 @@ class Create():
 
     def defaultStyle(self):
         # Set the default style for the interface
-        defaultCatgs = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros", "Transferência")
         styleList =[]
         # QPushButton
         # QFrame
@@ -88,8 +87,8 @@ class Create():
         # QTabWidget
         # QStackedWidget
         # Category - Related
-        for iCategory in defaultCatgs:
-            color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        for iCategory in self.allCategories:
+            color = self.allCategories[iCategory]
             currCat = Funs.formatCategoryName(iCategory)
             styleList.append({
                 'selectorStr':["QFrame"],

@@ -21,13 +21,13 @@ def showdic(dict):
         print ('               ',dict[x])
         # for y in dict[x]:
         #     print ('               ',y,':',dict[x][y])
-   
+
 def formatCategoryName(name):
     return unidecode.unidecode(name.replace(' ', '_'))
 
 def testCategoryName(name):
     return "Not OK" if re.search(r"\.|\/|\&", name) else 'OK'
-#=========================================================================================     
+#=========================================================================================
 def AddTransaction(objAcc, category, value, date, comment, bankAccount):
     month, year = GetMY(date)
     objAcc.totalAmount += int(value)
@@ -86,12 +86,12 @@ def checkDate(date):
     datePattern = re.compile(r'[0-3]\d/[0-1]\d/\d{4}\Z')
     matched = datePattern.match(date)
     return matched
-    
+
 #=========================================================================================
 def createID():
     newID = binascii.b2a_hex(os.urandom(15))
     return newID
-    
+
 #=========================================================================================
 def debugAccounts(Accounts):
     print("===============================")
@@ -299,8 +299,17 @@ def account_dictFromlist(accountList):
     }
     return accDict
 
+def getHexFromRGB(rgbString):
+    rgbString = rgbString.replace('rgb','').replace('(','').replace(')','')
+    rgbSplit = rgbString.split(',')
+    red = int(rgbSplit[0])
+    green = int(rgbSplit[1])
+    blue = int(rgbSplit[2])
+    return '#{:02x}{:02x}{:02x}'.format( red, green , blue )
+
 if __name__ == "__main__":
-    print(testCategoryName('Cartão po'))
+    print(getHexFromRGB('rgb(100,100,100)'))
+    # print(testCategoryName('Cartão po'))
     # print(formatCategoryName('Remédio Cartão'))
     # sys.path.append("C:/Users/felip/AppData/Roaming/Python/Python37/Scripts")
     # for i in range(60):
