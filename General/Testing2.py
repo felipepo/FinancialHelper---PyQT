@@ -17,18 +17,18 @@ class MatplotlibWidget(FigureCanvas):
         self.figure = Figure()
         self.canvas = FigureCanvas(self.figure)
         self.axes = self.figure.add_subplot(111)
-        
+
         self.data = np.random.random((10,10))
-        
+
         self.data = np.zeros((10,10))
         self.data[2:3,:] = 1
         self.axes.imshow(self.data)
-        
+
     def Plot(self):
         self.data = np.random.random((10,10))
         self.axes.imshow(self.data)
 
-# the majority of the following class comes from using 'pyside-uic blah.ui'  
+# the majority of the following class comes from using 'pyside-uic blah.ui'
 # where blah.ui is a simple gui made in the qt designer
 
 class Ui_MainWindow(object):
@@ -67,7 +67,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        
+
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle("MainWindow")
         self.pushButton.setText("clickme")
@@ -81,18 +81,18 @@ class Ui_MainWindow(object):
     # the rest of this class was hand coded
         self.pushButton.clicked.connect(self.output)
         self.count = 0
-    
+
     def printoutput(self, event):
         sys.stdout.flush()
         print(self.widget.data[int(0.5+event.ydata), int(0.5+event.xdata)])
         sys.stdout.flush()
-        
+
     def output(self):
         print(ui.textEdit.toPlainText())
         self.count += 1
         self.widget.Plot()
         self.widget.draw()
-     
+
 try:
     app = QtWidgets.QApplication(sys.argv)
 except RuntimeError:
