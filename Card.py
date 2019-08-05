@@ -4,7 +4,7 @@ import math
 from DialogWindows import TransactionWindow
 
 class CardArea(QtWidgets.QScrollArea):
-    resized = QtCore.Signal()   
+    resized = QtCore.Signal()
     def __init__(self,parent, debitOrCredit):
         super().__init__(parent)
         self.parentPage = parent
@@ -30,7 +30,7 @@ class CardArea(QtWidgets.QScrollArea):
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.filters = {
             "Month": Funs.GetMonth(QtCore.QDate.currentDate().month()),
-            "Year": QtCore.QDate.currentDate().year(),
+            "Year": str(QtCore.QDate.currentDate().year()),
             "AccName": "Todas",
             "Category": "Todas"
         }
@@ -111,7 +111,7 @@ class CardArea(QtWidgets.QScrollArea):
     def UpdateArea(self):
         self.HideAllCards()
         self.ShowAllCards()
-    
+
     def HideAllCards(self):
         for iCard in list(self.card.keys()):
             self.card[iCard].hide()
@@ -124,14 +124,14 @@ class CardArea(QtWidgets.QScrollArea):
             self.gridLayout.addWidget(self.card[iCard],self.row, self.col, 1, 1)
             self.card[iCard].show()
             self.updatePosition()
-    
+
     def AddCard(self, transData, transID):
         if Funs.checkFilter(transData, self.filters):
             self.card[transID] = Card(self, transData, transID)
             self.card[transID].setObjectName(Funs.formatCategoryName(transData['Category']))
             self.gridLayout.addWidget(self.card[transID], self.row, self.col, 1, 1)
             self.updatePosition()
-    
+
     def Reshape(self):
         # Minimun - 700 (Card - 150 *4 = 600)
         currWidth = self.frameGeometry().width()
@@ -159,12 +159,12 @@ class Card(QtWidgets.QFrame):
         self.setFrameShadow(QtWidgets.QFrame.Raised)
 
         ## Creation ==
-        self.categoryLbl = QtWidgets.QLabel(self, text=self.category, objectName="categoryLbl")
-        self.valueLbl = QtWidgets.QLabel(self, text=str(self.value), objectName="valueLbl")
-        self.currencyLbl = QtWidgets.QLabel(self, text="R$", objectName="currencyLbl")
-        self.dateLbl = QtWidgets.QLabel(self, text=self.date, objectName="dateLbl")
-        self.commLbl = QtWidgets.QLabel(self, text=self.comment, objectName="commLbl")
-        self.accLbl = QtWidgets.QLabel(self, text=self.acc, objectName="accLbl")
+        self.categoryLbl = QtWidgets.QLabel(self, text=self.category, objectName="CardCategoryLbl")
+        self.valueLbl = QtWidgets.QLabel(self, text=str(self.value), objectName="CardPositive")
+        self.currencyLbl = QtWidgets.QLabel(self, text="R$", objectName="CardCurrencyLbl")
+        self.dateLbl = QtWidgets.QLabel(self, text=self.date, objectName="CardDateLbl")
+        self.commLbl = QtWidgets.QLabel(self, text=self.comment, objectName="CardCommentLbl")
+        self.accLbl = QtWidgets.QLabel(self, text=self.acc, objectName="CardBankLbl")
         self.editButton = QtWidgets.QPushButton(self, objectName="editButton")
 
         ## Customization ==
@@ -174,6 +174,8 @@ class Card(QtWidgets.QFrame):
         self.editButton.setMinimumSize(QtCore.QSize(24, 24))
         self.editButton.setMaximumSize(QtCore.QSize(24, 24))
 
+        if self.value < 0:
+            self.valueLbl.setObjectName("CardNegative")
         self.currencyLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.accLbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
 
@@ -216,16 +218,16 @@ class Card(QtWidgets.QFrame):
                     transInfo = {"Trans_ID":self.Id, "Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
                     updatedFlag = self.cardArea.parentPage.mainWin.DataBase.UpdateTransaction(transInfo)
                     if updatedFlag == 'OK':
-                        self.cardArea.parentPage.mainWin.DataBase.ReGetValues()  
+                        self.cardArea.parentPage.mainWin.DataBase.ReGetValues()
                         self.cardArea.parentPage.mainWin.updateValuePlaces()
                         mayProceed = True
-                        self.Update(wind.inputs)                  
+                        self.Update(wind.inputs)
                     else:
                         print('Problema na conta')
                 else:
                     self.cardArea.RemoveCardandTransaction(self.Id)
                     mayProceed = True
-            else: 
+            else:
                 mayProceed = True
 
     def Update(self, transData):

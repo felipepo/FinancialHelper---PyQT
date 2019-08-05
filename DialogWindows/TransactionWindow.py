@@ -73,7 +73,8 @@ class Create(QtWidgets.QDialog):
                 self.debitRadio.setChecked(True)
             else:
                 self.CCRadio.setChecked(True)
-            self.accountCombo.setCurrentText(transData['Account'])
+            if "Account" in transData:
+                self.accountCombo.setCurrentText(transData['Account'])
         
         self.delButton.setIcon(QtGui.QIcon('Icons/EditTransfer.png'))
         self.delButton.setIconSize(QtCore.QSize(24,24))

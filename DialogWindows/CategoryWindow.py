@@ -40,9 +40,9 @@ class Create(QtWidgets.QDialog):
         self.exitButton.clicked.connect(self.CloseWindow)
         self.apllyButton.clicked.connect(self.Apply)
 
-        ## Layout == 
+        ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        
+
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 3)
         self.gridLayout.addItem(spacerItem, 1, 0, 1, 1)
         self.gridLayout.addWidget(self.apllyButton, 1, 1, 1, 1)
@@ -59,7 +59,7 @@ class Create(QtWidgets.QDialog):
                 self.inputs["RemoveData"] = self.removeTab.catCombo.currentText()
 
         if mayProceed:
-            # Edit category color 
+            # Edit category color
             self.inputs["EditData"] = self.styleSTR
 
             # Append new Category
@@ -84,7 +84,7 @@ class Create(QtWidgets.QDialog):
 class AddTab(QtWidgets.QWidget):
     def __init__(self, parent):
         super().__init__()
-        self.setObjectName('AddTab')        
+        self.setObjectName('AddTab')
         ## Initialization ==
         self.rgb = ''
         self.cardWidth = 300
@@ -94,7 +94,7 @@ class AddTab(QtWidgets.QWidget):
         self.newEntry = QtWidgets.QLineEdit(self, objectName="newEntry")
         self.colorLbl = QtWidgets.QLabel(self, objectName="colorLbl", text="Cor")
         self.showColor = QtWidgets.QLabel(self, objectName="-")
-        templateData = {'Category':'','Value':'00.0','Date':'10/10/2010','Comment':'Template', 'AccName':'Conta', 'AccType':1}
+        templateData = {'Category':'','Value':00.0,'Date':'10/10/2010','Comment':'Template', 'AccName':'Conta', 'AccType':1}
         self.cardTemplate = Card.Card(self, templateData, 'Template')
 
         ## Customization ==
@@ -108,7 +108,7 @@ class AddTab(QtWidgets.QWidget):
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-        
+
         self.gridLayout.addWidget(self.catLbl, 0, 0, 1, 2)
         self.gridLayout.addWidget(self.newEntry, 1, 0, 1, 3)
         self.gridLayout.addWidget(self.colorLbl, 2, 0, 1, 1)
@@ -119,7 +119,7 @@ class AddTab(QtWidgets.QWidget):
         self.cardTemplate.categoryLbl.setText(self.newEntry.text())
         if Funs.testCategoryName(self.newEntry.text()) == "Not OK":
             print('Chars ".", "/" and "&" are not accepted!')
-        
+
     def GetColor(self, *args):
         color = QtWidgets.QColorDialog.getColor()
         if color.isValid():
@@ -172,8 +172,8 @@ class RemoveTab(QtWidgets.QWidget):
         self.verticalLayout.addWidget(self.catLbl)
         self.verticalLayout.addWidget(self.catCombo)
         self.verticalLayout.addItem(spacerItem)
-        
-        
+
+
 class RenameTab(QtWidgets.QWidget):
     def __init__(self, parent):
         super().__init__()
@@ -198,7 +198,7 @@ class RenameTab(QtWidgets.QWidget):
         self.verticalLayout.addWidget(self.newNameLbl)
         self.verticalLayout.addWidget(self.newEntry)
         self.verticalLayout.addItem(spacerItem)
-        
+
 class EditTab(QtWidgets.QWidget):
     def __init__(self, parent):
         super().__init__()
@@ -211,7 +211,7 @@ class EditTab(QtWidgets.QWidget):
         self.catCombo = QtWidgets.QComboBox(self, objectName="catCombo")
         self.colorLbl = QtWidgets.QLabel(self, objectName="colorLbl", text="Cor")
         self.showColor = QtWidgets.QLabel(self)
-        templateData = {'Category':'','Value':'00.0','Date':'10/10/2010','Comment':'Template', 'AccName':'Conta', 'AccType':1}
+        templateData = {'Category':'','Value':00.0,'Date':'10/10/2010','Comment':'Template', 'AccName':'Conta', 'AccType':1}
         self.cardTemplate = Card.Card(self, templateData, 'Template')
 
         ## Customization ==
@@ -229,7 +229,7 @@ class EditTab(QtWidgets.QWidget):
 
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
-                
+
         self.gridLayout.addWidget(self.catLbl, 0, 0, 1, 3)
         self.gridLayout.addWidget(self.catCombo, 1, 0, 1, 3)
         self.gridLayout.addWidget(self.colorLbl, 2, 0, 1, 1)
@@ -252,6 +252,6 @@ class EditTab(QtWidgets.QWidget):
         self.cardTemplate.categoryLbl.setText(self.catCombo.currentText())
         self.cardTemplate.setObjectName(Funs.formatCategoryName(self.catCombo.currentText()))
         self.cardTemplate.setStyle(self.cardTemplate.style())
-        
+
         self.showColor.setObjectName('Color'+Funs.formatCategoryName(self.catCombo.currentText()))
         self.showColor.setStyle(self.cardTemplate.style())

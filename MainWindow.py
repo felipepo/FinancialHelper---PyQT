@@ -10,7 +10,7 @@ from InterfaceStyle import Style
 
 class Create(QtWidgets.QMainWindow):
     ## Signals ==
-    resized = QtCore.Signal()       
+    resized = QtCore.Signal()
     def __init__(self, SimulateData):
         ## Initialization ==
         super().__init__()
@@ -25,9 +25,9 @@ class Create(QtWidgets.QMainWindow):
         self.SimulateData = SimulateData
 
         self.initialize()
-        ## Creation ==      
+        ## Creation ==
         self.centralwidget = QtWidgets.QWidget(self, objectName="centralwidget", styleSheet="")
-        self.showHideSide = QtWidgets.QPushButton(self.centralwidget, text="<<", objectName="showHideSide")
+        self.showHideSide = HideShowButton(self)
         self.stackFrame = QtWidgets.QStackedWidget(self.centralwidget, objectName="stackFrame", styleSheet="")
         self.sideFrame = SideFrame(self)
         self.statusbar = QtWidgets.QStatusBar(self, objectName="statusbar")
@@ -50,14 +50,6 @@ class Create(QtWidgets.QMainWindow):
         self.setStatusBar(self.statusbar)
         self.setMenuBar(self.menubar)
 
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.showHideSide.sizePolicy().hasHeightForWidth())
-        self.showHideSide.setSizePolicy(sizePolicy)
-        self.showHideSide.setMaximumSize(QtCore.QSize(20, 16777215))
-        self.showHideSide.clicked.connect(self.showHide)
-
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -67,7 +59,7 @@ class Create(QtWidgets.QMainWindow):
         ## Layout ==
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget, objectName="gridLayout", spacing=0)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        
+
         self.gridLayout.addWidget(self.showHideSide, 0, 1, 1, 1)
         self.gridLayout.addWidget(self.stackFrame, 0, 2, 1, 1)
         self.gridLayout.addWidget(self.sideFrame, 0, 0, 1, 1)
@@ -86,19 +78,10 @@ class Create(QtWidgets.QMainWindow):
             defaultCatg = Funs.generateCatg(rand="off")
             for iCatg in list(defaultCatg.keys()):
                 self.DataBase.CategoryTable.insert(iCatg, defaultCatg[iCatg])
-            
+
         self.styleObj = Style.Create(self.DataBase.CategoryTable)
         self.setStyleSheet(self.styleObj.InterfaceStyle)
         self.setStyle(self.style())
-        
-    def showHide(self):
-        currText = self.showHideSide.text()
-        if currText == "<<":
-            self.showHideSide.setText('>>')
-            self.sideFrame.hide()
-        else:
-            self.showHideSide.setText('<<')
-            self.sideFrame.show()
 
     def resizeEvent(self, event):
         self.resized.emit()
@@ -131,8 +114,8 @@ class SideFrame(QtWidgets.QFrame):
         self.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.setFrameShadow(QtWidgets.QFrame.Raised)
         self.button = {}
-        sideButtons = {"AccPageButton": "Contas", "CCPageButton": "Cartões de Crédito", 
-        "BudgetPageButton": "Orçamento", "TablesPageButton": "Tabelas", 
+        sideButtons = {"AccPageButton": "Contas", "CCPageButton": "Cartões de Crédito",
+        "BudgetPageButton": "Orçamento", "TablesPageButton": "Tabelas",
         "InvestPageButton": "Investimentos Geral", "BondsPageButton": "Renda Fixa", "StocksPageButton": "Ações"}
 
         ## Creation ==
@@ -150,15 +133,38 @@ class SideFrame(QtWidgets.QFrame):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
 
         self.verticalLayout.addItem(spacerItem)
-        
+
 class SideButton(QtWidgets.QPushButton):
     def __init__(self, pageNumber, parent, text = ""):
         super().__init__(parent)
         self.mainWin = parent
         self.pageNumber = pageNumber
-        self.setObjectName = "SideButton"
+        self.setObjectName("SideButton")
         self.setText(text)
         self.clicked.connect(self.goTo)
-        
+
     def goTo(self):
         self.mainWin.stackFrame.setCurrentIndex(self.pageNumber)
+
+class HideShowButton(QtWidgets.QPushButton):
+    def __init__(self, parent):
+        super().__init__(parent.centralwidget)
+        self.parent = parent
+        self.setText("<<")
+
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
+        self.setMaximumSize(QtCore.QSize(20, 16777215))
+        self.clicked.connect(self.showHide)
+
+    def showHide(self):
+        currText = self.text()
+        if currText == "<<":
+            self.setText('>>')
+            self.parent.sideFrame.hide()
+        else:
+            self.setText('<<')
+            self.parent.sideFrame.show()

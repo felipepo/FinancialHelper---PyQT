@@ -1,4 +1,5 @@
 from PySide2 import QtWidgets, QtCore
+from DialogWindows import TransactionWindow
 
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
@@ -47,6 +48,9 @@ class GroupBox(QtWidgets.QGroupBox):
             options = self.homepage.mainWin.DataBase.AllAccounts["debit"][:]
         else:
             options = self.homepage.mainWin.DataBase.AllAccounts["credit"][:]
+            self.payBill = QtWidgets.QPushButton(self,objectName="Button", text="Pagar Fatura")
+            self.payBill.clicked.connect(self.payCurrentBill)
+            self.gridLayout.addWidget(self.payBill, 3,1,1,1)
 
         options.insert(0,"Todas")
         self.comboBox.addItems(options)
@@ -58,6 +62,46 @@ class GroupBox(QtWidgets.QGroupBox):
         self.gridLayout.addWidget(self.comboBox, 0, 1, 1, 1)
         self.gridLayout.addWidget(self.valueLbl, 1, 1, 1, 1)
         self.gridLayout.addWidget(self.currencyLbl, 1, 0, 1, 1)
+
+    def payCurrentBill(self):
+        mayProceed = False
+        while mayProceed == False:
+            debitOptions = self.homepage.mainWin.DataBase.AllAccounts["debit"]
+            creditOptions = self.homepage.mainWin.DataBase.AllAccounts["credit"]
+            catgOptions = self.homepage.mainWin.DataBase.AllCategories
+            prevTransData = {
+                'Value': float(self.valueLbl.text()),
+                'Comment': "Pagamento Cartão " + self.comboBox.currentText(),
+                'Category': "Outros",
+                'AccType': 1,
+                'Date': QtCore.QDate.currentDate().toString('dd/MM/yyyy')
+            }
+            wind = TransactionWindow.Create(self, debitOptions, creditOptions, catgOptions, prevTransData)
+            if wind.exec_():
+                instalments = wind.inputs['Instalments']
+                targetCatg = self.homepage.mainWin.DataBase.CategoryTable.readByName(wind.inputs["Category"])
+                targetAcc = self.homepage.mainWin.DataBase.AccountTable.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
+                wind.inputs["Value"] = wind.inputs["Value"]/instalments
+                transInfo = {"Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
+                if targetAcc[1] == 2:
+                    for iMonth in range(instalments):
+                        instalmentInfo = transInfo.copy()
+                        cardData = wind.inputs.copy()
+                        if instalments > 1:
+                            instalmentInfo["Comment"] = '(' + str(iMonth+1) + '/' + str(instalments) + ') ' + instalmentInfo["Comment"]
+                            instalmentInfo["Date"] = QtCore.QDate.fromString(instalmentInfo["Date"], 'dd/MM/yyyy').addDays((iMonth)*30).toString('dd/MM/yyyy')
+                        transID = self.homepage.mainWin.DataBase.NewTransaction(instalmentInfo)
+                        cardData["Comment"] = instalmentInfo["Comment"]
+                        cardData["Date"] = instalmentInfo["Date"]
+                        self.homepage.mainWin.creditCardPage.cardArea.AddCard(cardData, transID)
+                else:
+                    transID = self.homepage.mainWin.DataBase.NewTransaction(transInfo)
+                    self.homepage.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
+                self.homepage.mainWin.DataBase.ReGetValues()
+                self.homepage.mainWin.updateValuePlaces()
+                mayProceed = True
+            else: 
+                mayProceed = True
 
     def UpdateValue(self):
         acc = self.comboBox.currentText()

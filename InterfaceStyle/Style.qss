@@ -1,77 +1,99 @@
 QFrame#Feira {
-    background-color: rgb(67, 129, 138);
+    background-color: rgb(254, 59, 194);
 }
 QLabel#ColorFeira {
-    background-color: rgb(67, 129, 138);
+    background-color: rgb(254, 59, 194);
     border: 2px solid black;
 }
 QFrame#Transporte {
-    background-color: rgb(129, 156, 168);
+    background-color: rgb(91, 251, 33);
 }
 QLabel#ColorTransporte {
-    background-color: rgb(129, 156, 168);
+    background-color: rgb(91, 251, 33);
     border: 2px solid black;
 }
 QFrame#Remedio {
-    background-color: rgb(175, 123, 6);
+    background-color: rgb(223, 17, 173);
 }
 QLabel#ColorRemedio {
-    background-color: rgb(175, 123, 6);
+    background-color: rgb(223, 17, 173);
     border: 2px solid black;
 }
 QFrame#Academia {
-    background-color: rgb(14, 231, 31);
+    background-color: rgb(63, 164, 174);
 }
 QLabel#ColorAcademia {
-    background-color: rgb(14, 231, 31);
+    background-color: rgb(63, 164, 174);
     border: 2px solid black;
 }
 QFrame#Aluguel {
-    background-color: rgb(79, 36, 178);
+    background-color: rgb(252, 192, 184);
 }
 QLabel#ColorAluguel {
-    background-color: rgb(79, 36, 178);
+    background-color: rgb(252, 192, 184);
     border: 2px solid black;
 }
 QFrame#Condominio {
-    background-color: rgb(32, 15, 168);
+    background-color: rgb(22, 197, 224);
 }
 QLabel#ColorCondominio {
-    background-color: rgb(32, 15, 168);
+    background-color: rgb(22, 197, 224);
     border: 2px solid black;
 }
 QFrame#Telefone {
-    background-color: rgb(17, 22, 109);
+    background-color: rgb(179, 69, 49);
 }
 QLabel#ColorTelefone {
-    background-color: rgb(17, 22, 109);
+    background-color: rgb(179, 69, 49);
     border: 2px solid black;
 }
 QFrame#Internet {
-    background-color: rgb(191, 165, 45);
+    background-color: rgb(113, 103, 22);
 }
 QLabel#ColorInternet {
-    background-color: rgb(191, 165, 45);
+    background-color: rgb(113, 103, 22);
     border: 2px solid black;
 }
 QFrame#Luz {
-    background-color: rgb(49, 40, 85);
+    background-color: rgb(237, 13, 223);
 }
 QLabel#ColorLuz {
-    background-color: rgb(49, 40, 85);
+    background-color: rgb(237, 13, 223);
     border: 2px solid black;
 }
 QFrame#Outros {
-    background-color: rgb(191, 160, 45);
+    background-color: rgb(196, 103, 74);
 }
 QLabel#ColorOutros {
-    background-color: rgb(191, 160, 45);
+    background-color: rgb(196, 103, 74);
     border: 2px solid black;
 }
 QFrame#Transferencia {
-    background-color: rgb(197, 108, 251);
+    background-color: rgb(2, 90, 171);
 }
 QLabel#ColorTransferencia {
-    background-color: rgb(197, 108, 251);
+    background-color: rgb(2, 90, 171);
     border: 2px solid black;
+}
+QLabel#CardCategoryLbl {
+    font: 63 7pt "Segoe UI Semibold";;
+}
+QLabel#CardDateLbl {
+    font-style: italic;
+}
+QLabel#CardCurrencyLbl {
+    font-weight: bold;
+}
+QLabel#CardCommentLbl {
+    text-decoration: underline;
+}
+QLabel#CardBankLbl {
+    font-family: Times New Roman;
+}
+QLabel#CardPositive {
+    color: green;
+    font-weight: bold;
+}
+QLabel#CardNegative {
+    color: red;
 }

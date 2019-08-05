@@ -1,5 +1,6 @@
 import Funs
 import random
+from InterfaceStyle import CardStyle
 # import os.path
 # QssExist = os.path.exists("InterfaceStyle/Style.qss")
 
@@ -25,7 +26,7 @@ class Create():
             self.readQSS()
         except:
             self.createQSS()
-        
+
     def readQSS(self):
         with open(self.styleFile,"r") as fh:
             self.InterfaceStyle = fh.read()
@@ -86,19 +87,19 @@ class Create():
         # QComboBox
         # QTabWidget
         # QStackedWidget
-        # Card    
+        # Category - Related
         for iCategory in defaultCatgs:
             color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
             currCat = Funs.formatCategoryName(iCategory)
             styleList.append({
                 'selectorStr':["QFrame"],
                 'idStr':[currCat],
-                'classStr':["", ''],
-                'descendantStr':["", ''],
-                'childStr':["", ''],
-                'propStr':[{}, {}],
+                'classStr':[""],
+                'descendantStr':[""],
+                'childStr':[""],
+                'propStr':[{}],
                 'propertyDic':{'background-color':color}
-            })    
+            })
             styleList.append({
                 'selectorStr':["QLabel"],
                 'idStr':['Color'+currCat],
@@ -107,8 +108,8 @@ class Create():
                 'childStr':[""],
                 'propStr':[{}],
                 'propertyDic':{'background-color':color, "border":"2px solid black"}
-            }) 
-
+            })
+        styleList = styleList + CardStyle.cardappearence()
         return styleList
 
     def getStyle(self, selectorStr="", idStr="", classStr="", descendantStr="", childStr="", propStr={}, propertyDic={}):
@@ -131,7 +132,7 @@ class Create():
         childStr = stylesDict['childStr']
         propStr = stylesDict['propStr']
 
-        for iWidget in range(len(selectorStr)):            
+        for iWidget in range(len(selectorStr)):
             particularSelector = 'selectorStridStrclassStrpropStr'
             if idStr[iWidget]:
                 idStr[iWidget] = "#" + idStr[iWidget]
@@ -152,9 +153,9 @@ class Create():
 
             replaces = ('selectorStr', 'idStr', 'classStr', 'propStr')
             repValues = {
-                'selectorStr':selectorStr[iWidget], 
-                'idStr':idStr[iWidget], 
-                'classStr':classStr[iWidget], 
+                'selectorStr':selectorStr[iWidget],
+                'idStr':idStr[iWidget],
+                'classStr':classStr[iWidget],
                 'propStr':propStr[iWidget]}
 
             for iRep in replaces:
