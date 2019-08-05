@@ -1,6 +1,7 @@
 from PySide2 import QtWidgets, QtCore
 from DialogWindows import TransactionWindow
 import Funs
+import Plotting
 
 class Create(QtWidgets.QWidget):
     def __init__(self, parent):
@@ -15,7 +16,8 @@ class Create(QtWidgets.QWidget):
         self.debitGroupBox = GroupBox(self, "Conta")
         self.creditGroupBox = GroupBox(self, "Cartão de Crédito")
         self.budgetGroupBox = BudgetGroupBox(self, "Orçamento")
-        self.graphicsView = QtWidgets.QGraphicsView(self, objectName="graphicsView")
+        self.bar_chart = Plotting.BarChart(self, self.mainWin.DataBase)
+        self.bar_chart.createGraph()
 
         ## Customization ==
         self.debitGroupBox.setObjectName("debitGroupBox")
@@ -25,7 +27,7 @@ class Create(QtWidgets.QWidget):
         ## Layout ==
         self.gridLayout.addWidget(self.debitGroupBox, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.creditGroupBox, 1, 0, 1, 1)
-        self.gridLayout.addWidget(self.graphicsView, 0, 1, 2, 5)
+        self.gridLayout.addWidget(self.bar_chart, 0, 1, 2, 5)
         self.gridLayout.addWidget(self.budgetGroupBox, 2, 0, 1, 3)
         self.gridLayout.addWidget(self.payGroupBox, 2, 3, 1, 3)
 

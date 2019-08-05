@@ -6,7 +6,7 @@ import MainWindow
 if __name__ == "__main__":
     financHelper = QtWidgets.QApplication([])
 
-    SimulateData = 1
+    SimulateData = 2
     app = MainWindow.Create(SimulateData)
     app.show()
 
