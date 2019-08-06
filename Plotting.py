@@ -14,10 +14,8 @@ class BarChart(FigureCanvas):
         self.DataBase = DataBase
         self.bar_chart = self.figure.subplots()
         allCat = DataBase.CategoryTable.readAll()
-        self.catgColors = {}
         self.graphData = {}
-        for iCatg in allCat:
-            self.catgColors[iCatg[1]] = iCatg[2]
+        self.catgColors = dict( [(iCatg[1], iCatg[2]) for iCatg in allCat] )
 
     def fomartGraph(self, categories):
         self.bar_chart.grid(True)
@@ -76,8 +74,7 @@ class BarChart(FigureCanvas):
         self.bar_chart.clear()
 
     def buttonPush(self):
-        for i in self.graphData:
-            self.graphData[i] = self.graphData[i] + 1
+        self.graphData = dict( [(data, self.graphData[data] + 1) for data in self.graphData] )
         print(self.graphData)
         self.clearGraph()
         self.displayData()
@@ -89,6 +86,7 @@ if __name__ == "__main__":
     app = QtWidgets.QFrame()
     DataBase = SQLDB.Create(2)
 
+    a = DataBase.ExtractTable.readAll()
     # Month CHART -----------------------
     # Bar Chart - Value x Categories
     chart = BarChart(app, DataBase)

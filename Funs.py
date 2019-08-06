@@ -27,20 +27,16 @@ def formatCategoryName(name):
 
 def testCategoryName(name):
     return "Not OK" if re.search(r"\.|\/|\&", name) else 'OK'
-#=========================================================================================
-def AddTransaction(objAcc, category, value, date, comment, bankAccount):
-    month, year = GetMY(date)
-    objAcc.totalAmount += int(value)
-    objAcc.transactions["trans"+str(len(objAcc.transactions))] = {
-            "Category": category,
-            "Value": value,
-            "Date": date,
-            "Comment": comment,
-            "BankAccount": bankAccount,
-            "Month": month,
-            "Year": year
-        }
 
+def shift(input):
+
+    # slice string in two parts for left and right
+    dotPost = input.index('.') + 1
+    input = input.replace('.','')
+    result =  '{}.{}'.format(input[:dotPost], input[dotPost:])
+    if result[0] == '0':
+        result = result[1:]
+    return result
 #=========================================================================================
 def GetMY(date):
     months = ("Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro")
@@ -58,27 +54,12 @@ def GetMonth(month):
         return result[month]
 
 #=========================================================================================
-def saveData(fileName, data):
-    path = "DataBase/" + fileName
-    outfile = open(path, "wb")
-    pickle.dump(data,outfile)
-    outfile.close()
-
-#=========================================================================================
-def loadData(fileName):
-    path = "DataBase/" + fileName
-    infile = open(path, "rb")
-    loadedData = pickle.load(infile)
-    infile.close()
-    return loadedData
-
-#=========================================================================================
 def getDate():
     clk = list(time.localtime())
     day = "0" + str(clk[2]) if len(str(clk[2])) == 1 else str(clk[2])
     month = "0" + str(clk[1]) if len(str(clk[1])) == 1 else str(clk[1])
     year = str(clk[0])
-    dateVal = day + "/" + month + "/" +  year
+    dateVal = "{}/{}/{}".format(day, month, year)
     return dateVal
 
 #=========================================================================================
@@ -91,85 +72,6 @@ def checkDate(date):
 def createID():
     newID = binascii.b2a_hex(os.urandom(15))
     return newID
-
-#=========================================================================================
-def debugAccounts(Accounts):
-    print("===============================")
-    print("CONTAS")
-    for acc in Accounts.accountsObjs:
-        print("-----")
-        print(acc)
-        print(Accounts.accountsObjs[acc].totalAmount)
-        value = ""
-        category = ""
-        date = ""
-        count = 0
-        print("                Transactions")
-        for trans in Accounts.accountsObjs[acc].transactions:
-            count = count + 1
-            if count == 15:
-                count = 0
-                print(value)
-                print(date)
-                print(category)
-                print("")
-                value = ""
-                category = ""
-                date = ""
-            currValue = str(Accounts.accountsObjs[acc].transactions[trans].value)
-            currCat = Accounts.accountsObjs[acc].transactions[trans].category
-            currDate = Accounts.accountsObjs[acc].transactions[trans].date
-            value = value + currValue + getSpace(currValue)
-            category = category + currCat + getSpace(currCat)
-            date = date + currDate + getSpace(currDate)
-            #except:
-            #    print("None")
-        print(value)
-        print(date)
-        print(category)
-    print("===============================")
-    print("Cartão de Crédito")
-    for acc in Accounts.creditCardObjs:
-        print("-----")
-        print(acc)
-        print(Accounts.creditCardObjs[acc].totalAmount)
-        print(Accounts.creditCardObjs[acc].dueDay)
-        print(Accounts.creditCardObjs[acc].closingDay)
-        value = ""
-        category = ""
-        date = ""
-        count = 0
-        print("                Transactions")
-        for trans in Accounts.creditCardObjs[acc].transactions:
-            #try:
-            count = count + 1
-            if count == 15:
-                count = 0
-                print(value)
-                print(date)
-                print(category)
-                print("")
-                value = ""
-                category = ""
-                date = ""
-            currValue = str(Accounts.creditCardObjs[acc].transactions[trans].value)
-            currCat = Accounts.creditCardObjs[acc].transactions[trans].category
-            currDate = Accounts.creditCardObjs[acc].transactions[trans].date
-            value = value + currValue + getSpace(currValue)
-            category = category + currCat + getSpace(currCat)
-            date = date + currDate + getSpace(currDate)
-            #except:
-            #    print("None")
-        print(value)
-        print(date)
-        print(category)
-
-def getSpace(targetStr):
-    length = len(targetStr)
-    spaces = ""
-    while len(spaces) < 15-length:
-        spaces = spaces + " "
-    return spaces
 
 def generateCatg(rand="on"):
     catgData = {}
@@ -236,7 +138,7 @@ def generateTrans(Catg_ID_list, Acc_ID_list):
         day = random.randint(1,31)
     else:
         day = random.randint(1,30)
-    date = str(day)+"/"+str(month)+"/"+str(year)
+    date = "{}/{}/{}".format(day, month, year)
     transData={
         'Catg_ID': random.choice(Catg_ID_list),
         'Acc_ID': random.choice(Acc_ID_list),

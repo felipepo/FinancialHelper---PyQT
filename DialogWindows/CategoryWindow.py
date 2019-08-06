@@ -123,8 +123,8 @@ class AddTab(QtWidgets.QWidget):
     def GetColor(self, *args):
         color = QtWidgets.QColorDialog.getColor()
         if color.isValid():
-            rgb =  'rgb('+str(color.red())+', '+str(color.green())+', '+str(color.blue())+')'
-            backRGB = 'background-color: '+rgb
+            rgb = 'rgb({}, {}, {})'.format(color.red(), color.green(), color.blue())
+            backRGB = 'background-color: {}'.format(rgb)
             self.showColor.setStyleSheet(backRGB)
             self.cardTemplate.setStyleSheet(backRGB)
             self.rgb = rgb
@@ -239,11 +239,11 @@ class EditTab(QtWidgets.QWidget):
     def GetColor(self, *args):
         prevColor = self.showColor.palette().color(QtGui.QPalette.Base)
         color = QtWidgets.QColorDialog.getColor()
-        prevRgb =  'rgb('+str(prevColor.red())+', '+str(prevColor.green())+', '+str(prevColor.blue())+')'
-        prevBackRGB = 'background-color: '+prevRgb
+        prevRgb = 'rgb({}, {}, {})'.format(prevColor.red(), prevColor.green(), prevColor.blue())
+        prevBackRGB = 'background-color: {}'.format(prevRgb)
         if color.isValid():
-            rgb =  'rgb('+str(color.red())+', '+str(color.green())+', '+str(color.blue())+')'
-            backRGB = 'background-color: '+rgb
+            rgb = 'rgb({}, {}, {})'.format(color.red(), color.green(), color.blue())
+            backRGB = 'background-color: {}'.format(rgb)
             self.parent.styleSTR = self.parent.styleSTR.replace(prevBackRGB,backRGB)
             self.parent.setStyleSheet(self.parent.styleSTR)
             self.UpdateTemplate()

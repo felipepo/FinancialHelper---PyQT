@@ -74,7 +74,7 @@ class GroupBox(QtWidgets.QGroupBox):
             catgOptions = self.homepage.mainWin.DataBase.AllCategories
             prevTransData = {
                 'Value': float(self.valueLbl.text()),
-                'Comment': "Pagamento Cartão " + self.comboBox.currentText(),
+                'Comment': "Pagamento Cartão {}".format(self.comboBox.currentText()),
                 'Category': "Outros",
                 'AccType': 1,
                 'Date': QtCore.QDate.currentDate().toString('dd/MM/yyyy')
@@ -95,7 +95,7 @@ class GroupBox(QtWidgets.QGroupBox):
                         instalmentInfo = transInfo.copy()
                         cardData = wind.inputs.copy()
                         if instalments > 1:
-                            instalmentInfo["Comment"] = '(' + str(iMonth+1) + '/' + str(instalments) + ') ' + instalmentInfo["Comment"]
+                            instalmentInfo["Comment"] = '({}/{}) {}'.format(iMonth+1, instalments, instalmentInfo["Comment"])
                             instalmentInfo["Date"] = QtCore.QDate.fromString(instalmentInfo["Date"], 'dd/MM/yyyy').addDays((iMonth)*30).toString('dd/MM/yyyy')
                         transID = self.homepage.mainWin.DataBase.NewTransaction(instalmentInfo)
                         cardData["Comment"] = instalmentInfo["Comment"]

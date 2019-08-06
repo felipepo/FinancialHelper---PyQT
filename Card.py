@@ -52,12 +52,14 @@ class CardArea(QtWidgets.QScrollArea):
             if "DELETED" not in currAcc[2]:
                 if currAcc[1] == self.debitOrCredit:
                     currCatg = self.parentPage.mainWin.DataBase.CategoryTable.readById(iTrans[1])
-                    transData["Category"] = currCatg[1]
-                    transData["AccName"] = currAcc[2]
-                    transData["Date"] = iTrans[3]
-                    transData["Value"] = iTrans[4]
-                    transData["Comment"] = iTrans[5]
-                    transData["AccType"] = currAcc[1]
+                    transData = {
+                        "Category": currCatg[1],
+                        "AccName": currAcc[2],
+                        "Date": iTrans[3],
+                        "Value": iTrans[4],
+                        "Comment": iTrans[5],
+                        "AccType": currAcc[1],
+                    }
                     self.AddCard(transData, iTrans[0])
 
     def resizeEvent(self, event):
@@ -205,7 +207,7 @@ class Card(QtWidgets.QFrame):
             prevTransData = {
                 'Value': float(self.value),
                 'Comment': self.comment,
-                'Account': self.acc,
+                'AccName': self.acc,
                 'Category': self.category,
                 'AccType': self.type,
                 'Date': self.date

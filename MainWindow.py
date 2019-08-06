@@ -78,8 +78,7 @@ class Create(QtWidgets.QMainWindow):
             if self.SimulateData == 1:
                 self.DataBase.simulateData(nTrans=40, nAcc=10)
         else:
-            for iRow in emptyTable:
-                allCategories[iRow[1]] = iRow[2]
+            allCategories = dict( [(iRow[1], iRow[2]) for iRow in emptyTable] )
 
         self.styleObj = Style.Create(allCategories)
         self.setStyleSheet(self.styleObj.InterfaceStyle)

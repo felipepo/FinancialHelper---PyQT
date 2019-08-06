@@ -11,6 +11,7 @@ class Create(QtWidgets.QDialog):
         self.setObjectName("Dialog")
         self.resize(391, 232)
         self.inputs = {}
+        self.count_change = 0
 
         ## Creation ==
         self.valueLbl = QtWidgets.QLabel(self, text="Valor", objectName="valueLbl")
@@ -18,7 +19,7 @@ class Create(QtWidgets.QDialog):
         self.dateLbl = QtWidgets.QLabel(self, text="Data", objectName="dateLbl")
         self.commentLbl = QtWidgets.QLabel(self, text="Comentário", objectName="commentLbl")
         self.accLbl = QtWidgets.QLabel(self, text="Fonte/Destino", objectName="accLbl")
-        self.valueEdit = QtWidgets.QLineEdit(self, placeholderText="00.0", alignment=QtCore.Qt.AlignCenter, objectName="valueEdit")
+        self.valueEdit = QtWidgets.QLineEdit(self, placeholderText="00.00", alignment=QtCore.Qt.AlignCenter, objectName="valueEdit", text="00.00")
         self.categoryCombo = QtWidgets.QComboBox(self, objectName="categoryCombo")
         self.dateEdit = QtWidgets.QDateEdit(self, date=QtCore.QDate.currentDate(), objectName="dateEdit")
         self.accountCombo = QtWidgets.QComboBox(self, objectName="accountCombo")
@@ -36,6 +37,7 @@ class Create(QtWidgets.QDialog):
         ## Customization ==
         self.accountCombo.addItems(self.debitOptions)
         self.categoryCombo.addItems(self.CAToptions)
+        self.valueEdit.textChanged.connect(self.numberEntered)
 
         self.valueLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
         self.categoryLbl.setStyleSheet("font: 63 11pt \"Segoe UI Semibold\";")
@@ -73,8 +75,8 @@ class Create(QtWidgets.QDialog):
                 self.debitRadio.setChecked(True)
             else:
                 self.CCRadio.setChecked(True)
-            if "Account" in transData:
-                self.accountCombo.setCurrentText(transData['Account'])
+            if "AccName" in transData:
+                self.accountCombo.setCurrentText(transData['AccName'])
 
         self.delButton.setIcon(QtGui.QIcon('Icons/EditTransfer.png'))
         self.delButton.setIconSize(QtCore.QSize(24,24))
@@ -110,6 +112,30 @@ class Create(QtWidgets.QDialog):
         self.horizontalLayout.setContentsMargins(8, 0, 0, 3)
         self.horizontalLayout.addWidget(self.expenseRadio)
         self.horizontalLayout.addWidget(self.revenueRadio)
+
+    def shift(self, input):
+        try:
+            dotPost = -2
+            input = input.replace('.','')
+        except:
+            dotPost = -2
+        result =  '{}.{}'.format(input[:dotPost], input[dotPost:])
+        if result[0] == '0':
+            result = result[1:]
+        if result[0] == '.':
+            result = "0" + result
+        return result
+
+    def numberEntered(self):
+        self.count_change += 1
+        if self.count_change < 2:
+            currText = self.valueEdit.text()
+            shiftedText = self.shift(currText)
+            self.valueEdit.setText(shiftedText)
+            if shiftedText == currText:
+                self.count_change -= 1
+        else:
+            self.count_change = 0
 
     def accTypeSwitch(self):
         self.CCRadio.setChecked(not self.debitRadio.isChecked())

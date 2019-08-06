@@ -20,7 +20,7 @@ class ToolBar(QtWidgets.QToolBar):
         for button in toolbarButtons:
             self.button[button] = QtWidgets.QAction(parent, objectName="ToolbarButton")
             icon = QtGui.QIcon()
-            iconPath = "Icons/" + button + ".png"
+            iconPath = "Icons/{}.png".format(button)
             icon.addPixmap(QtGui.QPixmap(iconPath), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.button[button].setIcon(icon)
             self.addAction(self.button[button])
@@ -35,7 +35,7 @@ class ToolBar(QtWidgets.QToolBar):
         #self.button["RemoveAccCC"].triggered.connect(self.goToHome)
         #self.button["AddRevenueCC"].triggered.connect(self.goToHome)
         self.button["Transfer"].triggered.connect(self.transfer)
-        self.button["EditTransfer"].triggered.connect(self.debug)
+        # self.button["EditTransfer"].triggered.connect(self.debug)
 
         ## Layout ==
 
@@ -60,7 +60,7 @@ class ToolBar(QtWidgets.QToolBar):
                         instalmentInfo = transInfo.copy()
                         cardData = wind.inputs.copy()
                         if instalments > 1:
-                            instalmentInfo["Comment"] = '(' + str(iMonth+1) + '/' + str(instalments) + ') ' + instalmentInfo["Comment"]
+                            instalmentInfo["Comment"] = '({}/{}) {}'.format(iMonth+1, instalments, instalmentInfo["Comment"])
                             instalmentInfo["Date"] = QtCore.QDate.fromString(instalmentInfo["Date"], 'dd/MM/yyyy').addDays((iMonth)*30).toString('dd/MM/yyyy')
                         transID = self.mainWin.DataBase.NewTransaction(instalmentInfo)
                         cardData["Comment"] = instalmentInfo["Comment"]
@@ -90,7 +90,7 @@ class ToolBar(QtWidgets.QToolBar):
                     'Category':"Transferência",
                     'Date':wind.inputs['Date'],
                     'AccName':wind.inputs['srcName'],
-                    'Comment':'Transferência p/ '+wind.inputs['dstName'],
+                    'Comment':'Transferência p/ {}'.format(wind.inputs['dstName']),
                     'AccType':1,
                     'Value':wind.inputs['Value']*(-1)
                 }
@@ -100,7 +100,7 @@ class ToolBar(QtWidgets.QToolBar):
                     'Category':"Transferência",
                     'Date':wind.inputs['Date'],
                     'AccName':wind.inputs['dstName'],
-                    'Comment':'Transferência de '+wind.inputs['srcName'],
+                    'Comment':'Transferência de {}'.format(wind.inputs['srcName']),
                     'AccType':1,
                     'Value':wind.inputs['Value']
                 }
@@ -153,7 +153,7 @@ class ToolBar(QtWidgets.QToolBar):
                 toBeRemoved = Funs.account_dictFromlist(toBeRemoved)
                 updatedFlag = 0
                 counter = 0
-                toBeRemoved['Name'] = 'DELETED' + str(counter) + toBeRemoved['Name']
+                toBeRemoved['Name'] = 'DELETED{}{}'.format(counter, toBeRemoved['Name'])
                 while not updatedFlag:
                     try:
                         self.mainWin.DataBase.AccountTable.updateById(toBeRemoved)
@@ -176,6 +176,3 @@ class ToolBar(QtWidgets.QToolBar):
                 self.mainWin.updateValuePlaces()
             else:
                 mayProceed = True
-
-    def debug(self):
-        Funs.debugAccounts(self.mainWin.allAcc)

@@ -34,7 +34,7 @@ class Create():
                 if 'DELETED' in accountName:
                     acc['debit'].append(accountName) if data[0] == 1 else acc['credit'].append(accountName)
         return acc
-    
+
     def get_totals(self):
         getStr = "SELECT Type, Total, Name FROM Account"
         total = {'credit':{"Todas":0}, 'debit':{"Todas":0}}
@@ -47,16 +47,16 @@ class Create():
                     total['debit']["Todas"] = total['debit']["Todas"] + data[1]
                     total['debit'][data[2]] = data[1]
         return total
-    
+
     def insert(self, accInfo):
         try:
-            insertStr = """INSERT INTO Account (Type, Name, Total, LimitVal, DueDay, ClosingDay) 
+            insertStr = """INSERT INTO Account (Type, Name, Total, LimitVal, DueDay, ClosingDay)
                             VALUES (:Type, :Name, :Total, :Limit, :DueDay, :ClosingDay)"""
             with self.conn:
                 self.cursor.execute(insertStr, accInfo)
             return self.cursor.lastrowid
         except:
-            print("Account " + str(accInfo) + " already exist")
+            print("Account {} already exists".format(accInfo))
 
     def readAll(self):
         # Provide results that we can iterate through

@@ -187,12 +187,6 @@ class FilterGroup(QtWidgets.QGroupBox):
         self.controlFrame.creditPage.cardArea.HideAllCards()
         self.controlFrame.creditPage.cardArea.initializeCards()
 
-    def updatePosition(self):
-        self.col = self.col + 2
-        if self.col == 4:
-            self.col = 0
-            self.row = self.row + 1
-
     def getComboValues(self):
         catgTable = self.controlFrame.creditPage.mainWin.DataBase.CategoryTotalTable.readAll()
         years = ["Todos"]
