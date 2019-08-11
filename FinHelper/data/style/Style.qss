@@ -1,0 +1,99 @@
+QFrame#Feira {
+    background-color: rgb(179, 175, 114);
+}
+QLabel#ColorFeira {
+    background-color: rgb(179, 175, 114);
+    border: 2px solid black;
+}
+QFrame#Transporte {
+    background-color: rgb(214, 254, 62);
+}
+QLabel#ColorTransporte {
+    background-color: rgb(214, 254, 62);
+    border: 2px solid black;
+}
+QFrame#Remedio {
+    background-color: rgb(74, 149, 112);
+}
+QLabel#ColorRemedio {
+    background-color: rgb(74, 149, 112);
+    border: 2px solid black;
+}
+QFrame#Academia {
+    background-color: rgb(105, 130, 230);
+}
+QLabel#ColorAcademia {
+    background-color: rgb(105, 130, 230);
+    border: 2px solid black;
+}
+QFrame#Aluguel {
+    background-color: rgb(164, 67, 187);
+}
+QLabel#ColorAluguel {
+    background-color: rgb(164, 67, 187);
+    border: 2px solid black;
+}
+QFrame#Condominio {
+    background-color: rgb(115, 192, 168);
+}
+QLabel#ColorCondominio {
+    background-color: rgb(115, 192, 168);
+    border: 2px solid black;
+}
+QFrame#Telefone {
+    background-color: rgb(255, 107, 114);
+}
+QLabel#ColorTelefone {
+    background-color: rgb(255, 107, 114);
+    border: 2px solid black;
+}
+QFrame#Internet {
+    background-color: rgb(151, 163, 211);
+}
+QLabel#ColorInternet {
+    background-color: rgb(151, 163, 211);
+    border: 2px solid black;
+}
+QFrame#Luz {
+    background-color: rgb(72, 227, 236);
+}
+QLabel#ColorLuz {
+    background-color: rgb(72, 227, 236);
+    border: 2px solid black;
+}
+QFrame#Outros {
+    background-color: rgb(173, 41, 76);
+}
+QLabel#ColorOutros {
+    background-color: rgb(173, 41, 76);
+    border: 2px solid black;
+}
+QFrame#Transferencia {
+    background-color: rgb(160, 218, 55);
+}
+QLabel#ColorTransferencia {
+    background-color: rgb(160, 218, 55);
+    border: 2px solid black;
+}
+QLabel#CardCategoryLbl {
+    font: 63 7pt "Segoe UI Semibold";;
+}
+QLabel#CardDateLbl {
+    font-style: italic;
+}
+QLabel#CardCurrencyLbl {
+    font-weight: bold;
+}
+QLabel#CardCommentLbl {
+    text-decoration: underline;
+}
+QLabel#CardBankLbl {
+    font-family: Times New Roman;
+}
+QLabel#CardPositive {
+    color: green;
+    font-weight: bold;
+}
+QLabel#CardNegative {
+    color: red;
+}
