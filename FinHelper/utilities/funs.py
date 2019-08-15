@@ -3,6 +3,7 @@ import re
 import os
 import binascii
 import unidecode
+from pathlib import Path
 
 '''
 General Functions
@@ -14,15 +15,33 @@ General Functions
 '''
 
 def checkFolderExist():
-    if not os.path.exists("FinHelper/data/images"):
-        os.makedirs("FinHelper/data/images")
-        print("Created FinHelper/data/images folder")
-    if not os.path.exists("FinHelper/data/sql"):
-        os.makedirs("FinHelper/data/sql")
-        print("Created FinHelper/data/sql folder")
-    if not os.path.exists("FinHelper/data/style"):
-        os.makedirs("FinHelper/data/style")
-        print("Created FinHelper/data/style folder")
+    parentPath = getFinHelperPath()
+    dataFolder = "{}/data".format(parentPath)
+    imagesFolder = "{}/data/images".format(parentPath)
+    sqlFolder = "{}/data/sql".format(parentPath)
+    styleFolder = "{}/data/style".format(parentPath)
+    if not os.path.exists(dataFolder):
+        os.makedirs(dataFolder)
+        os.makedirs(imagesFolder)
+        os.makedirs(sqlFolder)
+        os.makedirs(styleFolder)
+        print("Create data folder")
+    if not os.path.exists(imagesFolder):
+        os.makedirs(imagesFolder)
+        print("Created ../data/images folder")
+    if not os.path.exists(sqlFolder):
+        os.makedirs(sqlFolder)
+        print("Created ../data/sql folder")
+    if not os.path.exists(styleFolder):
+        os.makedirs(styleFolder)
+        print("Created ../data/style folder")
+
+def getFinHelperPath():
+    currFilePath = __file__
+    finHelperFolder = Path(Path(currFilePath).parent).parent
+    finHelperFolder = os.fspath(finHelperFolder)
+    finHelperFolder = finHelperFolder.replace("\\","/")
+    return finHelperFolder
 
 def formatCategoryName(name):
     return unidecode.unidecode(name.replace(' ', '_'))
@@ -82,9 +101,22 @@ def getHexFromRGB(rgbString):
     blue = int(rgbSplit[2])
     return '#{:02x}{:02x}{:02x}'.format( red, green , blue )
 
+def shift(input):
+    try:
+        dotPost = -2
+        input = input.replace('.','')
+    except:
+        dotPost = -2
+    result =  '{}.{}'.format(input[:dotPost], input[dotPost:])
+    if result[0] == '0':
+        result = result[1:]
+    if result[0] == '.':
+        result = "0" + result
+    return result
+
 if __name__ == "__main__":
-    a,b,c,d = getDate()
-    print(a,b,c,d)
+    datapath = getDataPath()
+    print(datapath)
     # for i in range(60):
     #     test = generateTrans(tuple(range(8)),tuple(range(8)))
     #     test = generateCatgTotal(tuple(range(40)))

@@ -1,6 +1,6 @@
 from PySide2 import QtWidgets, QtCore, QtGui
-from dialogwin import transaction_window, account_window, transfer_window
-from utilities import dict_from_list
+from ..dialogwin import transaction_window, account_window, transfer_window
+from ..utilities import dict_from_list, funs
 
 class ToolBar(QtWidgets.QToolBar):
     def __init__(self, parent):
@@ -18,7 +18,8 @@ class ToolBar(QtWidgets.QToolBar):
         for button in toolbarButtons:
             self.button[button] = QtWidgets.QAction(parent, objectName="ToolbarButton")
             icon = QtGui.QIcon()
-            iconPath = "FinHelper/data/images/{}.png".format(button)
+            finHelperFolder = funs.getFinHelperPath()
+            iconPath = "{}/data/images/{}.png".format(finHelperFolder, button)
             icon.addPixmap(QtGui.QPixmap(iconPath), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.button[button].setIcon(icon)
             self.addAction(self.button[button])
@@ -48,6 +49,8 @@ class ToolBar(QtWidgets.QToolBar):
             catgOptions = self.mainWin.DataBase.AllCategories
             wind = transaction_window.Create(self, debitOptions, creditOptions, catgOptions)
             if wind.exec_():
+                if "AppendData" in wind.inputs:
+                    self.mainWin.newCategory(wind.inputs)
                 instalments = wind.inputs['Instalments']
                 targetCatg = self.mainWin.DataBase.category_tbl.readByName(wind.inputs["Category"])
                 targetAcc = self.mainWin.DataBase.acc_tbl.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
@@ -67,7 +70,6 @@ class ToolBar(QtWidgets.QToolBar):
                 else:
                     transID = self.mainWin.DataBase.NewTransaction(transInfo)
                     self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
-                self.mainWin.DataBase.ReGetValues()
                 self.mainWin.updateValuePlaces()
                 mayProceed = True
             else:
@@ -109,10 +111,9 @@ class ToolBar(QtWidgets.QToolBar):
                     print('Problema na conta')
                 transID = self.mainWin.DataBase.NewTransaction(destData)
                 if transID != 'Error':
-                    self.mainWin.DataBase.ReGetValues()
-                    self.mainWin.homePage.debitGroupBox.UpdateValue()
                     mayProceed = True
                     self.mainWin.accPage.cardArea.AddCard(destData, transID)
+                    self.mainWin.updateValuePlaces()
                 else:
                     print('Problema na conta')
             else:
@@ -126,15 +127,13 @@ class ToolBar(QtWidgets.QToolBar):
                 addedFlag = self.mainWin.DataBase.acc_tbl.insert(wind.inputs)
                 if addedFlag:
                     mayProceed = True
-                    self.mainWin.DataBase.ReGetValues()
+                    self.mainWin.updateValuePlaces()
                     if wind.inputs['Type'] == 1:
                         self.mainWin.homePage.debitGroupBox.comboBox.addItem(wind.inputs['Name'])
                         self.mainWin.accPage.controlFrame.setValueGroup.nameDropDown.addItem(wind.inputs['Name'])
-                        self.mainWin.accPage.controlFrame.filterGroup.getComboValues()
                     else:
                         self.mainWin.homePage.creditGroupBox.comboBox.addItem(wind.inputs['Name'])
                         self.mainWin.creditCardPage.controlFrame.setValueGroup.nameDropDown.addItem(wind.inputs['Name'])
-                    self.mainWin.updateValuePlaces()
                 else:
                     print('acc ja existe')
             else:
@@ -160,7 +159,6 @@ class ToolBar(QtWidgets.QToolBar):
                         toBeRemoved['Name'] = toBeRemoved['Name'].replace(str(counter), str(counter+1))
                         counter = counter + 1
                 mayProceed = True
-                self.mainWin.DataBase.ReGetValues()
                 if wind.inputs['Type'] == 1:
                     itemToRemove = debitOptions.index(wind.inputs['Name']) + 1
                     self.mainWin.homePage.debitGroupBox.comboBox.removeItem(itemToRemove)

@@ -1,8 +1,7 @@
 from PySide2 import QtWidgets, QtXml
-from base import base_window
+from FinHelper.base import base_window
 
-
-if __name__ == "__main__":
+def main():
     financHelper = QtWidgets.QApplication([])
 
     SimulateData = 2
@@ -10,6 +9,10 @@ if __name__ == "__main__":
     app.show()
 
     financHelper.exec_()
+
+
+if __name__ == "__main__":
+    main()
 
     #pyside2-uic mainwindow.ui > ui_mainwindow.py
     #pyside2-uic transaction.ui > transaction.py

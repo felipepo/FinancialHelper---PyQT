@@ -1,6 +1,6 @@
 from PySide2 import QtCore, QtGui, QtWidgets
 import copy
-from utilities import cards, funs
+from ..utilities import cards, funs
 
 class Create(QtWidgets.QDialog):
     def __init__(self, mainWin):

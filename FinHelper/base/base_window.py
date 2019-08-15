@@ -1,9 +1,9 @@
 from PySide2 import QtWidgets, QtCore, QtGui
-from pages import homepage, debit_page, credit_page
-from base import menu, toolbar
-from utilities import generate, funs
-from database import sql_class
-from interfacestyle import style
+from ..pages import homepage, debit_page, credit_page
+from . import menu, toolbar
+from ..utilities import generate, funs
+from ..database import sql_class
+from ..interfacestyle import style
 
 class Create(QtWidgets.QMainWindow):
     ## Signals ==
@@ -13,7 +13,8 @@ class Create(QtWidgets.QMainWindow):
         super().__init__()
         self.setWindowTitle('Financial Helper')
         icon = QtGui.QIcon()
-        iconPath = "FinHelper/data/images/Icon.ico"
+        finHelperFolder = funs.getFinHelperPath()
+        iconPath = "{}/data/images/Icon.ico".format(finHelperFolder)
         icon.addPixmap(QtGui.QPixmap(iconPath), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
         self.setObjectName("MainWindow")
@@ -33,8 +34,8 @@ class Create(QtWidgets.QMainWindow):
 
         # Pages
         self.homePage = homepage.Create(self)
-        self.accPage = debit_page.Create(self)
-        self.creditCardPage = credit_page.Create(self)
+        self.accPage = debit_page.Page(self)
+        self.creditCardPage = credit_page.Page(self)
 
         ## Customization ==
         self.stackFrame.addWidget(self.homePage)
@@ -92,18 +93,28 @@ class Create(QtWidgets.QMainWindow):
         self.DataBase.close_db()
 
     def updateValuePlaces(self):
+        self.DataBase.ReGetValues()
         # Update Total
         self.homePage.debitGroupBox.UpdateValue()
         self.homePage.creditGroupBox.UpdateValue()
         self.accPage.controlFrame.setValueGroup.UpdateEditBox()
-        self.accPage.controlFrame.filterGroup.getComboValues()
         self.creditCardPage.controlFrame.setValueGroup.UpdateEditBox()
+        # Update filters
+        self.accPage.controlFrame.filterGroup.getComboValues()
         self.creditCardPage.controlFrame.filterGroup.getComboValues()
-        # Update drop-downs with account names
         # Update Plots
         self.homePage.updateGraph()
         self.creditCardPage.updateGraph()
         self.accPage.updateGraph()
+
+    def newCategory(self, catgData):
+        for iStyle in catgData["AppendData"]:
+            if iStyle != "Name" and iStyle != "rgb":
+                self.styleObj.appendStyle(catgData["AppendData"][iStyle])
+        self.DataBase.category_tbl.insert(catgData["AppendData"]["Name"], catgData["AppendData"]["rgb"])
+        self.setStyleSheet(self.styleObj.InterfaceStyle)
+        self.styleObj.createQSSFile()
+        self.setStyle(self.style())
 
 class SideFrame(QtWidgets.QFrame):
     def __init__(self, parent):

@@ -68,7 +68,7 @@ def cardappearence():
 
 if __name__ == '__main__':
     from PySide2 import QtWidgets
-    import Card
+    import style
 
     class test(QtWidgets.QFrame):
         def __init__(self):

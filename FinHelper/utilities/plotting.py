@@ -4,10 +4,10 @@ matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
-from utilities import funs
+from . import funs
 
 class BarChart(FigureCanvas):
-    def __init__(self, parent, DataBase):
+    def __init__(self, DataBase):
         self.fig = Figure(figsize=(5, 3),dpi=100)
         super().__init__(self.fig)
         self.DataBase = DataBase
@@ -66,6 +66,8 @@ class BarChart(FigureCanvas):
                 self.graphData[currCategory] = currValue
 
     def updateGraph(self, cards=[]):
+        allCat = self.DataBase.category_tbl.readAll()
+        self.catgColors = dict( [(iCatg[1], iCatg[2]) for iCatg in allCat] )
         self.bar_chart.cla()
         self.createGraph(cards)
         self.bar_chart.figure.canvas.draw()
@@ -79,34 +81,3 @@ class BarChart(FigureCanvas):
         self.clearGraph()
         self.displayData()
         self.bar_chart.figure.canvas.draw()
-
-if __name__ == "__main__":
-    from database import sql_class
-
-    plotTest = QtWidgets.QApplication([])
-
-    app = QtWidgets.QFrame()
-    DataBase = sql_class.Create(2)
-
-    a = DataBase.extract_tbl.readAll()
-    # Month CHART -----------------------
-    # Bar Chart - Value x Categories
-    chart = BarChart(app, DataBase)
-    chart.createGraph()
-    updatePlot = QtWidgets.QPushButton(app, text="Testing")
-
-    layout = QtWidgets.QVBoxLayout(app)
-    layout.addWidget(chart)
-    layout.addWidget(updatePlot)
-    # chart.clearGraph()
-    # chart.createGraph()
-
-    updatePlot.clicked.connect(chart.buttonPush)
-    # Pie Chart - Value/Percentage x Categories
-
-    # Multiple Months CHART -------------
-    # Bar Chart - Value(Income/Outcome) x Months
-    # Horizontal Bar
-
-    app.show()
-    plotTest.exec_()

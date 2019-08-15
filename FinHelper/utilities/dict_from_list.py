@@ -1,4 +1,4 @@
-def transt(transList):
+def trans(transList):
     transDict = {
         'Trans_ID': transList[0],
         'Catg_ID': transList[1],

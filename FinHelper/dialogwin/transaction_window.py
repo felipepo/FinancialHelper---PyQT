@@ -1,5 +1,7 @@
 from PySide2 import QtCore, QtGui, QtWidgets
 from decimal import Decimal
+from ..utilities import funs
+from . import category_window
 
 class Create(QtWidgets.QDialog):
     def __init__(self, parent,debitOptions,creditOptions,CAToptions, transData={}):
@@ -34,6 +36,7 @@ class Create(QtWidgets.QDialog):
         self.instalments = QtWidgets.QSpinBox(self, value=1, objectName="instalments", enabled=False)
         self.okButton = QtWidgets.QPushButton(self, objectName="okButton", text="OK")
         self.delButton = QtWidgets.QPushButton(self, objectName="delButton")
+        self.addCategoryButton = QtWidgets.QPushButton(self, objectName="addCategoryButton")
 
         ## Customization ==
         self.accountCombo.addItems(self.debitOptions)
@@ -60,6 +63,7 @@ class Create(QtWidgets.QDialog):
 
         self.delButton.clicked.connect(self.removeTrans)
         self.okButton.clicked.connect(self.getInputs)
+        self.addCategoryButton.clicked.connect(self.categoryWindow)
         self.dateEdit.setCalendarPopup(True)
         self.debitRadio.toggled.connect(self.accTypeSwitch)
         self.CCRadio.toggled.connect(self.CCTypeSwitch)
@@ -80,7 +84,8 @@ class Create(QtWidgets.QDialog):
             if "AccName" in transData:
                 self.accountCombo.setCurrentText(transData['AccName'])
 
-        self.delButton.setIcon(QtGui.QIcon('FinHelper/data/images/EditTransfer.png'))
+        finHelperFolder = funs.getFinHelperPath()
+        self.delButton.setIcon(QtGui.QIcon('{}/data/images/EditTransfer.png'.format(finHelperFolder)))
         self.delButton.setIconSize(QtCore.QSize(24,24))
         self.delButton.setMinimumSize(QtCore.QSize(24, 24))
         self.delButton.setMaximumSize(QtCore.QSize(24, 24))
@@ -91,7 +96,8 @@ class Create(QtWidgets.QDialog):
         self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 6)
         self.gridLayout.addWidget(self.categoryLbl, 1, 0, 1, 3)
         self.gridLayout.addWidget(self.dateLbl, 1, 3, 1, 3)
-        self.gridLayout.addWidget(self.categoryCombo, 2, 0, 1, 3)
+        self.gridLayout.addWidget(self.categoryCombo, 2, 0, 1, 2)
+        self.gridLayout.addWidget(self.addCategoryButton, 2, 2, 1, 1)
         self.gridLayout.addWidget(self.dateEdit, 2, 3, 1, 3)
         self.gridLayout.addWidget(self.valueLbl, 3, 0, 1, 3)
         self.gridLayout.addWidget(self.accLbl, 3, 3, 1, 3)
@@ -115,24 +121,11 @@ class Create(QtWidgets.QDialog):
         self.horizontalLayout.addWidget(self.expenseRadio)
         self.horizontalLayout.addWidget(self.revenueRadio)
 
-    def shift(self, input):
-        try:
-            dotPost = -2
-            input = input.replace('.','')
-        except:
-            dotPost = -2
-        result =  '{}.{}'.format(input[:dotPost], input[dotPost:])
-        if result[0] == '0':
-            result = result[1:]
-        if result[0] == '.':
-            result = "0" + result
-        return result
-
     def numberEntered(self):
         self.count_change += 1
         if self.count_change < 2:
             currText = self.valueEdit.text()
-            shiftedText = self.shift(currText)
+            shiftedText = funs.shift(currText)
             self.valueEdit.setText(shiftedText)
             if shiftedText == currText:
                 self.count_change -= 1
@@ -179,11 +172,20 @@ class Create(QtWidgets.QDialog):
         except:
             print('problema na conta')
 
-if __name__ == "__main__":
-    financHelper = QtWidgets.QApplication([])
-    parent = QtWidgets.QFrame()
-    wind = Create(parent, ["Debit1", "Debit2"], ["Credit1", "Credit2"], ["Cat1", "Catg2"])
-    if wind.exec_():
-        print(wind.inputs)
-    wind.show()
-    financHelper.exec_()
+    def categoryWindow(self):
+        dialogForCatg = QtWidgets.QDialog(self)
+        addButton = QtWidgets.QPushButton(dialogForCatg, text="OK")
+        addButton.clicked.connect(dialogForCatg.accept)
+        wind = category_window.AddTab(dialogForCatg)
+        gridLayout = QtWidgets.QGridLayout(dialogForCatg)
+        gridLayout.addWidget(wind, 0,0,1,4)
+        gridLayout.addWidget(addButton, 1,3,1,1)
+        if dialogForCatg.exec_():
+            if wind.newEntry.text():
+                self.inputs["AppendData"] = {}
+                self.inputs["AppendData"]["Name"] = wind.newEntry.text()
+                self.inputs["AppendData"]["rgb"] = wind.rgb
+                temp = wind.getStyle()
+                self.inputs["AppendData"]["StyleFrame"] = temp["Frame"]
+                self.inputs["AppendData"]["StyleLabel"] = temp["Label"]
+                self.categoryCombo.addItem(wind.newEntry.text())

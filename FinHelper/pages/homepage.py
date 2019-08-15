@@ -1,6 +1,6 @@
 from PySide2 import QtWidgets, QtCore
-from dialogwin import transaction_window
-from utilities import dict_from_list, plotting
+from ..dialogwin import transaction_window
+from ..utilities import dict_from_list, plotting
 from decimal import Decimal
 
 class Create(QtWidgets.QWidget):
@@ -16,7 +16,7 @@ class Create(QtWidgets.QWidget):
         self.debitGroupBox = GroupBox(self, "Débito")
         self.creditGroupBox = GroupBox(self, "Cartão de Crédito")
         self.budgetGroupBox = BudgetGroupBox(self, "Orçamento")
-        self.bar_chart = plotting.BarChart(self, self.mainWin.DataBase)
+        self.bar_chart = plotting.BarChart(self.mainWin.DataBase)
         self.bar_chart.createGraph()
 
         ## Customization ==
@@ -38,6 +38,7 @@ class GroupBox(QtWidgets.QGroupBox):
     def __init__(self, parent, titleSTR):
         super().__init__(parent)
         self.homepage=parent
+        self.mainWin = self.homepage.mainWin
         ## Initialization ==
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setTitle(titleSTR)
@@ -51,9 +52,9 @@ class GroupBox(QtWidgets.QGroupBox):
 
         ## Customizaion ==
         if self.title() == "Débito":
-            options = self.homepage.mainWin.DataBase.AllAccounts["debit"][:]
+            options = self.mainWin.DataBase.AllAccounts["debit"][:]
         else:
-            options = self.homepage.mainWin.DataBase.AllAccounts["credit"][:]
+            options = self.mainWin.DataBase.AllAccounts["credit"][:]
             self.payBill = QtWidgets.QPushButton(self,objectName="Button", text="Pagar Fatura")
             self.payBill.clicked.connect(self.payCurrentBill)
             self.gridLayout.addWidget(self.payBill, 3,1,1,1)
@@ -71,26 +72,28 @@ class GroupBox(QtWidgets.QGroupBox):
 
     def payCurrentBill(self):
         mayProceed = False
+        targetCredit = self.mainWin.DataBase.acc_tbl.readByUnique(2, self.comboBox.currentText())
+        prevTransData = {
+            'Value': float(self.valueLbl.text()),
+            'Comment': "Pagamento Cartão {}".format(self.comboBox.currentText()),
+            'Category': "Outros",
+            'AccType': 1,
+            'Date': QtCore.QDate.currentDate().toString('dd/MM/yyyy')
+        }
         while mayProceed == False:
-            debitOptions = self.homepage.mainWin.DataBase.AllAccounts["debit"]
-            creditOptions = self.homepage.mainWin.DataBase.AllAccounts["credit"]
-            catgOptions = self.homepage.mainWin.DataBase.AllCategories
-            prevTransData = {
-                'Value': int(self.valueLbl.text().replace('.','')),
-                'Comment': "Pagamento Cartão {}".format(self.comboBox.currentText()),
-                'Category': "Outros",
-                'AccType': 1,
-                'Date': QtCore.QDate.currentDate().toString('dd/MM/yyyy')
-            }
+            debitOptions = self.mainWin.DataBase.AllAccounts["debit"]
+            creditOptions = self.mainWin.DataBase.AllAccounts["credit"]
+            catgOptions = self.mainWin.DataBase.AllCategories
             wind = transaction_window.Create(self, debitOptions, creditOptions, catgOptions, prevTransData)
             if wind.exec_():
+                if "AppendData" in wind.inputs:
+                    self.mainWin.newCategory(wind.inputs)
                 instalments = wind.inputs['Instalments']
-                targetCatg = self.homepage.mainWin.DataBase.category_tbl.readByName(wind.inputs["Category"])
-                targetCredit = self.homepage.mainWin.DataBase.acc_tbl.readByUnique(2, self.comboBox.currentText())
-                targetDebit = self.homepage.mainWin.DataBase.acc_tbl.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
+                targetCatg = self.mainWin.DataBase.category_tbl.readByName(wind.inputs["Category"])
+                targetDebit = self.mainWin.DataBase.acc_tbl.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
                 accData = dict_from_list.account(targetCredit)
                 accData["Total"] = accData["Total"] - wind.inputs["Value"]
-                self.homepage.mainWin.DataBase.acc_tbl.updateById(accData)
+                self.mainWin.DataBase.acc_tbl.updateById(accData)
                 wind.inputs["Value"] = wind.inputs["Value"]/instalments
                 transInfo = {"Catg_ID":targetCatg[0], "Acc_ID":targetDebit[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
                 if targetDebit[1] == 2:
@@ -100,15 +103,14 @@ class GroupBox(QtWidgets.QGroupBox):
                         if instalments > 1:
                             instalmentInfo["Comment"] = '({}/{}) {}'.format(iMonth+1, instalments, instalmentInfo["Comment"])
                             instalmentInfo["Date"] = QtCore.QDate.fromString(instalmentInfo["Date"], 'dd/MM/yyyy').addDays((iMonth)*30).toString('dd/MM/yyyy')
-                        transID = self.homepage.mainWin.DataBase.NewTransaction(instalmentInfo)
+                        transID = self.mainWin.DataBase.NewTransaction(instalmentInfo)
                         cardData["Comment"] = instalmentInfo["Comment"]
                         cardData["Date"] = instalmentInfo["Date"]
-                        self.homepage.mainWin.creditCardPage.cardArea.AddCard(cardData, transID)
+                        self.mainWin.creditCardPage.cardArea.AddCard(cardData, transID)
                 else:
-                    transID = self.homepage.mainWin.DataBase.NewTransaction(transInfo)
-                    self.homepage.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
-                self.homepage.mainWin.DataBase.ReGetValues()
-                self.homepage.mainWin.updateValuePlaces()
+                    transID = self.mainWin.DataBase.NewTransaction(transInfo)
+                    self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
+                self.mainWin.updateValuePlaces()
                 mayProceed = True
             else:
                 mayProceed = True
@@ -116,9 +118,9 @@ class GroupBox(QtWidgets.QGroupBox):
     def UpdateValue(self):
         acc = self.comboBox.currentText()
         if self.title() == "Débito":
-            value = round(Decimal(self.homepage.mainWin.DataBase.Totals['debit'][acc]), 2)
+            value = round(Decimal(self.mainWin.DataBase.Totals['debit'][acc]), 2)
         else:
-            value = round(Decimal(self.homepage.mainWin.DataBase.Totals['credit'][acc]), 2)
+            value = round(Decimal(self.mainWin.DataBase.Totals['credit'][acc]), 2)
         self.valueLbl.setText(str(value))
 
 class BudgetGroupBox(QtWidgets.QGroupBox):

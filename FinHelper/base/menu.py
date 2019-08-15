@@ -1,5 +1,6 @@
 from PySide2 import QtWidgets, QtCore, QtGui
-from dialogwin import category_window
+from ..dialogwin import category_window
+from ..utilities import funs
 import os
 
 class MenuBar(QtWidgets.QMenuBar):
@@ -45,10 +46,11 @@ class MenuBar(QtWidgets.QMenuBar):
         ## Layout ==
 
     def newDB(self):
+        finHelperFolder = funs.getFinHelperPath()
         self.mainWin.DataBase.close_db()
-        os.remove('FinHelper/data/sql/data.db')
+        os.remove('{}/data/sql/data.db'.format(finHelperFolder))
         print("Saved")
-        os.remove('FinHelper/data/style/Style.qss')
+        os.remove('{}/data/style/Style.qss'.format(finHelperFolder))
         self.mainWin.initialize()
 
     def configCategory(self):
@@ -74,5 +76,5 @@ class MenuBar(QtWidgets.QMenuBar):
             self.mainWin.setStyleSheet(self.mainWin.styleObj.InterfaceStyle)
             self.mainWin.styleObj.createQSSFile()
             self.mainWin.setStyle(self.mainWin.style())
-            self.mainWin.DataBase.ReGetValues()
             self.mainWin.accPage.cardArea.UpdateALLCards()
+            self.mainWin.updateValuePlaces()

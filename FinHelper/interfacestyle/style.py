@@ -1,8 +1,6 @@
-from utilities import funs
+from ..utilities import funs
 import random
-from interfacestyle import card
-# import os.path
-# QssExist = os.path.exists("FinHelper/data/style/Style.qss")
+from . import card
 
 class Create():
     # Class to customize the interface. It works using a dictionary with the following format
@@ -15,11 +13,11 @@ class Create():
     #     'propStr':propStr,
     #     'propertyDic':propertyDic
     # }
-    # rgb(255, 255, 127)
 
     def __init__(self, allCategories):
         self.allCategories = allCategories
-        self.styleFile = "FinHelper/data/style/Style.qss"
+        finHelperFolder = funs.getFinHelperPath()
+        self.styleFile = "{}/data/style/Style.qss".format(finHelperFolder)
         self.InterfaceStyle = ""
         self.widgetStyles = []
         try:
@@ -48,13 +46,10 @@ class Create():
         self.InterfaceStyle = self.InterfaceStyle + self.createStyle(styledict)
 
     def renameStyle(self, oldName, newName):
-        # Change in QSS
         self.InterfaceStyle = self.InterfaceStyle.replace(oldName, newName)
 
     def removeStyle(self, styleName):
-        # Remove in Category Class
         pass
-        # Remove in QSS
 
     def createStyle(self, stylesDict):
         propertyDic = stylesDict['propertyDic']

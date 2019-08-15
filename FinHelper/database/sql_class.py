@@ -1,10 +1,11 @@
 import sqlite3
-from utilities import generate, dict_from_list, funs
-from database import account_table, category_table, category_total_table, extract_table
+from ..utilities import generate, dict_from_list, funs
+from . import account_table, category_table, category_total_table, extract_table
 
 class Create():
     def __init__(self, inMemory):
-        self.db_file = 'DataBase/DataTest.db' if inMemory == 1 else 'FinHelper/data/sql/data.db'
+        finHelperFolder = funs.getFinHelperPath()
+        self.db_file = 'DataBase/DataTest.db' if inMemory == 1 else '{}/data/sql/data.db'.format(finHelperFolder)
         try:
             self.conn = sqlite3.connect(self.db_file)
             self.cursor = self.conn.cursor()
@@ -146,18 +147,3 @@ class Create():
         for _ in range(nTrans):
             transInfo = generate.generateTrans(Catg_ID_list, Acc_ID_list)
             self.NewTransaction(transInfo)
-
-if __name__ == "__main__":
-    inMemory = 1
-    create_Data = 1
-    sql_db = Create(inMemory)
-
-    if create_Data == 1:
-        sql_db.simulateData()
-
-        print(list(sql_db.category_tbl.get_names()))
-    else:
-        transInfo = {"Trans_ID":2, "Acc_ID":3, "Catg_ID":6, "Comment":"Atualizado", "Date":"18/2/2019", "Value":0}
-        sql_db.UpdateTransaction(transInfo)
-
-    sql_db.close_db()

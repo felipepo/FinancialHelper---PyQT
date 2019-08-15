@@ -1,7 +1,7 @@
 from PySide2 import QtWidgets, QtCore, QtGui
-from utilities import funs, dict_from_list
+from . import funs, dict_from_list
 import math
-from dialogwin import transaction_window
+from ..dialogwin import transaction_window
 from decimal import Decimal
 
 class CardArea(QtWidgets.QScrollArea):
@@ -9,6 +9,7 @@ class CardArea(QtWidgets.QScrollArea):
     def __init__(self,parent, debitOrCredit):
         super().__init__(parent)
         self.parentPage = parent
+        self.main_win = self.parentPage.mainWin
         ## Initialization ==
         self.width = 750
         self.cardWidth = 160
@@ -47,12 +48,12 @@ class CardArea(QtWidgets.QScrollArea):
         transData={}
         self.HideAllCards()
         self.card = {}
-        allTransaction = self.parentPage.mainWin.DataBase.extract_tbl.readAll()
+        allTransaction = self.main_win.DataBase.extract_tbl.readAll()
         for iTrans in allTransaction:
-            currAcc = self.parentPage.mainWin.DataBase.acc_tbl.readById(iTrans[2])
+            currAcc = self.main_win.DataBase.acc_tbl.readById(iTrans[2])
             if "DELETED" not in currAcc[2]:
                 if currAcc[1] == self.debitOrCredit:
-                    currCatg = self.parentPage.mainWin.DataBase.category_tbl.readById(iTrans[1])
+                    currCatg = self.main_win.DataBase.category_tbl.readById(iTrans[1])
                     transData = {
                         "Category": currCatg[1],
                         "AccName": currAcc[2],
@@ -79,11 +80,11 @@ class CardArea(QtWidgets.QScrollArea):
     def UpdateALLCards(self):
         cardsToBeRemoved = []
         for iCard in self.card:
-            currCard = self.parentPage.mainWin.DataBase.extract_tbl.readById(self.card[iCard].Id)
+            currCard = self.main_win.DataBase.extract_tbl.readById(self.card[iCard].Id)
             currCard = dict_from_list.trans(currCard)
-            accName = self.parentPage.mainWin.DataBase.acc_tbl.readById(currCard["Acc_ID"])
+            accName = self.main_win.DataBase.acc_tbl.readById(currCard["Acc_ID"])
             if "DELETED" not in accName[2]:
-                catgName = self.parentPage.mainWin.DataBase.category_tbl.readById(currCard["Catg_ID"])
+                catgName = self.main_win.DataBase.category_tbl.readById(currCard["Catg_ID"])
                 transData = {
                     "AccType": accName[1],
                     "AccName":accName[2],
@@ -101,10 +102,9 @@ class CardArea(QtWidgets.QScrollArea):
 
     def RemoveCardandTransaction(self, transID):
         self.RemoveCard(transID)
-        self.parentPage.mainWin.DataBase.RemoveTransaction(transID)
-        self.parentPage.mainWin.DataBase.extract_tbl.deleteByID(transID)
-        self.parentPage.mainWin.DataBase.ReGetValues()
-        self.parentPage.mainWin.updateValuePlaces()
+        self.main_win.DataBase.RemoveTransaction(transID)
+        self.main_win.DataBase.extract_tbl.deleteByID(transID)
+        self.main_win.updateValuePlaces()
         self.UpdateArea()
 
     def RemoveCard(self, transID):
@@ -148,6 +148,10 @@ class Card(QtWidgets.QFrame):
     def __init__(self, parent, transData, transID):
         super().__init__(parent)
         self.cardArea = parent
+        try:
+            self.main_win = self.cardArea.parentPage.mainWin
+        except:
+            print("Template Card")
         self.Id = transID
         self.type = transData["AccType"]
         self.acc = transData["AccName"]
@@ -171,8 +175,9 @@ class Card(QtWidgets.QFrame):
         self.editButton = QtWidgets.QPushButton(self, objectName="editButton")
 
         ## Customization ==
+        finHelperFolder = funs.getFinHelperPath()
         self.editButton.setCursor(QtCore.Qt.PointingHandCursor)
-        self.editButton.setIcon(QtGui.QIcon('FinHelper/data/images/EditTransfer.png'))
+        self.editButton.setIcon(QtGui.QIcon('{}/data/images/EditTransfer.png'.format(finHelperFolder)))
         self.editButton.setIconSize(QtCore.QSize(24,24))
         self.editButton.setMinimumSize(QtCore.QSize(24, 24))
         self.editButton.setMaximumSize(QtCore.QSize(24, 24))
@@ -201,10 +206,12 @@ class Card(QtWidgets.QFrame):
 
     def UpdateWindow(self):
         mayProceed = False
+        if not hasattr(self, 'main_win'):
+            mayProceed = True
         while mayProceed == False:
-            debitOptions = self.cardArea.parentPage.mainWin.DataBase.AllAccounts["debit"]
-            creditOptions = self.cardArea.parentPage.mainWin.DataBase.AllAccounts["credit"]
-            catgOptions = self.cardArea.parentPage.mainWin.DataBase.AllCategories
+            debitOptions = self.main_win.DataBase.AllAccounts["debit"]
+            creditOptions = self.main_win.DataBase.AllAccounts["credit"]
+            catgOptions = self.main_win.DataBase.AllCategories
             prevTransData = {
                 'Value': self.value,
                 'Comment': self.comment,
@@ -216,13 +223,14 @@ class Card(QtWidgets.QFrame):
             wind = transaction_window.Create(self, debitOptions, creditOptions, catgOptions, prevTransData)
             if wind.exec_():
                 if "Remove" not in wind.inputs:
-                    targetCatg = self.cardArea.parentPage.mainWin.DataBase.category_tbl.readByName(wind.inputs["Category"])
-                    targetAcc = self.cardArea.parentPage.mainWin.DataBase.acc_tbl.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
+                    if "AppendData" in wind.inputs:
+                        self.mainWin.newCategory(wind.inputs)
+                    targetCatg = self.main_win.DataBase.category_tbl.readByName(wind.inputs["Category"])
+                    targetAcc = self.main_win.DataBase.acc_tbl.readByUnique(wind.inputs["AccType"], wind.inputs["AccName"])
                     transInfo = {"Trans_ID":self.Id, "Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
-                    updatedFlag = self.cardArea.parentPage.mainWin.DataBase.UpdateTransaction(transInfo)
+                    updatedFlag = self.main_win.DataBase.UpdateTransaction(transInfo)
                     if updatedFlag == 'OK':
-                        self.cardArea.parentPage.mainWin.DataBase.ReGetValues()
-                        self.cardArea.parentPage.mainWin.updateValuePlaces()
+                        self.main_win.updateValuePlaces()
                         mayProceed = True
                         self.Update(wind.inputs)
                     else:

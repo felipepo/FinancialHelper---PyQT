@@ -1,4 +1,5 @@
 from PySide2 import QtCore, QtGui, QtWidgets
+from ..utilities import funs
 import copy
 
 class New(QtWidgets.QDialog):
@@ -105,24 +106,11 @@ class New(QtWidgets.QDialog):
         except:
             print('Números errados')
 
-    def shift(self, input):
-        try:
-            dotPost = -2
-            input = input.replace('.','')
-        except:
-            dotPost = -2
-        result =  '{}.{}'.format(input[:dotPost], input[dotPost:])
-        if result[0] == '0':
-            result = result[1:]
-        if result[0] == '.':
-            result = "0" + result
-        return result
-
     def numberEntered(self, targetEdit):
         self.count_change += 1
         if self.count_change < 2:
             currText = targetEdit.text()
-            shiftedText = self.shift(currText)
+            shiftedText = funs.shift(currText)
             targetEdit.setText(shiftedText)
             if shiftedText == currText:
                 self.count_change -= 1
@@ -181,17 +169,3 @@ class Remove(QtWidgets.QDialog):
             self.accept()
         except:
             print('Números errados')
-
-if __name__ == "__main__":
-    financHelper = QtWidgets.QApplication([])
-    parent = QtWidgets.QFrame()
-    accTotal = {
-        "Todas": 30,
-        "Debit1": 10,
-        "Debit2": 20
-    }
-    wind = New(parent)
-    if wind.exec_():
-        print(wind.inputs)
-    wind.show()
-    financHelper.exec_()

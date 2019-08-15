@@ -1,4 +1,6 @@
 from PySide2 import QtCore, QtGui, QtWidgets
+from ..utilities import funs
+from decimal import Decimal
 import copy
 
 class Create(QtWidgets.QDialog):
@@ -65,27 +67,14 @@ class Create(QtWidgets.QDialog):
         tempOptions = self.options[:]
         del tempOptions[index]
         self.destCombo.addItems(tempOptions)
-        strToWrite = "Disponível: R$ {}".format(self.optDict[textToExclude])
+        strToWrite = "Disponível: R$ {}".format(round(Decimal(self.optDict[textToExclude]), 2))
         self.value_available_label.setText(strToWrite)
-
-    def shift(self, input):
-        try:
-            dotPost = -2
-            input = input.replace('.','')
-        except:
-            dotPost = -2
-        result =  '{}.{}'.format(input[:dotPost], input[dotPost:])
-        if result[0] == '0':
-            result = result[1:]
-        if result[0] == '.':
-            result = "0" + result
-        return result
 
     def numberEntered(self):
         self.count_change += 1
         if self.count_change < 2:
             currText = self.valueEdit.text()
-            shiftedText = self.shift(currText)
+            shiftedText = funs.shift(currText)
             self.valueEdit.setText(shiftedText)
             if shiftedText == currText:
                 self.count_change -= 1
