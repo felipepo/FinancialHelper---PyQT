@@ -4,7 +4,52 @@ matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
-from . import funs
+from . import funs, generate
+
+class HorBarChart(FigureCanvas):
+    def __init__(self):
+        self.fig = Figure(figsize=(0.5, 0.5),dpi=100)
+        super().__init__(self.fig)
+        self.bar_chart = self.figure.subplots()
+        self.budget = generate.generateBudget()
+
+    def formatGraph(self):
+        self.bar_chart.axis('off')
+        self.bar_chart.set_yticks([1])
+        self.bar_chart.invert_yaxis()
+        self.fig.tight_layout()
+
+        # Set up the legend so it is arranged across the top of the chart.
+        anchor_vals = (0.01, 0.6, 0.95, 0.2)
+        # self.fig.legend(bbox_to_anchor=anchor_vals, loc=4, ncol=4, mode="expand", borderaxespad=0.0)
+
+    def createGraph(self):
+        self.displayData()
+
+    def displayData(self):
+        categories = list(self.budget.keys())
+        x_np = np.arange(len(categories))
+        # Sum up the value total.
+        outer_bar_length = 0
+        for iCatg in categories:
+            outer_bar_length += self.budget[iCatg][1]
+        outer_bar_label = 'Budget'
+        # In this case we expect only 1 item in the entries list.
+        y_pos = [0]
+        width = 0.5
+        # self.bar_chart.barh(y_pos, 0, 1.0, align='center', color='white', ecolor='black', label=None)
+        # Is there an 'outer' or container bar?
+        # if outer_bar_length != -1:
+        #     self.bar_chart.barh(y_pos, outer_bar_length, 0.12, align='center', color='#D9DCDE', label=outer_bar_label, left=0)
+        left_pos = 0
+        for iCatg in categories:
+            seglabel = iCatg
+            segval = self.budget[iCatg][1]
+            segcol = funs.getHexFromRGB(self.budget[iCatg][0])
+
+            self.bar_chart.barh(y_pos, [segval], width, align='center', color=segcol, label=seglabel, left=left_pos, edgecolor=['black', 'black'], linewidth=0.5)
+            left_pos += segval
+        self.formatGraph()
 
 class BarChart(FigureCanvas):
     def __init__(self, DataBase):
@@ -16,7 +61,7 @@ class BarChart(FigureCanvas):
         self.graphData = {}
         self.catgColors = dict( [(iCatg[1], iCatg[2]) for iCatg in allCat] )
 
-    def fomartGraph(self, categories):
+    def formatGraph(self, categories):
         self.bar_chart.grid(True)
         self.fig.tight_layout()
         self.bar_chart.axis('off')
@@ -44,7 +89,7 @@ class BarChart(FigureCanvas):
         values = list(self.graphData.values())
         x_np = np.arange(len(categories))
         self.barlist = self.bar_chart.bar(x_np, values)
-        self.fomartGraph(categories)
+        self.formatGraph(categories)
 
     def getTableData(self):
         _, _, month, year = funs.getDate()

@@ -70,7 +70,7 @@ class ToolBar(QtWidgets.QToolBar):
                 else:
                     transID = self.mainWin.DataBase.NewTransaction(transInfo)
                     self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
-                self.mainWin.updateValuePlaces()
+                self.mainWin.updateInteface()
                 mayProceed = True
             else:
                 mayProceed = True
@@ -113,7 +113,7 @@ class ToolBar(QtWidgets.QToolBar):
                 if transID != 'Error':
                     mayProceed = True
                     self.mainWin.accPage.cardArea.AddCard(destData, transID)
-                    self.mainWin.updateValuePlaces()
+                    self.mainWin.updateInteface()
                 else:
                     print('Problema na conta')
             else:
@@ -127,7 +127,7 @@ class ToolBar(QtWidgets.QToolBar):
                 addedFlag = self.mainWin.DataBase.acc_tbl.insert(wind.inputs)
                 if addedFlag:
                     mayProceed = True
-                    self.mainWin.updateValuePlaces()
+                    self.mainWin.updateInteface()
                     if wind.inputs['Type'] == 1:
                         self.mainWin.homePage.debitGroupBox.comboBox.addItem(wind.inputs['Name'])
                         self.mainWin.accPage.controlFrame.setValueGroup.nameDropDown.addItem(wind.inputs['Name'])
@@ -169,6 +169,6 @@ class ToolBar(QtWidgets.QToolBar):
                     self.mainWin.homePage.creditGroupBox.comboBox.removeItem(itemToRemove)
                     self.mainWin.creditCardPage.controlFrame.setValueGroup.nameDropDown.removeItem(itemToRemove-1)
                     self.mainWin.creditCardPage.cardArea.UpdateALLCards()
-                self.mainWin.updateValuePlaces()
+                self.mainWin.updateInteface()
             else:
                 mayProceed = True

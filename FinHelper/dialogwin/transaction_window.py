@@ -36,7 +36,7 @@ class Create(QtWidgets.QDialog):
         self.instalments = QtWidgets.QSpinBox(self, value=1, objectName="instalments", enabled=False)
         self.okButton = QtWidgets.QPushButton(self, objectName="okButton", text="OK")
         self.delButton = QtWidgets.QPushButton(self, objectName="delButton")
-        self.addCategoryButton = QtWidgets.QPushButton(self, objectName="addCategoryButton")
+        self.addCategoryButton = QtWidgets.QPushButton(self, objectName="addCategoryButton", text="+")
 
         ## Customization ==
         self.accountCombo.addItems(self.debitOptions)

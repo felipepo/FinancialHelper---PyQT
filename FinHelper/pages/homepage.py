@@ -11,7 +11,6 @@ class Create(QtWidgets.QWidget):
         ## Initialization ==
 
         ## Creation ==
-        self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
         self.payGroupBox = QtWidgets.QGroupBox(self, title = "Pagamentos", objectName="payGroupBox")
         self.debitGroupBox = GroupBox(self, "Débito")
         self.creditGroupBox = GroupBox(self, "Cartão de Crédito")
@@ -25,6 +24,7 @@ class Create(QtWidgets.QWidget):
         self.budgetGroupBox.setObjectName("budgetGroupBox")
 
         ## Layout ==
+        self.gridLayout = QtWidgets.QGridLayout(self, objectName="gridLayout")
         self.gridLayout.addWidget(self.debitGroupBox, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.creditGroupBox, 1, 0, 1, 1)
         self.gridLayout.addWidget(self.bar_chart, 0, 1, 2, 5)
@@ -110,7 +110,7 @@ class GroupBox(QtWidgets.QGroupBox):
                 else:
                     transID = self.mainWin.DataBase.NewTransaction(transInfo)
                     self.mainWin.accPage.cardArea.AddCard(wind.inputs, transID)
-                self.mainWin.updateValuePlaces()
+                self.mainWin.updateInteface()
                 mayProceed = True
             else:
                 mayProceed = True
@@ -133,14 +133,14 @@ class BudgetGroupBox(QtWidgets.QGroupBox):
         self.budgets = {}
 
         ## Creation ==
-        self.progressBar = QtWidgets.QProgressBar(self, objectName="progressBar")
+        self.bar_chart = plotting.HorBarChart()
+        self.bar_chart.createGraph()
         for irow in [1, 2, 3]:
             for icol in range(3):
                 self.budgets[str(irow)+str(icol)] = QtWidgets.QLabel(self,  text=str(irow)+str(icol), objectName=str(irow)+str(icol))
                 self.gridLayout.addWidget(self.budgets[str(irow)+str(icol)], irow, icol, 1, 1)
 
         ## Customization ==
-        self.progressBar.setProperty("value", 24)
 
         ## Layout ==
-        self.gridLayout.addWidget(self.progressBar, 0, 0, 1, 3)
+        self.gridLayout.addWidget(self.bar_chart, 0, 0, 1, 3)

@@ -77,4 +77,4 @@ class MenuBar(QtWidgets.QMenuBar):
             self.mainWin.styleObj.createQSSFile()
             self.mainWin.setStyle(self.mainWin.style())
             self.mainWin.accPage.cardArea.UpdateALLCards()
-            self.mainWin.updateValuePlaces()
+            self.mainWin.updateInteface()

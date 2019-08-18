@@ -74,3 +74,11 @@ def generateCatg(rand="on"):
             color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
             catgData[iColor] = color
     return catgData
+
+def generateBudget():
+    budget = {}
+    category = ("Feira","Transporte","Remédio","Academia","Aluguel","Condomínio","Telefone","Internet","Luz","Outros", "Transferência")
+    for iColor in category:
+        color = 'rgb({}, {}, {})'.format(random.randint(0,255), random.randint(0,255), random.randint(0,255))
+        budget[iColor] = (color, random.randint(0, 1000))
+    return budget

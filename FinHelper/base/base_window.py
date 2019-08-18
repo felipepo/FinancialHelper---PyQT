@@ -1,5 +1,5 @@
 from PySide2 import QtWidgets, QtCore, QtGui
-from ..pages import homepage, debit_page, credit_page
+from ..pages import homepage, create_page
 from . import menu, toolbar
 from ..utilities import generate, funs
 from ..database import sql_class
@@ -34,8 +34,8 @@ class Create(QtWidgets.QMainWindow):
 
         # Pages
         self.homePage = homepage.Create(self)
-        self.accPage = debit_page.Page(self)
-        self.creditCardPage = credit_page.Page(self)
+        self.accPage = create_page.DebitPage(self)
+        self.creditCardPage = create_page.CreditPage(self)
 
         ## Customization ==
         self.stackFrame.addWidget(self.homePage)
@@ -92,7 +92,7 @@ class Create(QtWidgets.QMainWindow):
         super(QtWidgets.QMainWindow, self).closeEvent(*args, **kwargs)
         self.DataBase.close_db()
 
-    def updateValuePlaces(self):
+    def updateInteface(self):
         self.DataBase.ReGetValues()
         # Update Total
         self.homePage.debitGroupBox.UpdateValue()

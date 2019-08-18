@@ -13,19 +13,24 @@ def run_test():
 
     # Month CHART -----------------------
     # Bar Chart - Value x Categories
-    chart = plotting.BarChart(DataBase)
-    chart.createGraph()
-    updatePlot = QtWidgets.QPushButton(app, text="Testing")
-    updatePlot.clicked.connect(chart.buttonPush)
-
-    layout = QtWidgets.QVBoxLayout(app)
-    layout.addWidget(chart)
-    layout.addWidget(updatePlot)
+    val_x_catg = plotting.BarChart(DataBase)
+    val_x_catg.createGraph()
 
     # Pie Chart - Value/Percentage x Categories
     # Multiple Months CHART -------------
     # Bar Chart - Value(Income/Outcome) x Months
-    # Horizontal Bar
+    # Horizontal Bar - Bugeting
+    buget_bar = plotting.HorBarChart()
+    buget_bar.createGraph()
+
+    # General Interface setup
+    updatePlot = QtWidgets.QPushButton(app, text="Testing")
+    updatePlot.clicked.connect(val_x_catg.buttonPush)
+
+    layout = QtWidgets.QVBoxLayout(app)
+    layout.addWidget(val_x_catg)
+    layout.addWidget(buget_bar)
+    layout.addWidget(updatePlot)
 
     app.show()
     plotTest.exec_()

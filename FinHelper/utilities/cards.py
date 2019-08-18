@@ -104,7 +104,7 @@ class CardArea(QtWidgets.QScrollArea):
         self.RemoveCard(transID)
         self.main_win.DataBase.RemoveTransaction(transID)
         self.main_win.DataBase.extract_tbl.deleteByID(transID)
-        self.main_win.updateValuePlaces()
+        self.main_win.updateInteface()
         self.UpdateArea()
 
     def RemoveCard(self, transID):
@@ -230,7 +230,7 @@ class Card(QtWidgets.QFrame):
                     transInfo = {"Trans_ID":self.Id, "Catg_ID":targetCatg[0], "Acc_ID":targetAcc[0], "Comment":wind.inputs["Comment"], "Value":wind.inputs["Value"], "Date":wind.inputs["Date"]}
                     updatedFlag = self.main_win.DataBase.UpdateTransaction(transInfo)
                     if updatedFlag == 'OK':
-                        self.main_win.updateValuePlaces()
+                        self.main_win.updateInteface()
                         mayProceed = True
                         self.Update(wind.inputs)
                     else:
