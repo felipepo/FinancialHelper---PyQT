@@ -11,8 +11,8 @@ class MenuBar(QtWidgets.QMenuBar):
         self.button = {}
         self.setObjectName("menubar")
         FileButtons = ["Novo", "Save", "Save As..."]
-        EditButtons = ["Categorias"]
-        AccButtons = ["Adicionar", "Remover", "Renomear", "Definir Valor Atual"]
+        CatgButtons = ["Editar"]
+        # AccButtons = ["Adicionar", "Remover", "Renomear", "Definir Valor Atual"]
         ToolsButtons = ["Exportar"]
 
         ## Creation ==
@@ -22,17 +22,17 @@ class MenuBar(QtWidgets.QMenuBar):
             self.menuFile.addAction(self.button[button])
         self.addAction(self.menuFile.menuAction())
 
-        self.menuEdit = QtWidgets.QMenu(self, objectName="MenuEdit", title="Editar")
-        for button in EditButtons:
+        self.menuEdit = QtWidgets.QMenu(self, objectName="MenuEdit", title="Categorias")
+        for button in CatgButtons:
             self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
             self.menuEdit.addAction(self.button[button])
         self.addAction(self.menuEdit.menuAction())
 
-        self.menuAcc = QtWidgets.QMenu(self, objectName="menuAcc", title="Contas")
-        for button in AccButtons:
-            self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
-            self.menuAcc.addAction(self.button[button])
-        self.addAction(self.menuAcc.menuAction())
+        # self.menuAcc = QtWidgets.QMenu(self, objectName="menuAcc", title="Contas")
+        # for button in AccButtons:
+        #     self.button[button] = QtWidgets.QAction(parent, objectName=button, text=button)
+        #     self.menuAcc.addAction(self.button[button])
+        # self.addAction(self.menuAcc.menuAction())
 
         self.menuTools = QtWidgets.QMenu(self, objectName="menuTools", title="Ferramentas")
         for button in ToolsButtons:
@@ -42,7 +42,7 @@ class MenuBar(QtWidgets.QMenuBar):
 
         ## Customization ==
         self.button["Novo"].triggered.connect(self.newDB)
-        self.button["Categorias"].triggered.connect(self.configCategory)
+        self.button["Editar"].triggered.connect(self.configCategory)
         ## Layout ==
 
     def newDB(self):
@@ -54,7 +54,9 @@ class MenuBar(QtWidgets.QMenuBar):
         self.mainWin.initialize()
 
     def configCategory(self):
-        wind = category_window.Create(self.mainWin)
+        catgList = list(self.mainWin.DataBase.category_tbl.get_names())
+        styleStr = self.mainWin.styleObj.InterfaceStyle
+        wind = category_window.Create(catgList, styleStr)
         if wind.exec_():
             self.mainWin.styleObj.InterfaceStyle = wind.inputs["EditData"]
             if "AppendData" in wind.inputs:

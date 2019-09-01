@@ -1,13 +1,10 @@
 from PySide2 import QtCore, QtGui, QtWidgets
-import copy
 from ..utilities import cards, funs
 
 class Create(QtWidgets.QDialog):
-    def __init__(self, mainWin):
+    def __init__(self, options, styleSTR):
         super().__init__()
-        self.mainWin = mainWin
-        self.DataBase = mainWin.DataBase
-        self.styleSTR = mainWin.styleObj.InterfaceStyle
+        self.styleSTR = styleSTR
         self.inputs = {}
         ## Initialization ==
         self.setObjectName('CategoryWindow')
@@ -18,9 +15,9 @@ class Create(QtWidgets.QDialog):
         ## Creation ==
         self.tabWidget = QtWidgets.QTabWidget(self, objectName="tabWidget")
         self.addTab = AddTab(self)
-        self.removeTab = RemoveTab(self)
-        self.renameTab = RenameTab(self)
-        self.editTab = EditTab(self)
+        self.removeTab = RemoveTab(self, options)
+        self.renameTab = RenameTab(self, options)
+        self.editTab = EditTab(self, options)
         self.apllyButton = QtWidgets.QPushButton(self, objectName="applyButton", text="Aplicar")
         self.exitButton = QtWidgets.QPushButton(self, objectName="exitButton", text="Sair")
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -152,7 +149,7 @@ class AddTab(QtWidgets.QWidget):
         return styleDict
 
 class RemoveTab(QtWidgets.QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, options):
         super().__init__()
         self.setObjectName('RemoveTab')
         ## Initialization ==
@@ -162,7 +159,7 @@ class RemoveTab(QtWidgets.QWidget):
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
         ## Customization ==
-        options = list(parent.DataBase.category_tbl.get_names()[:])
+        options = options.copy()
         options.insert(0,'')
         self.catCombo.addItems(options)
 
@@ -174,7 +171,7 @@ class RemoveTab(QtWidgets.QWidget):
 
 
 class RenameTab(QtWidgets.QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, options):
         super().__init__()
         self.setObjectName('RenameTab')
         ## Initialization ==
@@ -186,7 +183,7 @@ class RenameTab(QtWidgets.QWidget):
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
 
         ## Customization ==
-        options = list(parent.DataBase.category_tbl.get_names()[:])
+        options = options.copy()
         options.insert(0,'')
         self.catCombo.addItems(options)
 
@@ -199,7 +196,7 @@ class RenameTab(QtWidgets.QWidget):
         self.verticalLayout.addItem(spacerItem)
 
 class EditTab(QtWidgets.QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, options):
         super().__init__()
         self.parent = parent
         self.cardWidth = 300
@@ -214,7 +211,7 @@ class EditTab(QtWidgets.QWidget):
         self.cardTemplate = cards.Card(self, templateData, 'Template')
 
         ## Customization ==
-        options = parent.DataBase.category_tbl.get_names()[:]
+        options = options.copy()
         self.catCombo.addItems(options)
         self.catCombo.currentIndexChanged.connect(self.UpdateTemplate)
         self.cardTemplate.setObjectName(funs.formatCategoryName(self.catCombo.currentText()))

@@ -1,4 +1,4 @@
-from ..utilities import plotting
+from ..Graphs import plotting
 from PySide2 import QtWidgets
 from ..database import sql_class
 print(__name__)

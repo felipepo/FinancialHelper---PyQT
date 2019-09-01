@@ -6,8 +6,6 @@ from ..database import sql_class
 from ..interfacestyle import style
 
 class Create(QtWidgets.QMainWindow):
-    ## Signals ==
-    resized = QtCore.Signal()
     def __init__(self, SimulateData):
         ## Initialization ==
         super().__init__()
@@ -62,11 +60,9 @@ class Create(QtWidgets.QMainWindow):
         self.gridLayout.addWidget(self.stackFrame, 0, 2, 1, 1)
         self.gridLayout.addWidget(self.sideFrame, 0, 0, 1, 1)
 
-        self.resized.connect(self.accPage.cardArea.Reshape)
-
     def initialize(self):
         funs.checkFolderExist()
-        self.DataBase = sql_class.Create(self.SimulateData)
+        self.DataBase = sql_class.Create()
         allCategories = {}
         emptyTable = self.DataBase.category_tbl.readAll()
         if not emptyTable:
@@ -78,15 +74,14 @@ class Create(QtWidgets.QMainWindow):
                 print("Simulating Data")
                 self.DataBase.simulateData(nTrans=40, nAcc=10)
         else:
+            if self.SimulateData == 1:
+                print("Simulating Data")
+                self.DataBase.simulateData(nTrans=100, nAcc=0)
             allCategories = dict( [(iRow[1], iRow[2]) for iRow in emptyTable] )
 
         self.styleObj = style.Create(allCategories)
         self.setStyleSheet(self.styleObj.InterfaceStyle)
         self.setStyle(self.style())
-
-    def resizeEvent(self, event):
-        self.resized.emit()
-        return super().resizeEvent(event)
 
     def closeEvent(self, *args, **kwargs):
         super(QtWidgets.QMainWindow, self).closeEvent(*args, **kwargs)

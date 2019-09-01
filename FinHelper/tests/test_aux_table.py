@@ -5,9 +5,10 @@ class MyGui(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.table = aux_table_page.ContributionTable()
+        self.table2 = aux_table_page.MonthlyProfitTable()
         parent = QtWidgets.QFrame(self)
         self.setCentralWidget(parent)
-        self.setGeometry(50,50,700,400)
+        self.setGeometry(50,50,1280,920)
 
         testButton = QtWidgets.QPushButton(text="Apply")
         self.offsetInput = QtWidgets.QLineEdit(placeholderText="Offset")
@@ -17,6 +18,7 @@ class MyGui(QtWidgets.QMainWindow):
 
         ver = QtWidgets.QGridLayout(parent)
         ver.addWidget(self.table, 0,0,1,2)
+        ver.addWidget(self.table2, 0,3,1,1)
         ver.addWidget(self.offsetInput, 1,0,1,1)
         ver.addWidget(self.goaltInput, 1,1,1,1)
         ver.addWidget(testButton, 2,0,1,2)
@@ -30,5 +32,5 @@ class MyGui(QtWidgets.QMainWindow):
 def run_test():
     financHelper = QtWidgets.QApplication([])
 
-    MyGui()
+    mygui = MyGui()
     financHelper.exec_()

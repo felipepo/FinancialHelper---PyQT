@@ -3,9 +3,9 @@ from ..utilities import generate, dict_from_list, funs
 from . import account_table, category_table, category_total_table, extract_table
 
 class Create():
-    def __init__(self, inMemory):
+    def __init__(self):
         finHelperFolder = funs.getFinHelperPath()
-        self.db_file = 'DataBase/DataTest.db' if inMemory == 1 else '{}/data/sql/data.db'.format(finHelperFolder)
+        self.db_file = '{}/data/sql/data.db'.format(finHelperFolder)
         try:
             self.conn = sqlite3.connect(self.db_file)
             self.cursor = self.conn.cursor()

@@ -1,5 +1,6 @@
 from PySide2 import QtWidgets, QtCore, QtGui
-from ..utilities import cards, plotting, funs
+from ..utilities import cards, funs
+from ..graphs import plotting
 from decimal import Decimal
 
 class SetValue(QtWidgets.QGroupBox):

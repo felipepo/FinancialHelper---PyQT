@@ -1,6 +1,7 @@
 from PySide2 import QtWidgets, QtCore
 from ..dialogwin import transaction_window
-from ..utilities import dict_from_list, plotting
+from ..utilities import dict_from_list
+from ..graphs import plotting
 from decimal import Decimal
 
 class Create(QtWidgets.QWidget):

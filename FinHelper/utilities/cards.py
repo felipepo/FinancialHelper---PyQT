@@ -5,7 +5,6 @@ from ..dialogwin import transaction_window
 from decimal import Decimal
 
 class CardArea(QtWidgets.QScrollArea):
-    resized = QtCore.Signal()
     def __init__(self,parent, debitOrCredit):
         super().__init__(parent)
         self.parentPage = parent
@@ -42,8 +41,6 @@ class CardArea(QtWidgets.QScrollArea):
         ## Layout ==
         self.gridLayout.addItem(spacerItem, self.row+1, 0, 1, 1)
 
-        self.resized.connect(self.Reshape)
-
     def initializeCards(self):
         transData={}
         self.HideAllCards()
@@ -65,7 +62,13 @@ class CardArea(QtWidgets.QScrollArea):
                     self.AddCard(transData, iTrans[0])
 
     def resizeEvent(self, event):
-        self.resized.emit()
+        # Minimun - 700 (Card - 150 *4 = 600)
+        currWidth = self.frameGeometry().width()
+        testWidth = math.floor((currWidth-100)/self.cardWidth )
+        if testWidth != self.nCOl:
+            self.nCOl = testWidth
+            self.HideAllCards()
+            self.ShowAllCards()
         return super().resizeEvent(event)
 
     def updatePosition(self):
@@ -134,15 +137,6 @@ class CardArea(QtWidgets.QScrollArea):
             self.card[transID].setObjectName(funs.formatCategoryName(transData['Category']))
             self.gridLayout.addWidget(self.card[transID], self.row, self.col, 1, 1)
             self.updatePosition()
-
-    def Reshape(self):
-        # Minimun - 700 (Card - 150 *4 = 600)
-        currWidth = self.frameGeometry().width()
-        testWidth = math.floor((currWidth-100)/self.cardWidth )
-        if testWidth != self.nCOl:
-            self.nCOl = testWidth
-            self.HideAllCards()
-            self.ShowAllCards()
 
 class Card(QtWidgets.QFrame):
     def __init__(self, parent, transData, transID):

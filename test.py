@@ -12,11 +12,11 @@ def manuallyChoose(chosenTest):
         tests.test_trans_win.run_test()
     elif chosenTest == 5: # Test plots
         tests.test_aux_table.run_test()
-    elif chosenTest == 2: # Test plots
+    elif chosenTest == 6: # Test Stock
+        tests.test_request.run_test()
+    elif chosenTest == 7: # Test plots
         tests.test_sql.run_test()
-    elif chosenTest == 2: # Test plots
-        tests.test_sql.run_test()
-    elif chosenTest == 2: # Test plots
+    elif chosenTest == 8: # Test plots
         tests.test_sql.run_test()
 
 def autoChoose():
@@ -34,6 +34,6 @@ def run_test():
     tests.test_plotting.run_test()
 
 if __name__ == "__main__":
-    chosenTest = 5
+    chosenTest = 6
     manuallyChoose(chosenTest)
     # autoChoose()
